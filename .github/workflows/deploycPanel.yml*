@@ -1,0 +1,31 @@
+name: Deploy isoclick to cpanel 
+
+on:
+  push:
+    branches: 
+    - main
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout your code
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # 2. (Optional) Install dependencies (e.g., npm, composer)
+      # - name: Install Dependencies
+      #   run: npm install
+
+      # 3. Upload files via FTP
+      - name: FTP Deploy
+        uses: SamKirkland/FTP-Deploy@v4.3.0
+        with:
+          server: ${{ secrets.FTP_SERVER }}      # FTP hostname (e.g., ftp.example.com)
+          username: ${{ secrets.FTP_USERNAME }}  # FTP username
+          password: ${{ secrets.FTP_PASSWORD }}  # FTP password
+          local-dir: ./                          # Local directory to upload (e.g., "./dist" for builds)
+          server-dir: /public_html/              # Remote directory on the server (e.g., "/public_html/")
+          # protocol: ftp                         # Use "ftps" for secure connections
+          # port: 21                             # Default FTP port
+          # passive: true                        # Enable if behind a firewall
