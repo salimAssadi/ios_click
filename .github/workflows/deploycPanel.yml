@@ -20,7 +20,7 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: /public_html/ 
+          server-dir: /
           protocol: ftps  # Enable FTPS (explicit TLS)
           # port: 21      # Uncomment if your server uses a non-standard port
           # passive: true # Enable if behind a firewall
