@@ -41,12 +41,16 @@ use App\Http\Controllers\RequestController;
 
 require __DIR__ . '/auth.php';
 
-Route::get('/', [HomeController::class, 'index'])->middleware(
-    [
+Route::get('/',function(){
+    return redirect('/iso_dic/login');
+});
 
-        'XSS',
-    ]
-);
+// Route::get('/', [HomeController::class, 'index'])->middleware(
+//     [
+
+//         'XSS',
+//     ]
+// );
 Route::get('home', [HomeController::class, 'index'])->name('home')->middleware(
     [
 
