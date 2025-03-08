@@ -18,16 +18,19 @@ class AuthenticatedIsoDicController extends Controller
      * @return \Illuminate\View\View
      */
     public function create()
-    {
+    {   
         if (!file_exists(setup())) {
             header('location:install');
             die;
         }
+        if(!Auth::user()){
 
-        $user = \App\Models\User::find(1);
-        \App::setLocale($user->lang);
-
-        return view($this->iso_dic_path.'.auth.login');
+            $user = \App\Models\User::find(1);
+            \App::setLocale($user->lang);
+            return view($this->iso_dic_path.'.auth.login');
+        }else{
+            return redirect()->intended($this->iso_dic_path.'/home');
+        }
     }
 
     /**
