@@ -14,7 +14,7 @@ use App\Http\Controllers\DocController;
 use App\Http\Controllers\iso_dic\ProcedureController;
 use App\Http\Controllers\iso_dic\SampleController;
 use App\Http\Controllers\PdfController;
-use App\Http\Controllers\SettingController;
+use App\Http\Controllers\iso_dic\SettingController;
 
 // Group all ISO_DIC routes under a common prefix
 Route::prefix('iso_dic')->middleware(['XSS'])->name('iso_dic.')->group(function () {

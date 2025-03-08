@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\iso_dic;
 
 use App\Models\Custom;
 use App\Models\Page;
@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use PragmaRX\Google2FAQRCode\Google2FA;
+use App\Http\Controllers\Controller;
 
 class SettingController extends Controller
 {
@@ -23,7 +24,7 @@ class SettingController extends Controller
         $timezones = config('timezones');
         return view('settings.index', compact('loginUser', 'settings', 'timezones'));
     }
-
+    
     public function accountData(Request $request)
     {
         $loginUser = \Auth::user();
