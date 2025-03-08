@@ -39,7 +39,7 @@ use App\Http\Controllers\RequestController;
 |
 */
 
-// require __DIR__ . '/auth.php';
+require __DIR__ . '/auth.php';
 
 Route::get('/', [HomeController::class, 'index'])->middleware(
     [

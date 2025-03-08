@@ -14,6 +14,7 @@
     @php
         $registerPage = getSettingsValByName('register_page');
     @endphp
+
     <div class="card">
         <div class="card-body">
             <div class="row">

@@ -67,10 +67,11 @@
                 </div> --}}
                 @yield('content')
             </div>
-            @if (!empty($authPage) && $authPage->section == 1)
+
+            {{-- @if (!empty($authPage) && $authPage->section == 1) --}}
                 <div class="auth-sidecontent">
                     <div class="p-3 px-lg-5 text-center">
-                        <div id="carouselExampleIndicators" class="carousel slide carousel-dark"
+                        {{-- <div id="carouselExampleIndicators" class="carousel slide carousel-dark"
                             data-bs-ride="carousel">
                             <div class="carousel-inner">
                                 @foreach ($titles as $index => $title)
@@ -90,12 +91,12 @@
                                         aria-label="Slide {{ $index + 1 }}"></button>
                                 @endforeach
                             </div>
-                        </div>
-                        {{-- <img src="{{ asset(Storage::url('upload/images/auth_page.svg')) }}" alt="images"
-                            class="img-fluid mt-3 w-75" /> --}}
+                        </div> --}}
+                        <img src="{{ asset(Storage::url('upload/images/auth_page.svg')) }}" alt="images"
+                            class="img-fluid mt-3 w-75" />
                     </div>
                 </div>
-            @endif
+            {{-- @endif --}}
 
         </div>
     </div>
