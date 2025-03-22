@@ -15,6 +15,8 @@ class Sample extends Model
         'description',
         'template_path',
         'is_optional',
+        'procedure_id',
+        'content',
         'form_id',
         'status'
     ];
@@ -22,4 +24,10 @@ class Sample extends Model
     {
         return $this->belongsTo(Form::class);
     }
+    
+    public function procedure()
+    {
+        return $this->belongsTo(Procedure::class,'procedure_id');
+    }
+    
 }

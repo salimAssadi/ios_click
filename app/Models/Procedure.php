@@ -22,8 +22,21 @@ class Procedure extends Model
     {
         return $this->belongsTo(Form::class);
     }
+    // public function sample()
+    // {
+    //     return $this->hasOne(Procedure::class);
+    // }
     public function document()
     {
         return $this->hasOne(Document::class,'reference_id')->where('remark', 'procedure');
+    }
+
+    public function getCodeAttribute(): string
+    {
+        $companySymbol= getCompanySymbol();
+        $procedureCode = $this->procedure->code;
+        $sampleId = str_pad($this->id, 2, '0', STR_PAD_LEFT);
+        
+        return "{$procedureCode}-{$sampleId}";
     }
 }

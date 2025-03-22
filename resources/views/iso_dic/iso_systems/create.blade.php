@@ -1,4 +1,4 @@
-{{ Form::open(['url' => 'iso _dic/iso_systems', 'method' => 'post', 'files' => true]) }}
+{{ Form::open(['url' => 'iso_dic/iso_systems', 'method' => 'post', 'files' => true]) }}
 <div class="modal-body">
     <div class="row">
        
@@ -13,6 +13,10 @@
         <div class="form-group col-md-6">
             {{ Form::label('code', __('code'). ' <span class="text-danger">*</span>', ['class' => 'form-label'], false) }}
             {{ Form::text('code', null, ['class' => 'form-control', 'placeholder' => __('Enter code'), 'required' => 'required']) }}
+        </div>
+        <div class="form-group col-md-6">
+            {{ Form::label('symbole', __('symbole'). ' <span class="text-danger">*</span>', ['class' => 'form-label'], false) }}
+            {{ Form::text('symbole', null, ['class' => 'form-control', 'placeholder' => __('Enter symbole'), 'required' => 'required']) }}
         </div>
         <div class="form-group col-md-6">
             {{ Form::label('iso_image', __('ios image'), ['class' => 'form-label'], false) }}

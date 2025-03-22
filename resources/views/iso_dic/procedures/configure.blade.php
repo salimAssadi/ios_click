@@ -131,7 +131,7 @@
                                         <div class="tab-pane fade show active" id="purpose" role="tabpanel"
                                             aria-labelledby="purpose-tab">
                                             {{-- <x-procedure-purpose purposes = {{$purposes}} /> --}}
-                                            <form action="{{ route('iso_dic.procedures.saveConfigure', 'purpose') }}"
+                                            <form action="{{ route('iso_dic.procedures.saveConfigrue', 'purpose') }}"
                                                 method="POST" id="form-purpose">
                                                 @csrf
                                                 <div class="row align-items-center pb-2">

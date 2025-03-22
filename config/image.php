@@ -36,7 +36,7 @@ return [
     | - "strip" controls if meta data like exif tags should be removed when
     |    encoding images.
     */
-
+    
     'options' => [
         'autoOrientation' => true,
         'decodeAnimation' => true,

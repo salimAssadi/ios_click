@@ -42,6 +42,28 @@ Route::prefix('iso_dic')->middleware(['XSS'])->name('iso_dic.')->group(function 
             'tag' => TagController::class,
         ]);
 
+        Route::controller(IsoSystemController::class)
+        ->prefix('iso_systems')
+        ->name('iso_systems.')
+        ->group(function () {
+            Route::get('{cid}/procedure/create', 'addProcedure')->name('procedure.create');
+            Route::get('procedure/{id}/preview', 'preview')->name('procedure.preview');
+            Route::get('procedure/{id}/download', 'download')->name('procedure.download');
+            Route::post('procedure/save', 'saveProcedure')->name('procedure.save');
+            Route::delete('procedure/{id}/delete', 'deleteProcedure')->name('procedure.delete');
+            Route::get('{cid}/sample/create', 'addSample')->name('sample.create');
+           
+        });
+
+        // Route::controller(IsoSystemController::class)
+        // ->prefix('iso_systems')
+        // ->name('iso_systems.')
+        // ->group(function () {
+            
+        //     // Route::get('{cid}/attachment/create', 'addAttachment')->name('attachment.create');
+        //     // Route::get('attachment/{id}/preview', 'preview')->name('attachment.preview');
+        //     // Route::get('attachment/{id}/download', 'download')->name('attachment.download');
+        // });
         // Document Controller Routes
         Route::controller(DocumentController::class)->prefix('document')->name('document.')->group(function () {
             Route::get('history', 'history')->name('history');
@@ -60,6 +82,7 @@ Route::prefix('iso_dic')->middleware(['XSS'])->name('iso_dic.')->group(function 
             Route::get('logged/{id}/history/show', 'loggedHistoryShow')->name('logged.history.show');
             Route::delete('logged/{id}/history', 'loggedHistoryDestroy')->name('logged.history.destroy');
         });
+
 
         // Settings Controller Routes
         Route::controller(SettingController::class)->prefix('settings')->name('setting.')->group(function () {
@@ -99,9 +122,11 @@ Route::prefix('iso_dic')->middleware(['XSS'])->name('iso_dic.')->group(function 
             Route::get('all', 'all')->name('all');
             Route::post('save/{id?}', 'save')->name('save');
             Route::get('configure/{id}', 'configure')->name('configure');
-            Route::post('configure/{id}', 'saveConfigure')->name('saveConfigure');;
+            Route::post('configure/{id}/save', 'saveConfigure')->name('saveConfigure');;
             Route::post('configure/{id}', 'saveTemplatePath')->name('saveTemplatePath');
             Route::post('status/{id}', 'status')->name('status');
+            Route::get('{id}/preview', 'preview')->name('sample.preview');
+            Route::get('{id}/download', 'download')->name('sample.download');
         });
 
         // ISO Tree Data and Widget Update

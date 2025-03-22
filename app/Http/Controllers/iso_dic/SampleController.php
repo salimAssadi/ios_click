@@ -2,23 +2,45 @@
 
 namespace App\Http\Controllers\iso_dic;
 
+use App\Constants\Status;
 use App\Http\Controllers\Controller;
 use App\Lib\FormProcessor;
+use App\Models\Category;
 use App\Models\Form;
+use App\Models\Procedure;
 use App\Models\Sample;
+use Exception;
+use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
-use Illuminate\Support\Facades\Validator; 
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\File;
+use Meneses\LaravelMpdf\Facades\LaravelMpdf;
 
 class SampleController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $samples = Sample::searchable(['sample_name'])->with('form')->paginate(getPaginate());
-        return view($this->iso_dic_path . '.samples.index', compact('samples'));
+
+        $samplesQuery = Sample::searchable(['sample_name'])->with('procedure');
+        $filterId = $request->input('procedure_id', -1); // Default to -1 if not provided
+        if (!is_numeric($filterId)) {
+            $filterId = -1;
+        }
+        $selectedProcedureId = $filterId;
+        if ($filterId != -1) {
+            $samplesQuery->where('procedure_id', $filterId);
+        }
+        // dd($samplesQuery);
+        $samples = $samplesQuery->paginate(getPaginate());
+        $procedures = Procedure::get();
+        if ($request->ajax()) {
+            return view('iso_dic.samples.sample', compact('samples'));
+        }
+        return view($this->iso_dic_path . '.samples.index', compact('samples', 'procedures', 'selectedProcedureId'));
     }
 
     /**
@@ -26,7 +48,11 @@ class SampleController extends Controller
      */
     public function create()
     {
-        return view($this->iso_dic_path.'.samples.create');
+        $procedures = Procedure::where('status', Status::ENABLE)->get()->pluck('procedure_name', 'id');
+        $procedures->prepend(__('Select Procedure'), '');
+        $category = Category::where('parent_id', parentId())->get()->pluck('title', 'id');
+        $category->prepend(__('Select Category'), '');
+        return view($this->iso_dic_path . '.samples.create', compact('category', 'procedures'));
     }
 
     /**
@@ -34,66 +60,70 @@ class SampleController extends Controller
      */
     public function store(Request $request)
     {
-        // Define validation rules
-        $validator =    Validator::make($request->all(), [
-            'sample_name' => 'required|string|max:255',
-            'sample_description' => 'nullable|string|max:1000',
-            'is_optional' => 'required|boolean',
-            'status' => 'required|boolean',
-        ]);
-    
-        // Check if validation fails
-        if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator)->withInput();
+        try {
+
+            // Define validation rules
+            $validator =    Validator::make($request->all(), [
+                'sample_name' => 'required|string|max:255',
+                'sample_description' => 'nullable|string|max:1000',
+                'is_optional' => 'required|boolean',
+                'status' => 'required|boolean',
+            ]);
+
+            // Check if validation fails
+            if ($validator->fails()) {
+                return redirect()->back()->withErrors($validator)->withInput();
+            }
+
+            // Store the sample data
+            $sample = new Sample();
+            $sample->sample_name = $request->input('sample_name');
+            $sample->description = $request->input('sample_description');
+            $sample->is_optional = $request->input('is_optional');
+            $sample->procedure_id = $request->input('procedure_id');
+            $sample->template_path = "";
+            $sample->status = $request->input('status');
+
+            // // Handle file upload
+            // if ($request->hasFile('template_path')) {
+            //     $file = $request->file('template_path');
+            //     $filePath = $file->store('samples/templates', 'public'); // Save file in storage/app/public/samples/templates
+            //     $sample->template_path = $filePath;
+            // }
+
+            // Save the sample
+            $sample->save();
+
+            // Redirect with success message
+            return redirect()->back()->with('success', __('Sample created successfully!'));
+        } catch (Exception $e) {
+            return redirect()->back()->with('error', __('Failed to create sample. Please try again later.'));
         }
-        
-        // Store the sample data
-        $sample = new Sample();
-        $sample->sample_name = $request->input('sample_name');
-        $sample->description = $request->input('sample_description');
-        $sample->is_optional = $request->input('is_optional');
-        $sample->template_path = "";
-        $sample->status = $request->input('status');
-    
-        // // Handle file upload
-        // if ($request->hasFile('template_path')) {
-        //     $file = $request->file('template_path');
-        //     $filePath = $file->store('samples/templates', 'public'); // Save file in storage/app/public/samples/templates
-        //     $sample->template_path = $filePath;
-        // }
-    
-        // Save the sample
-        $sample->save();
-    
-        // Redirect with success message
-        return redirect()->back()->with('success', __('Sample created successfully!'));
     }
 
     /**
      * Display the specified resource.
      */
     public function show(string $id)
-    {   
+    {
         $id = Crypt::decrypt($id);
         $sample = Sample::find($id);
-        if($sample){
-            $form = $sample->form()->where('act', 'sample_'.$id)->first();
+        if ($sample) {
+            $form = $sample->form()->where('act', 'sample_' . $id)->first();
             $pageTitle =  $sample->sample_name;
-            $identifier = 'sample_'.$id;
-            return view($this->iso_dic_path . '.sample_view', compact('pageTitle', 'form','identifier'));
+            $identifier = 'sample_' . $id;
+            return view($this->iso_dic_path . '.sample_view', compact('pageTitle', 'form', 'identifier'));
         }
         return redirect()->back()->with('error', __('Not Found'));
-
     }
 
     /**
      * Show the form for editing the specified resource.
      */
     public function edit(string $id)
-    {  
-        $sample =Sample::find($id);
+    {
+        $sample = Sample::find($id);
         return view($this->iso_dic_path . '.samples.edit', compact('sample'));
-
     }
 
     /**
@@ -114,36 +144,128 @@ class SampleController extends Controller
 
     public function configure($id)
     {
-        // $id = Crypt::decrypt($cid);
-        $sample   = Sample::findOrFail($id);
-        $remark= __('Configure');
-        $pageTitle =$remark.' '. $sample->sample_name ;
-
-        return view($this->iso_dic_path . '.samples.configure', compact('pageTitle', 'sample'));
+        $id = Crypt::decrypt($id);
+        $sample   = Sample::with('procedure')->find($id);
+        $remark = __('Configure');
+        $pageTitle = $remark . ' ' . $sample->sample_name;
+        $page= 'sample_config_'.sprintf('%02d', $sample->procedure_id).'_'.sprintf('%02d', $sample->id);
+        return view($this->iso_dic_path . '.samples.config.sample_template' , compact('pageTitle', 'id','sample'));
     }
 
-    public function saveTemplatePath(Request $request,$id)
+
+    // public function configure($id)
+    // {
+    //     try {
+    //         $id = Crypt::decrypt($id); // Decrypt the ID
+    //     } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
+    //         return redirect()->back()->with('error', __('Invalid or corrupted ID.'));
+    //     }
+
+    //     // Fetch the sample with related procedure data
+    //     $sample = Sample::with('procedure')->find($id);
+
+    //     if (!$sample) {
+    //         return redirect()->back()->with('error', __('Sample not found.'));
+    //     }
+
+    //     // Prepare page title and file name
+    //     $remark = __('Configure');
+    //     $pageTitle = $remark . ' ' . $sample->sample_name;
+    //     $page = 'sample_config_' . sprintf('%02d', $sample->procedure_id) . '_' . sprintf('%02d', $sample->id);
+
+    //     // Define the full path to the Blade file
+    //     $bladePath = resource_path("views/{$this->iso_dic_path}/samples/config/{$page}.blade.php");
+
+    //     // Check if the Blade file exists
+    //     if (!File::exists($bladePath)) {
+    //         // Path to the template Blade file to copy from
+    //         $templatePath = resource_path("views/{$this->iso_dic_path}/samples/config/sample_template.blade.php");
+
+    //         // Ensure the template file exists
+    //         if (!File::exists($templatePath)) {
+    //             return redirect()->back()->with('error', __('Template file not found.'));
+    //         }
+
+    //         // Copy the content from the template file to the new file
+    //         $templateContent = File::get($templatePath);
+    //         File::put($bladePath, $templateContent);
+    //     }
+
+    //     // Render the view
+    //     return view("{$this->iso_dic_path}.samples.config.{$page}", compact('pageTitle', 'sample'));
+    // }
+
+    public function saveTemplatePath(Request $request, $id)
     {
         // $id = Crypt::decrypt($cid);
         $sample   = Sample::findOrFail($id);
-        $sample->template_path = $request->input('template_path','');
+        $sample->template_path = $request->input('template_path', '');
         $sample->save();
         return redirect()->back()->with('success', __('Sample configured successfully'));
     }
 
-    public function saveConfigure($id)
-    {
-        $sample          = Sample::findOrFail($id);
-        $formProcessor  = new FormProcessor();
-        $generate       = $formProcessor->generate('sample_' . $sample->id, true);
-        $sample->form_id = @$generate->id ?? 0;
+    public function saveConfigure(Request $request,$id)
+    {   
+        $id = Crypt::decrypt($id);
+        $sample  = Sample::findOrFail($id);
+        $sample->content = $request->content?? 0;
         $sample->save();
-        return redirect()->back()->with('success', __('Sample configured successfully'));
-
+        return redirect()->route('iso_dic.samples.index')->with('success', __('Sample configured successfully'));
     }
 
     public function status($id)
     {
         return Form::changeStatus($id);
+    }
+
+
+    public function download($id)
+    {
+        $data = $this->initializeFormData($id);
+
+        if ($data instanceof \Illuminate\Http\RedirectResponse) {
+            return $data;
+        }
+        $procedureName =$data['pageTitle']; 
+        $pdf = LaravelMpdf::loadView('template.forms.template', $data);
+        return $pdf->download($procedureName . '.pdf');
+    }
+
+    public function preview($id)
+    {
+        $data = $this->initializeFormData($id);
+        if ($data instanceof \Illuminate\Http\RedirectResponse) {
+            return $data; 
+        }
+        $pdf = LaravelMpdf::loadView('template.forms.template', compact('data'));
+        return response($pdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="procedure_document.pdf"'
+        ]);
+    }
+    
+    private function initializeFormData($id)
+    {
+        try {
+            $id = Crypt::decrypt($id); // Decrypt the ID
+        } catch (DecryptException $e) {
+            return redirect()->back()->with('error', __('Invalid or corrupted ID.'));
+        }
+
+        $sample = Sample::with('procedure')->where('id', $id)->first();
+
+        if (!$sample) {
+            return redirect()->back()->with('error', __('Sample not found.'));
+        }
+
+       
+
+        // Fetch and group procedure templates
+       
+        $pageTitle = $sample->sample_name;
+        return [
+            'pageTitle' => $pageTitle,
+            'sample' => $sample
+        ];
     }
 }

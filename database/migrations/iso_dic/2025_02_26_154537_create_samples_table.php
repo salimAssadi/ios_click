@@ -15,9 +15,11 @@ return new class extends Migration
             $table->id();
             $table->string('sample_name');
             $table->text('description')->nullable();
+            $table->unsignedInteger('procedure_id')->default(0);
             $table->string('template_path');
             $table->boolean('is_optional')->default(false);
             $table->unsignedInteger('form_id')->default(0);
+            $table->longText('content')->nullable();
             $table->boolean('status')->default(false);
             $table->timestamps();
         });
@@ -29,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('procedures');
+        Schema::dropIfExists('samples');
     }
 };

@@ -11,7 +11,6 @@
     </li>
     <li class="breadcrumb-item" aria-current="page">
         {{ __('Procedures') }}
-
     </li>
 @endsection
 
@@ -43,7 +42,6 @@
                                 <tr class="align-center">
                                     <th>{{ __('Procedure Name') }}</th>
                                     <th>{{ __('Procedure Description') }}</th>
-                                    <th>{{ __('Category') }}</th>
                                     <th>{{ __('Required Procedure') }}</th>
                                     <th>{{ __('status') }}</th>
                                     <th>{{ __('Action') }}</th>
@@ -72,15 +70,7 @@
                                             </div>
                                         </td>
 
-                                        <td>
-                                            <div class="flex-grow-1 ms-3">
-                                                <h5 class="mb-1">
-                                                    {{ $procedure->document?->category?->title }}
-
-                                                </h5>
-                                            </div>
-                                        </td>
-
+                                       
 
                                         <td>
                                             <div class="flex-grow-1 ms-3">

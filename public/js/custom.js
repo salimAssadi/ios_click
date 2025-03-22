@@ -56,7 +56,8 @@ $(document).on("click", ".confirm_dialog", function (e) {
         showCancelButton: true,
         confirmButtonColor: "#3085d6",
         cancelButtonColor: "#d33",
-        confirmButtonText: "Yes",
+        confirmButtonText: "نعم",
+        cancelButtonText: "إلغاء",
     }).then((data) => {
         if (data.isConfirmed) {
             dialogForm.submit();
@@ -79,7 +80,8 @@ $(document).on("click", ".common_confirm_dialog", function (e) {
         showCancelButton: true,
         confirmButtonColor: "#3085d6",
         cancelButtonColor: "#d33",
-        confirmButtonText: "Yes",
+        confirmButtonText: "نعم",
+        cancelButtonText: "إلغاء",
     }).then((data) => {
         if (data.isConfirmed) {
             dialogForm.submit();
@@ -181,8 +183,17 @@ function datatable() {
     if ($(".basic-datatable").length > 0) {
         $(".basic-datatable").DataTable({
             scrollX: true,
-            dom: "Bfrtip",
-            buttons: ["copy", "csv", "excel", "print"],
+            // dom: "Bfrtip",
+            // buttons: ["copy", "csv", "excel", "print"],
+        });
+    }
+
+    if ($(".easy-datatable").length > 0) {
+        $(".easy-datatable").DataTable({
+            scrollX: true,
+            // stateSave: false,
+            // dom: "Bfrtip",
+            // buttons: ["copy", "csv", "excel", "print"],
         });
     }
 
@@ -217,4 +228,26 @@ function datatable() {
     }
 }
 
+if ($(".summernote").length) {
+    "use strict";
+    $('.summernote').summernote({
+        toolbar: [
+            ['style', ['style']],
+            ['font', ['bold', 'italic', 'underline', 'strikethrough', 'superscript', 'subscript', 'clear']],
+            ['fontsize', ['fontsize']],
+            ['color', ['color']],
+            ['para', ['ul', 'ol', 'paragraph']],
+            ['table', ['table']], // Enable table functionality
+            ['insert', ['link', 'picture', 'video', 'hr']], // Enable image, video, and horizontal rule
+            ['view', ['fullscreen', 'codeview', 'help']] // Enable fullscreen and code view
+        ],
+        height: 500,
+        popover: {
+            table: [
+                ['add', ['addRowDown', 'addRowUp', 'addColLeft', 'addColRight']], // Add rows/columns
+                ['delete', ['deleteRow', 'deleteCol', 'deleteTable']] // Delete rows/columns/table
+            ]
+        }
+    });
+}
 

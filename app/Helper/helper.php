@@ -1901,14 +1901,20 @@ if (!function_exists('authPage')) {
 
     function fileUploader($file, $location, $size = null, $old = null, $thumb = null, $filename = null)
     {
-        $fileManager        = new FileManager($file);
-        $fileManager->path  = $location;
-        $fileManager->size  = $size;
-        $fileManager->old   = $old;
-        $fileManager->thumb = $thumb;
-        $fileManager->filename = $filename;
-        $fileManager->upload();
-        return $fileManager->filename;
+        try {
+
+
+            $fileManager        = new FileManager($file);
+            $fileManager->path  = $location;
+            $fileManager->size  = $size;
+            $fileManager->old   = $old;
+            $fileManager->thumb = $thumb;
+            $fileManager->filename = $filename;
+            $fileManager->upload();
+            return $fileManager->filename;
+        } catch (\Exception $e) {
+            return $e->getMessage();
+        }
     }
 
     function fileManager()
@@ -1934,5 +1940,37 @@ if (!function_exists('authPage')) {
     function paginateLinks($data)
     {
         return $data->appends(request()->all())->links();
+    }
+
+    if (!function_exists('getCompanySymbol')) {
+        function getCompanySymbol(): string
+        {
+            return \App\Models\Setting::where('name', 'company_symbol')
+                ->value('value') ?? 'COMPANY';
+        }
+    }
+
+    if (!function_exists('getIsoSystemSymbol')) {
+        function getIsoSystemSymbol($id): string
+        {
+            $symbol = \App\Models\IsoSystem::where('id', $id)
+                ->value('symbole');
+            return $symbol ?? 'ISO';
+        }
+    }
+
+
+
+    if (!function_exists('generateProcedureCoding')) {
+
+        function generateProcedureCoding(String $isoSystemSymbol, ?int $procedureId): string
+        {
+            $type = 'P';
+            if (empty($type) || empty($isoSystemSymbol) || empty($procedureId)) {
+                throw new InvalidArgumentException('Invalid input for procedure coding generation.');
+            }
+            $formattedProcedureId = sprintf('%02d', $procedureId);
+            return "{$type}-{$isoSystemSymbol}-" . $formattedProcedureId;
+        }
     }
 }

@@ -14,6 +14,7 @@ class IsoSystem extends Model
     protected $fillable = [
         'name_ar',
         'name_en',
+        'symbole',
         'code',
         'specification',
         'version',
@@ -24,6 +25,14 @@ class IsoSystem extends Model
     public function attachments()
     {
         return $this->hasMany(IsoAttachment::class);
+    }
+    public function procedures()
+    {
+        return $this->hasMany(IsoSystemProcedure::class);
+    }
+    public function forms()
+    {
+        return $this->hasMany(IsoSystemForm::class);
     }
 
     public function specificationItems()

@@ -1,75 +1,195 @@
 <?php
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Barryvdh\DomPDF\Facade\Pdf;
-use Omaralalwi\Gpdf\Enums\GpdfDefaultSupportedFonts;
-use Omaralalwi\Gpdf\Enums\GpdfSettingKeys;
-use Omaralalwi\Gpdf\Facade\Gpdf;
-use Omaralalwi\Gpdf\GpdfConfig;
+use App\Models\IsoSystemProcedure;
+use App\Models\Procedure;
+use App\Models\ProcedureTemplate;
+use Illuminate\Contracts\Encryption\DecryptException;
+// use Illuminate\Http\Request;
+// use App\Traits\{HasViewDynamicParams, HasDataGenerator};
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Crypt;
+// use Omaralalwi\Gpdf\Gpdf;
+// use Omaralalwi\Gpdf\Facade\Gpdf as GpdfFacAde;
+// use Omaralalwi\Gpdf\Enums\{GpdfDefaultSettings as GpdfDefault,
+//     GpdfSettingKeys as GpdfSet,
+//     GpdfDefaultSupportedFonts,
+//     GpdfStorageDrivers};
+use Illuminate\Support\Facades\Log;
+use Meneses\LaravelMpdf\Facades\LaravelMpdf;
 
 class PdfController extends Controller
 {
-    protected $config;
+ 
+    // use HasViewDynamicParams, HasDataGenerator;
 
-    public function generatePdf()
+   public function generatePdf(){
+
+   }
+    public function preview($id)
     {
-        // Define the custom header HTML
-        $header = '
-        <div class="header">
-            <p dir="rtl" class="Header" style="margin-right:18pt; text-indent:-18pt;">&nbsp;</p>
-            <div dir="rtl">
-                <table style="width:529.6pt; margin-right:auto; margin-left:auto; border:6pt solid #c00000; padding:0pt; border-collapse:collapse;">
-                    <tbody>
-                        <tr style="height:78.5pt;">
-                            <td style="width:129.25pt; border-left:6pt solid #c00000; border-bottom:6pt solid #c00000; padding:0pt 2.4pt; vertical-align:middle;">
-                                <p dir="rtl" style="text-align:center;"><strong><span style="font-family:\'PT Bold Heading\'; font-size:18pt;">إجــــراء</span></strong></p>
-                                <p dir="ltr" style="text-align:center; font-size:18pt;"><strong><span style="font-size:14pt;">ضبط المعلومات الموثقة</span></strong><span dir="ltr">&nbsp;</span><strong>ASD-P-IMS-01</strong></p>
-                            </td>
-                            <td rowspan="2" style="width:145.95pt; border-right:6pt solid #c00000; border-left:6pt solid #c00000; border-bottom:6pt solid #c00000; padding:0pt 2.4pt; vertical-align:middle;">
-                                <p dir="rtl" class="Header" style="text-align:center; line-height:115%; font-size:14pt;"><strong><span style="font-family:Arial;">إصدار / مراجعة: 1/0</span></strong></p>
-                                <p dir="rtl" class="Header" style="text-align:center; line-height:115%; font-size:14pt;"><strong><span style="font-family:Arial;">تاريـخ الإصـدار: </span></strong><span style="line-height:115%; font-family:Arial; font-size:12pt; font-weight:bold;" dir="ltr">01/02/2025</span></p>
-                                <p dir="rtl" class="Header" style="line-height:115%; font-size:14pt;"><strong><span style="font-family:Arial;">&nbsp;</span></strong><strong><span style="font-family:Arial;">تاريـخ المراجعة:</span></strong></p>
-                                <p dir="rtl" style="text-align:center; line-height:115%; font-size:14pt;"><strong><span style="font-family:Arial;">صفحـــة رقـــم: </span></strong><span style="font-family:Arial;" dir="ltr">1</span></p>
-                            </td>
-                            <td style="width:216pt; border-right:6pt solid #c00000; border-bottom:6pt solid #c00000; padding:0pt 2.4pt; vertical-align:middle;">
-                                <p dir="rtl" style="text-align:center; font-size:20pt;"><img src="http://127.0.0.1:8000/storage/upload/logo//logo.png" alt="" style="max-width: 100%; height: auto;"></p>
-                            </td>
-                        </tr>
-                        <tr style="height:31pt;">
-                            <td style="width:129.25pt; border-top:6pt solid #c00000; border-left:6pt solid #c00000; padding:0pt 2.4pt; vertical-align:middle;">
-                                <p dir="rtl" style="text-align:center; font-size:16pt;"><strong><span style="font-family:\'AL-Sarem Bold\'; font-size:14pt;">قسم الجودة</span></strong></p>
-                            </td>
-                            <td style="width:216pt; border-top:6pt solid #c00000; border-right:6pt solid #c00000; padding:0pt 2.4pt; vertical-align:middle;">
-                                <p dir="rtl" class="Header" style="text-align:center; font-size:16pt;"><span dir="ltr"><strong>ISO</strong><strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</strong><strong>9001: 2015</strong></span></p>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            <p dir="rtl" class="Header"><span dir="ltr">&nbsp;</span></p>
-        </div>
-        ';
-        $this->config = new GpdfConfig([
-            GpdfSettingKeys::FONT_DIR => realpath(__DIR__ . '/assets/fonts/'),
-            GpdfSettingKeys::FONT_CACHE => realpath(__DIR__ . '/assets/fonts/'),
-            GpdfSettingKeys::DEFAULT_FONT => GpdfDefaultSupportedFonts::DEJAVU_SANS,
-            GpdfSettingKeys::IS_JAVASCRIPT_ENABLED => true,
-            GpdfSettingKeys::SHOW_NUMBERS_AS_HINDI => false,
+        try {
+            $id = Crypt::decrypt($id); // Decrypt the ID
+        } catch (DecryptException $e) {
+            return redirect()->back()->with('error', __('Invalid or corrupted ID.'));
+        }
+        $procedure   = IsoSystemProcedure::with('procedures','isoSystem')->where('id',$id)->first();
+        $templateTitles = [
+                    Config::get('procedure_templates.purpose_title'),
+                    Config::get('procedure_templates.scope_title'),
+                    Config::get('procedure_templates.responsibility_title'),
+                    Config::get('procedure_templates.definition_title'),
+                    Config::get('procedure_templates.forms_title'),
+                    Config::get('procedure_templates.procedure_title'),
+                    Config::get('procedure_templates.risk_matrix_title'),
+                ];
+
+        $procedureTemplates = ProcedureTemplate::whereIn('title', $templateTitles)->get();
+
+        $groupedTemplates = $procedureTemplates->keyBy('title');
+        $pageTitle = __('Configure') . ' ' . $procedure->procedure_name;
+        $jobRoles = [
+            "مدير إدارة",
+            "رئيس لجنة الجودة",
+            "موظف جودة",
+            "مشرف قسم",
+            "مدير مشروع",
+            "أخصائي تدريب",
+            "مسؤول موارد بشرية",
+            "مهندس جودة",
+            "فني صيانة",
+            "مستشار قانوني"
+        ];
+        // $pdf = PDF::loadView('pdf.document')
+        $pdf =  LaravelMpdf::loadView('template.procedure_template', [
+            'pageTitle' => $pageTitle,
+            'jobRoles' => $jobRoles,
+            'purposes' => $groupedTemplates->get(Config::get('procedure_templates.purpose_title')),
+            'scopes' => $groupedTemplates->get(Config::get('procedure_templates.scope_title')),
+            'responsibilities' => $groupedTemplates->get(Config::get('procedure_templates.responsibility_title')),
+            'definitions' => $groupedTemplates->get(Config::get('procedure_templates.definition_title')),
+            'forms' => $groupedTemplates->get(Config::get('procedure_templates.forms_title')),
+            'procedures' => $groupedTemplates->get(Config::get('procedure_templates.procedure_title')),
+            'risk_matrix' => $groupedTemplates->get(Config::get('procedure_templates.risk_matrix_title')),
         ]);
-        // Pass the header and other data to the view
-        $html = view('procedure-template.first-template', ['header' => $header])->render();
-        // $gpdf = new Gpdf($this->config);
-        // $pdfFile = $gpdf->generateWithStream($html);
+        return response($pdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="document.pdf"'
+        ]);	   
+         // return $pdf->download('pdf.pdf');
+        // $html = view('procedure-template.first-template', compact('pages'))->render();
+        // Config::set('gpdf.'.GpdfSet::DEFAULT_FONT, GpdfDefaultSupportedFonts::ALMARAI);
+        // $gpdf = app(Gpdf::class);
+        // $gpdf->generateWithStream($html,'test-pdf-files', true);
+        // $pdfFile = $gpdf->generate($html);
         // return response($pdfFile, 200, ['Content-Type' => 'application/pdf']);
-    
-        // $gpdf->generateWithStream($html, 'test-streamed-pdf', true);
-        // return response(null, 200, ['Content-Type' => 'application/pdf']);
-        // Create a PDF instance
-        $pdf = Pdf::loadHTML($html);
+        // $pdfContent = GpdfFacAde::generate($html);
 
-        $pdf->setPaper('A4', 'portrait');
+    }
 
-        return $pdf->stream('document.pdf');
+     /*
+     * this is second way depend on injection in service provider. (no need to inject it, it ready injected in GpdfServiceProvider)
+     */
+    public function generateSecondWayPdf()
+    {
+        $data = $this->getDynamicParams();
+
+        $html = view('pdf.example-2',$data)->render();
+
+        $gpdf = app(Gpdf::class);
+        $pdfFile = $gpdf->generate($html);
+
+        return response($pdfFile, 200, ['Content-Type' => 'application/pdf']);
+    }
+
+    /*
+     * override some configs
+     * change paper size and font  and some configs, for this pdf file only
+     */
+    public function generateWithCustomInlineConfig()
+    {
+        $data = $this->getDynamicParams();
+
+        Config::set('gpdf.'.GpdfSet::DEFAULT_PAPER_SIZE, 'a3');
+        Config::set('gpdf.'.GpdfSet::DPI, 300);
+        Config::set('gpdf.'.GpdfSet::DEFAULT_FONT, GpdfDefaultSupportedFonts::COURIER);
+
+        $html = view('pdf.example-2',$data)->render();
+
+        $gpdf = app(Gpdf::class);
+        $pdfFile = $gpdf->generate($html);
+
+        return response($pdfFile, 200, ['Content-Type' => 'application/pdf']);
+    }
+
+    public function generateAndStream()
+    {
+        $data = $this->getDynamicParams();
+
+        $html = view('pdf.example-2',$data)->render();
+
+        $gpdf = app(Gpdf::class);
+        $gpdf->generateWithStream($html,'test-pdf-files', true);
+
+        $pdfFile = $gpdf->generate($html); // optional
+        return response($pdfFile, 200, ['Content-Type' => 'application/pdf']);
+    }
+
+    public function generateAndStore()
+    {
+        $data = $this->getDynamicParams();
+        $html = view('pdf.example-2',$data)->render();
+        $gpdf = app(Gpdf::class);
+        $file = $gpdf->generateWithStore($html, null, 'test-store-pdf-fle', true, false); // we used default storage path /public/downloads/pdfs
+        $fileUrl = $file['ObjectURL'];
+
+        return $fileUrl; // return file url as string to store it to db or do any action
+    }
+
+    public function generateAndStoreToS3()
+    {
+        $data = $this->getDynamicParams();
+        $html = view('pdf.example-2',$data)->render();
+        $gpdf = app(Gpdf::class);
+        $file = $gpdf->generateWithStoreToS3($html, null, 'test-store-pdf-fle', true, true);
+
+        return $file['ObjectURL']; // return file url as string
+    }
+
+    public function generateAndStoreMultiplePages()
+    {
+        $data = $this->getDynamicParams();
+
+        // generate from many html pages in same pdf file
+        $html = collect(['pdf.example-1', 'pdf.example-2', 'pdf.example-3'])
+            ->map(fn($view) => view($view, $data)->render())
+            ->implode('');
+
+        $gpdf = app(Gpdf::class);
+        $file = $gpdf->generateWithStore($html, null, 'test-store-pdf-fle'); // file name optionals
+        $fileUrl = $file['ObjectURL'];
+
+        Log::info($fileUrl);
+    }
+
+    public function generatePdfWithArabicContent()
+    {
+        $data = $this->getDynamicParams();
+
+        $html = view('pdf.example-2-with-arabic', $data)->render();
+        $pdfContent = GpdfFacAde::generate($html);
+        return response($pdfContent, 200, ['Content-Type' => 'application/pdf']);
+    }
+
+    public function generateAdvanceWithFixedHeader()
+    {
+        $pages = $this->generateData(10);
+        $html = view('pdf.advance-example', compact('pages'))->render();
+
+        $gpdf = app(Gpdf::class);
+        $file = $gpdf->generateWithStore($html, null, 'complex-advance-pdf', true, false);
+        $fileUrl = $file['ObjectURL'];
+
+        Log::info($fileUrl);
     }
 }

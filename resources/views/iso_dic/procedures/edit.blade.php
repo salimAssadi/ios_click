@@ -2,7 +2,7 @@
 
 <div class="modal-body">
     <div class="row">
-        <div class="form-group col-md-12">
+        {{-- <div class="form-group col-md-12">
             {{ Form::label('category_id', __('Category'), ['class' => 'form-label']) }}
             <span class="text-danger">*</span> <!-- Add the asterisk outside the label -->
             {{ Form::select('category_id', $categories, $selectedCategoryId, ['class' => 'form-control hidesearch', 'id' => 'category']) }}
@@ -11,7 +11,7 @@
         <div class="form-group col-md-12" id="iso-system-field">
             {{ Form::label('iso_system_id', __('ISO System'), ['class' => 'form-label']) }}
             {{ Form::select('iso_system_id', $isoSystems, $selectedIsoSystemId, ['class' => 'form-control showsearch', 'id' => 'iso_system']) }}
-        </div>
+        </div> --}}
         <!-- Procedure Name -->
         <div class="form-group col-md-12">
             {{ Form::label('procedure_name', __('Procedure Name') . ' <span class="text-danger">*</span>', ['class' => 'form-label'], false) }}

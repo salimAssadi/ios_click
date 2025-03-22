@@ -169,6 +169,7 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
         Alexusmai\LaravelFileManager\FileManagerServiceProvider::class,
+        Meneses\LaravelMpdf\LaravelMpdfServiceProvider::class,
 
     ])->toArray(),
 
@@ -185,6 +186,8 @@ return [
 
     'aliases' => Facade::defaultAliases()->merge([
         // 'Example' => App\Facades\Example::class,
+        'PDF' => Meneses\LaravelMpdf\Facades\LaravelMpdf::class
+
     ])->toArray(),
 
 ];

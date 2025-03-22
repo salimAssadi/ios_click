@@ -42,10 +42,8 @@
                             <thead>
                                 <tr class="align-center">
                                     <th>{{ __('image') }}</th>
-                                    <th>{{ __('name ar') }}</th>
-                                    <th>{{ __('name en') }}</th>
-                                    <th>{{ __('code') }}</th>
-                                    <th>{{ __('version') }}</th>
+                                    <th>{{ __('name ar').'/'. __('name en')}}</th>
+                                    <th>{{ __('code') .'/'. __('version')}}</th>
                                     <th>{{ __('status') }}</th>
                                     <th>{{ __('Action') }}</th>
                                 </tr>
@@ -70,39 +68,25 @@
                                         <td>
                                             <div class="flex-grow-1 ms-3">
                                                 <h5 class="mb-1">
-                                                    {{ $system->name_ar }}
+                                                    {{ $system->name_ar }} ({{ $system->symbole }})
 
                                                 </h5>
+                                                <p> {{ $system->name_en}}</p>
                                             </div>
                                         </td>
-                                        <td>
-                                            <div class="flex-grow-1 ms-3">
-                                                <h5 class="mb-1">
-                                                    {{ $system->name_en }}
-
-                                                </h5>
-                                            </div>
-                                        </td>
+                                      
 
                                         <td>
                                             <div class="flex-grow-1 ms-3">
                                                 <h5 class="mb-1">
-                                                    {{ $system->code }}
+                                                    {{ $system->code .'/'.$system->version }}
 
                                                 </h5>
-                                                <p class="text-muted f-12 mb-0">
-                                                    {{ !empty($system->specification) ? $system->specification : '' }} </p>
+                                                
                                             </div>
                                         </td>
 
-                                        <td>
-                                            <div class="flex-grow-1 ms-3">
-                                                <h5 class="mb-1">
-                                                    {{ $system->version }}
-
-                                                </h5>
-                                            </div>
-                                        </td>
+                                       
                                         <td>
                                             <div class="flex-grow-1 ms-3">
                                                 @if ($system->status == 1)
@@ -117,18 +101,18 @@
                                             <div class="cart-action align-items-center">
                                                 {!! Form::open(['method' => 'DELETE', 'route' => ['iso_dic.iso_systems.destroy', $system->id]]) !!}
                                                 
-                                                <a class="avtar avtar-xs btn-link-warning text-warning"
-                                                    data-bs-toggle="tooltip" data-bs-original-title="{{ __('Attachments') }}"
+                                                <a class="btn btn-info"
+                                                    data-bs-toggle="tooltip" data-bs-original-title="{{ __('ISO Items') }}"
                                                     href="{{ route('iso_dic.iso_systems.show',\Illuminate\Support\Facades\Crypt::encrypt($system->id)) }}"
-                                                    data-title="{{ __('Edit User') }}"> <i data-feather="eye"></i></a>
-                                                <a class="avtar avtar-xs btn-link-secondary text-secondary customModal"
+                                                    data-title="{{ __('ISO Items') }}">{{ __('ISO Items') }}</a>
+                                                <a class="btn btn-secondary customModal"
                                                     data-bs-toggle="tooltip" data-size="lg"
                                                     data-bs-original-title="{{ __('Edit') }}" href="#"
                                                     data-url="{{ route('iso_dic.iso_systems.edit', $system->id) }}"
-                                                    data-title="{{ __('Edit User') }}"> <i data-feather="edit"></i></a>
-                                                <a class="avtar avtar-xs btn-link-danger text-danger confirm_dialog"
+                                                    data-title="{{ __('Edit') }}"> {{ __('Edit') }}</a>
+                                                {{-- <a class="avtar avtar-xs btn-link-danger text-danger confirm_dialog"
                                                     data-bs-toggle="tooltip" data-bs-original-title="{{ __('Detete') }}"
-                                                    href="#"> <i data-feather="trash-2"></i></a>
+                                                    href="#"> <i data-feather="trash-2"></i></a> --}}
                                                 {!! Form::close() !!}
                                             </div>
 

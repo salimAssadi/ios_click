@@ -3,7 +3,8 @@
 namespace App\Lib;
 
 use App\Constants\FileInfo;
-use Intervention\Image\Facades\Image;
+// use Intervention\Image\Facades\Image;
+use Intervention\Image\Laravel\Facades\Image;
 
 class FileManager
 {
@@ -124,24 +125,24 @@ class FileManager
     * @return void
     */
 	protected function uploadImage(){
-		// $image = Image::make($this->file);
+		$image = Image::make($this->file);
 
-        // //resize the
-	    // if ($this->size) {
-	    //     $size = explode('x', strtolower($this->size));
-	    //     $image->resize($size[0], $size[1]);
-	    // }
-        // //save the image
-	    // $image->save($this->path . '/' . $this->filename);
+        //resize the
+	    if ($this->size) {
+	        $size = explode('x', strtolower($this->size));
+	        $image->resize($size[0], $size[1]);
+	    }
+        //save the image
+	    $image->save($this->path . '/' . $this->filename);
 
-        // //save the image as thumbnail version
-	    // if ($this->thumb) {
-        //     if ($this->old) {
-        //         $this->removeFile($this->path . '/thumb_' . $this->old);
-        //     }
-	    //     $thumb = explode('x', $this->thumb);
-	    //     Image::make($this->file)->resize($thumb[0], $thumb[1])->save($this->path . '/thumb_' . $this->filename);
-	    // }
+        //save the image as thumbnail version
+	    if ($this->thumb) {
+            if ($this->old) {
+                $this->removeFile($this->path . '/thumb_' . $this->old);
+            }
+	        $thumb = explode('x', $this->thumb);
+	        Image::make($this->file)->resize($thumb[0], $thumb[1])->save($this->path . '/thumb_' . $this->filename);
+	    }
 	}
 
 

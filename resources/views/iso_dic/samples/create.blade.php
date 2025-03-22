@@ -1,6 +1,17 @@
 {{ Form::open(['url' => 'iso_dic/samples', 'method' => 'post', 'files' => true]) }}
 <div class="modal-body">
     <div class="row">
+        {{-- <div class="form-group col-md-12">
+            {{ Form::label('category_id', __('Category'), ['class' => 'form-label']) }}
+            <span class="text-danger">*</span> <!-- Add the asterisk outside the label -->
+            {{ Form::select('category_id', $category, null, ['class' => 'form-control hidesearch', 'id' => 'category']) }}
+        </div> --}}
+        
+        <div class="form-group col-md-12" id="procedure-field">
+            {{ Form::label('procedure_id', __('Procedures'), ['class' => 'form-label']) }}
+            {{ Form::select('procedure_id', $procedures, null, ['class' => 'form-control showsearch', 'id' => 'procedure']) }}
+        </div>
+
         <div class="form-group col-md-12">
             {{ Form::label('sample_name', __('Sample Name') . ' <span class="text-danger">*</span>', ['class' => 'form-label'], false) }}
             {{ Form::text('sample_name', null, ['class' => 'form-control', 'placeholder' => __('Enter Sample Name'), 'required' => 'required']) }}
@@ -10,13 +21,7 @@
             {{ Form::label('sample_description', __('Sample Description'), ['class' => 'form-label']) }}
             {{ Form::textarea('sample_description', null, ['class' => 'form-control', 'placeholder' => __('Enter Sample Description'),'rows'=>2]) }}
         </div>
-{{-- 
-        <!-- Template Path with File Manager Integration -->
-        <div class="form-group col-md-6">
-            {{ Form::label('template_path', __('Template Path'), ['class' => 'form-label'], false) }}
-            {{ Form::text('template_path', null, ['class' => 'form-control', 'placeholder' => __('Enter Template Path'), 'id' => 'file_path', 'readonly' => 'readonly']) }}
-            <button type="button" id="open-file-manager" class="btn btn-primary">{{ __('Open File Manager') }}</button>
-        </div> --}}
+
 
         <!-- is_optional -->
         <div class="form-group col-md-6">
