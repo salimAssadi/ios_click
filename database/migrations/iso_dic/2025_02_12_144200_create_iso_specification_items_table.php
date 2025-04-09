@@ -18,9 +18,12 @@ return new class extends Migration
             $table->foreignId('iso_system_id'); 
             $table->unsignedBigInteger('parent_id')->nullable();
             $table->string('item_number'); 
-            $table->text('inspection_question')->nullable(); 
-            $table->text('sub_inspection_question')->nullable(); 
-            $table->text('additional_text')->nullable(); 
+            $table->text('inspection_question_ar')->nullable(); 
+            $table->text('inspection_question_en')->nullable(); 
+            $table->text('sub_inspection_question_ar')->nullable(); 
+            $table->text('sub_inspection_question_en')->nullable(); 
+            $table->text('additional_text_ar')->nullable(); 
+            $table->text('additional_text_en')->nullable(); 
             $table->string('attachment')->nullable(); 
             $table->boolean('status')->default(true);
             $table->timestamps();

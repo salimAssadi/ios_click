@@ -8,11 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 class Country extends Model
 {
     use HasFactory;
-
+    public $timestamps = false;
     protected $fillable = [
-      'sortname',
-      'name',
-      'phonecode',
+      'name_ar',
+      'name_en',
+      'code',
     ];
 
   public function states(){

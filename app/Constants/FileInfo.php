@@ -18,10 +18,14 @@ class FileInfo
 
     public function fileInfo(){
         $data['isoIcon'] = [
-            'path'=>'assets/images/isoIcon/'
+            'path'=>'assets/images/isoIcon',
+
         ];
-        $data['depositVerify'] = [
-            'path'      =>'assets/images/verify/deposit'
+        $data['prodcedureTemplate'] = [
+            'path'      =>'prodcedureTemplate'
+        ];
+        $data['sampleTemplate'] = [
+            'path'      =>'sampleTemplate'
         ];
         $data['verify'] = [
             'path'      =>'assets/verify'

@@ -8,6 +8,7 @@ use App\Lib\FormProcessor;
 use App\Models\Category;
 use App\Models\Form;
 use App\Models\Procedure;
+use App\Models\ProductScope;
 use App\Models\Sample;
 use Exception;
 use Illuminate\Contracts\Encryption\DecryptException;
@@ -16,6 +17,7 @@ use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\File;
 use Meneses\LaravelMpdf\Facades\LaravelMpdf;
+use Illuminate\Support\Facades\Redirect;
 
 class SampleController extends Controller
 {
@@ -68,6 +70,8 @@ class SampleController extends Controller
                 'sample_description' => 'nullable|string|max:1000',
                 'is_optional' => 'required|boolean',
                 'status' => 'required|boolean',
+                'has_menual_config' => 'nullable|boolean', 
+        
             ]);
 
             // Check if validation fails
@@ -83,7 +87,10 @@ class SampleController extends Controller
             $sample->procedure_id = $request->input('procedure_id');
             $sample->template_path = "";
             $sample->status = $request->input('status');
-
+            $sample->has_menual_config = $request->has('has_menual_config') ? 1 : 0; 
+            $sample->enable_upload_file = $request->has('enable_upload_file') ? 1 : 0; 
+            $sample->enable_editor = $request->has('enable_editor') ? 1 : 0; 
+            $sample->blade_view = $request->input('blade_view',''); 
             // // Handle file upload
             // if ($request->hasFile('template_path')) {
             //     $file = $request->file('template_path');
@@ -148,8 +155,22 @@ class SampleController extends Controller
         $sample   = Sample::with('procedure')->find($id);
         $remark = __('Configure');
         $pageTitle = $remark . ' ' . $sample->sample_name;
-        $page= 'sample_config_'.sprintf('%02d', $sample->procedure_id).'_'.sprintf('%02d', $sample->id);
-        return view($this->iso_dic_path . '.samples.config.sample_template' , compact('pageTitle', 'id','sample'));
+        $configdata=[];
+        $config = request()->query('config');
+        if ($config === 'editor' && $sample->enable_editor){
+            return view($this->iso_dic_path . '.samples.config.editor_view' , compact('pageTitle', 'id','sample'));
+        }
+        if($sample->has_menual_config){
+            $parents = ProductScope::all();
+            $products= $parents;
+            $configdata=[
+                'parents' => $parents,
+                'products' => $products,
+            ];
+        }
+        // $page= 'sample_config_'.sprintf('%02d', $sample->procedure_id).'_'.sprintf('%02d', $sample->id);
+        // return view($this->iso_dic_path . '.samples.config.sample_template' , compact('pageTitle', 'id','sample','configdata'));
+        return view($this->iso_dic_path . '.samples.configure' , compact('pageTitle', 'id','sample','configdata'));
     }
 
 
@@ -202,6 +223,31 @@ class SampleController extends Controller
         $sample->template_path = $request->input('template_path', '');
         $sample->save();
         return redirect()->back()->with('success', __('Sample configured successfully'));
+    }
+    public function showuploadview(string $id)
+    {
+        $sample = Sample::find($id);
+        return view($this->iso_dic_path . '.samples.uploadsample', compact('sample'));
+    }
+    
+   
+    public function uploadSample(Request $request)
+    {
+        // Validate the uploaded file
+        $request->validate([
+            'upload_file' => 'required|file|mimes:txt,doc,docx,pdf,jpg,jpeg,png|max:2048', // Max 2MB
+        ]);
+        $file = $request->file('upload_file');
+        $sample_id = $request->input('sample_id', true);
+        $sample   = Sample::findOrFail($sample_id);
+        if(!$sample){
+            return redirect()->back()->with('error', __('Invalid sample id.'));
+        }
+        $storagePath = getFilePath('sampleTemplate');
+        $filePath = uploadFiles($file, $storagePath,false);
+        $sample->template_path =   $filePath;
+        $sample->save();
+        return redirect()->back()->with('success', 'File uploaded successfully.');
     }
 
     public function saveConfigure(Request $request,$id)

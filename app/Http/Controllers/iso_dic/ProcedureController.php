@@ -67,6 +67,10 @@ class ProcedureController extends Controller
             $procedure->is_optional = $request->input('is_optional');
             $procedure->template_path = "";
             $procedure->status = $request->input('status');
+            $procedure->has_menual_config = $request->has('has_menual_config') ? 1 : 0; 
+            $procedure->enable_upload_file = $request->has('enable_upload_file') ? 1 : 0; 
+            $procedure->enable_editor = $request->has('enable_editor') ? 1 : 0; 
+            $procedure->blade_view = $request->input('blade_view',''); 
             $procedure->save();
             return redirect()->back()->with('success', __('Procedure created successfully!'));
         } catch (Exception $e) {
@@ -140,6 +144,10 @@ class ProcedureController extends Controller
             $procedure->description = $request->input('procedure_description');
             $procedure->is_optional = $request->input('is_optional');
             $procedure->status = $request->input('status');
+            $procedure->has_menual_config = $request->has('has_menual_config') ? 1 : 0; 
+            $procedure->enable_upload_file = $request->has('enable_upload_file') ? 1 : 0; 
+            $procedure->enable_editor = $request->has('enable_editor') ? 1 : 0; 
+            $procedure->blade_view = $request->input('blade_view',''); 
             $procedure->save();
             return redirect()->back()->with('success', __('Procedure updated successfully!'));
         } catch (\Exception $e) {
@@ -241,6 +249,7 @@ class ProcedureController extends Controller
             Config::get('procedure_templates.forms_title'),
             Config::get('procedure_templates.procedure_title'),
             Config::get('procedure_templates.risk_matrix_title'),
+            Config::get('procedure_templates.kpis'),
         ];
 
         $procedureTemplates = ProcedureTemplate::whereIn('title', $templateTitles)->get();
@@ -271,6 +280,7 @@ class ProcedureController extends Controller
             'forms' => $groupedTemplates->get(Config::get('procedure_templates.forms_title')),
             'procedures' => $groupedTemplates->get(Config::get('procedure_templates.procedure_title')),
             'risk_matrix' => $groupedTemplates->get(Config::get('procedure_templates.risk_matrix_title')),
+            'kpis' => $groupedTemplates->get(Config::get('procedure_templates.kpis')),
         ]);
     }
 

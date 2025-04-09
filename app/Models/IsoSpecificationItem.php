@@ -14,9 +14,12 @@ class IsoSpecificationItem extends Model
         'iso_system_id',
         'parent_id',
         'item_number',
-        'inspection_question',
-        'sub_inspection_question',
-        'additional_text',
+        'inspection_question_ar',
+        'inspection_question_en',
+        'sub_inspection_question_ar',
+        'sub_inspection_question_en',
+        'additional_text_ar',
+        'additional_text_ar',
         'attachment',
         'is_published'
     ];

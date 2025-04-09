@@ -54,10 +54,8 @@
                                         <td>
                                             <div class="d-flex align-items-center">
                                                 <div class="flex-shrink-0 wid-40">
-                                                    <img class="img-radius img-fluid wid-40"
-                                                        src="{{ !empty($system->image) ? asset(Storage::url('upload/iso')) . '/' . $system->image : asset(Storage::url('upload/profile')) . '/avatar.png' }}"
-                                                        alt="User image">
-
+                                                    <img  class="img-radius img-fluid wid-40" src="{{ getISOImage(getFilePath('isoIcon').'/'. $system->image)}}" alt="@lang('Image')" >
+                                                    
                                                 </div>
                                             </div>
 

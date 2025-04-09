@@ -33,7 +33,7 @@ $(document).on("click", ".customModal", function () {
                 ckediter();
             }
         },
-        error: function (result) {},
+        error: function (result) { },
     });
 });
 
@@ -104,7 +104,7 @@ $(document).on("click", ".fc-day-grid-event", function (e) {
             $("#customModal .modal-body").html(result);
             $("#customModal").modal("show");
         },
-        error: function (result) {},
+        error: function (result) { },
     });
 });
 
@@ -230,24 +230,41 @@ function datatable() {
 
 if ($(".summernote").length) {
     "use strict";
-    $('.summernote').summernote({
-        toolbar: [
-            ['style', ['style']],
-            ['font', ['bold', 'italic', 'underline', 'strikethrough', 'superscript', 'subscript', 'clear']],
-            ['fontsize', ['fontsize']],
-            ['color', ['color']],
-            ['para', ['ul', 'ol', 'paragraph']],
-            ['table', ['table']], // Enable table functionality
-            ['insert', ['link', 'picture', 'video', 'hr']], // Enable image, video, and horizontal rule
-            ['view', ['fullscreen', 'codeview', 'help']] // Enable fullscreen and code view
-        ],
-        height: 500,
-        popover: {
-            table: [
-                ['add', ['addRowDown', 'addRowUp', 'addColLeft', 'addColRight']], // Add rows/columns
-                ['delete', ['deleteRow', 'deleteCol', 'deleteTable']] // Delete rows/columns/table
-            ]
-        }
-    });
-}
+    var lang = document.documentElement.lang;
+    var editor_config = {
+        path_absolute: window.location.origin + "/",  // Use the current domain
+        document_base_url: window.location.origin + "/",  // Use the current domain
+        selector: "textarea.summernote",
+        theme: 'silver', // Specify your custom theme name
+        plugins: ' image  table   preview anchor    visualblocks visualchars code   fullscreen',
+        toolbar: ' undo redo  link |  emoticons styleselect  |fontfamily backcolor fontsize |alignleft aligncenter alignright alignjustify | preview language fullscreen',
+        table_toolbar: 'tableprops tabledelete | tableinsertrowbefore tableinsertrowafter tabledeleterow | tableinsertcolbefore tableinsertcolafter tabledeletecol link  ',
+        promotion: false,
+        convert_urls: true,
+        remove_script_host: false,
+        relative_urls: false,
+        directionality: "rtl",
+        file_picker_callback: function (callback, value, meta) {
+            if (meta.filetype === 'image') {
+                // Open the Alexusmai file manager
+                var x = window.innerWidth || document.documentElement.clientWidth || document.getElementsByTagName('body')[0].clientWidth;
+                var y = window.innerHeight || document.documentElement.clientHeight || document.getElementsByTagName('body')[0].clientHeight;
 
+                tinyMCE.activeEditor.windowManager.openUrl({
+                    url: 'iso_dic/file-manager', // Adjust this to your file manager route
+                    title: 'File Manager',
+                    width: x * 0.8,
+                    height: y * 0.8,
+                    resizable: "yes",
+                    close_previous: "no",
+                    onMessage: (api, message) => {
+                        callback(message.content); // Use the returned URL
+                    }
+                });
+            }
+        }
+
+    };
+
+    tinymce.init(editor_config);
+}

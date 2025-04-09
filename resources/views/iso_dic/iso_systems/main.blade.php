@@ -58,18 +58,18 @@
                                             </h5>
                                         </div>
                                         <div class="col-auto">
-                            
-                                            <a  class="btn btn-secondary"
-                                                href="{{ route('iso_dic.iso_systems.procedure.create',\Illuminate\Support\Facades\Crypt::encrypt($isoSystem->id)) }}">
+
+                                            <a class="btn btn-secondary"
+                                                href="{{ route('iso_dic.iso_systems.procedure.create', \Illuminate\Support\Facades\Crypt::encrypt($isoSystem->id)) }}">
                                                 <i class="ti ti-circle-plus align-text-bottom"></i>
                                                 {{ __('Create Procedure') }}
                                             </a>
-                                            <a  class="btn btn-secondary"
-                                                href="{{ route('iso_dic.iso_systems.sample.create',\Illuminate\Support\Facades\Crypt::encrypt($isoSystem->id))}}">
+                                            <a class="btn btn-secondary"
+                                                href="{{ route('iso_dic.iso_systems.sample.create', \Illuminate\Support\Facades\Crypt::encrypt($isoSystem->id)) }}">
                                                 <i class="ti ti-circle-plus align-text-bottom"></i>
                                                 {{ __('Create Sample') }}
                                             </a>
-                                          
+
                                         </div>
                                     </div>
                                 </div>
@@ -88,12 +88,19 @@
                                         {{-- scope-tab --}}
                                         <li class="nav-item" role="presentation">
                                             <button class="nav-link " id="sample-tab" data-bs-toggle="tab"
-                                                data-bs-target="#sample" type="button" role="tab" aria-controls="sample"
-                                                aria-selected="false">
+                                                data-bs-target="#sample" type="button" role="tab"
+                                                aria-controls="sample" aria-selected="false">
                                                 {{ __('Samples') }}
                                             </button>
                                         </li>
-
+                                        {{-- specifcationItem-tab --}}
+                                        <li class="nav-item" role="presentation" >
+                                            <button class="nav-link w-100" id="specifcationItem-tab" data-bs-toggle="tab"
+                                                data-bs-target="#specifcationItem" type="button" role="tab"
+                                                aria-controls="specifcationItem" aria-selected="false">
+                                                {{ __('ISO specification items') }}
+                                            </button>
+                                        </li>
                                         {{-- responsibility-tab --}}
                                         <li class="nav-item" role="presentation">
                                             <button class="nav-link " id="responsibility-tab" data-bs-toggle="tab"
@@ -102,6 +109,7 @@
                                                 {{ __('Attachments') }}
                                             </button>
                                         </li>
+
 
 
                                     </ul>
@@ -183,7 +191,10 @@
                                                                 </td>
                                                                 <td>
                                                                     <div class="cart-action align-items-center">
-                                                                        {!! Form::open(['method' => 'DELETE', 'route' => ['iso_dic.iso_systems.procedure.delete', \Illuminate\Support\Facades\Crypt::encrypt($procedure->id)]]) !!}
+                                                                        {!! Form::open([
+                                                                            'method' => 'DELETE',
+                                                                            'route' => ['iso_dic.iso_systems.procedure.delete', \Illuminate\Support\Facades\Crypt::encrypt($procedure->id)],
+                                                                        ]) !!}
                                                                         {{-- <a class="avtar avtar-xs btn-link-primary text-primary"
                                                                             data-bs-toggle="tooltip"
                                                                             data-bs-original-title="{{ __('Attachments') }}"
@@ -202,17 +213,18 @@
                                                                         <a class="avtar avtar-xs btn-link-danger text-danger confirm_dialog"
                                                                             data-bs-toggle="tooltip"
                                                                             data-bs-original-title="{{ __('Detete') }}"
-                                                                            data-dialog-title="{{__('Are you sure you want to delete this record ?')}}"
-                                                                            data-dialog-text="{{__('This record can not be restore after delete. Do you want to confirm?')}}"
-                                                                            href="#"><i class="ti ti-trash fs-2"></i>
+                                                                            data-dialog-title="{{ __('Are you sure you want to delete this record ?') }}"
+                                                                            data-dialog-text="{{ __('This record can not be restore after delete. Do you want to confirm?') }}"
+                                                                            href="#"><i
+                                                                                class="ti ti-trash fs-2"></i>
                                                                         </a>
                                                                         <a class="avtar avtar-xs btn-link-secondary text-secondary"
-                                                                                data-bs-toggle="tooltip" data-size="lg"
-                                                                                data-bs-original-title="{{ __('Download') }}"
-                                                                                href="{{ route('iso_dic.iso_systems.procedure.download', \Illuminate\Support\Facades\Crypt::encrypt($procedure->id)) }}"
-                                                                                data-title="{{ __('Download') }}">
-                                                                                <i data-feather="download"> </i>
-                                                                        </a> 
+                                                                            data-bs-toggle="tooltip" data-size="lg"
+                                                                            data-bs-original-title="{{ __('Download') }}"
+                                                                            href="{{ route('iso_dic.iso_systems.procedure.download', \Illuminate\Support\Facades\Crypt::encrypt($procedure->id)) }}"
+                                                                            data-title="{{ __('Download') }}">
+                                                                            <i data-feather="download"> </i>
+                                                                        </a>
                                                                         <a class="avtar avtar-xs btn-link-warning text-warning"
                                                                             data-bs-toggle="tooltip"
                                                                             data-bs-original-title="{{ __('preview') }}"
@@ -237,20 +249,23 @@
                                         <div class="tab-pane fade " id="sample" role="tabpanel"
                                             aria-labelledby="sample-tab">
                                             <div>
-                                                <form id="procedure-filter-form" action="{{ url()->current() }}" method="GET">
+                                                <form id="procedure-filter-form" action="{{ url()->current() }}"
+                                                    method="GET">
                                                     <div class="row">
                                                         <div class="col-md-4">
-                                                            <select id="procedure-filter" name="procedure_id" class="form-control">
-                                                                <option value="-1">{{__('All Procedures')}}</option>
+                                                            <select id="procedure-filter" name="procedure_id"
+                                                                class="form-control">
+                                                                <option value="-1">{{ __('All Procedures') }}</option>
                                                                 @foreach ($procedures as $procedure)
-                                                                    <option value="{{ $procedure->id }}" {{ $selectedProcedureId == $procedure->id ? 'selected' : '' }}>
+                                                                    <option value="{{ $procedure->id }}"
+                                                                        {{ $selectedProcedureId == $procedure->id ? 'selected' : '' }}>
                                                                         {{ $procedure->procedure->procedure_name }}
                                                                     </option>
                                                                 @endforeach
                                                             </select>
                                                         </div>
                                                     </div>
-                                                </form>                      
+                                                </form>
                                             </div>
                                             <div class="dt-responsive table-responsive">
                                                 <table class="table table-hover basic-datatable text-center">
@@ -258,7 +273,7 @@
                                                         <tr>
                                                             <th class="text-center">{{ __('no') }}</th>
                                                             <th class="text-center">{{ __('Sample Name') }}</th>
-                                                            <th class="text-center">{{ __('Procedure Name')}}</th>
+                                                            <th class="text-center">{{ __('Procedure Name') }}</th>
                                                             <th class="text-center">{{ __('Coding') }}</th>
                                                             <th class="text-center">{{ __('Required Sample') }}</th>
                                                             <th class="text-center">{{ __('status') }}</th>
@@ -266,7 +281,7 @@
 
                                                         </tr>
                                                     </thead>
-                                                  
+
                                                     <tbody id="results-container">
                                                         {{-- @include('partials.forms') --}}
                                                         @include('partials.forms', ['forms' => $forms])
@@ -279,6 +294,15 @@
                                         <div class="tab-pane fade" id="responsibility" role="tabpanel"
                                             aria-labelledby="responsibility-tab">
                                         </div>
+
+                                        <div class="tab-pane fade" id="specifcationItem" role="tabpanel"
+                                            aria-labelledby="specifcationItem-tab">
+                                            <div class="row">
+                                                @include('iso_dic.specification_items.table', [
+                                                    'specificationItems' => $specificationItems,
+                                                ])
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -290,17 +314,19 @@
     @endsection
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        $(document).ready(function () {
-            $('#procedure-filter').on('change', function () {
+        $(document).ready(function() {
+            $('#procedure-filter').on('change', function() {
                 var selectedProcedureId = $(this).val();
                 $.ajax({
                     url: $('#procedure-filter-form').attr('action'),
                     type: 'GET',
-                    data: { procedure_id: selectedProcedureId },
-                    success: function (response) {
+                    data: {
+                        procedure_id: selectedProcedureId
+                    },
+                    success: function(response) {
                         $('#results-container').html(response);
                     },
-                    error: function (xhr) {
+                    error: function(xhr) {
                         console.error('Error occurred:', xhr);
                     }
                 });

@@ -3,7 +3,6 @@
 namespace App\Lib;
 
 use App\Constants\FileInfo;
-// use Intervention\Image\Facades\Image;
 use Intervention\Image\Laravel\Facades\Image;
 
 class FileManager
@@ -13,244 +12,259 @@ class FileManager
     | File Manager
     |--------------------------------------------------------------------------
     |
-    | FileManager class is using to manage edit, update, remove files. Developer
-    | can manage any kind of files from here. But some limitations is here for image.
-    | This class using a trait to manage the file paths and sizes. Developer can also
+    | FileManager class is used to manage edit, update, remove files. Developer
+    | can manage any kind of files from here. But some limitations are here for images.
+    | This class uses a trait to manage the file paths and sizes. Developer can also
     | use this class as a helper function.
     |
     */
 
     /**
-    * The file which will be uploaded
-    *
-    *
-    * @var object
-    */
-	protected $file;
+     * The file which will be uploaded
+     *
+     * @var object
+     */
+    protected $file;
 
     /**
-    * The path where will be uploaded
-    *
-    * @var string
-    */
-	public $path;
+     * The path where the file will be uploaded
+     *
+     * @var string
+     */
+    public $path;
 
     /**
-    * The size, if the file is image
-    *
-    * @var string
-    */
-	public $size;
+     * The size, if the file is an image
+     *
+     * @var string
+     */
+    public $size;
 
     /**
-    * Check the file is image or not
-    *
-    * @var boolean
-    */
-	protected $isImage;
+     * Check if the file is an image or not
+     *
+     * @var boolean
+     */
+    protected $isImage;
 
     /**
-    * Thumbnail version size, if required
-    * and if the file is image
-    *
-    * @var string
-    */
-	public $thumb;
+     * Thumbnail version size, if required and if the file is an image
+     *
+     * @var string
+     */
+    public $thumb;
 
     /**
-    * Old filename, which will be removed
-    *
-    * @var string
-    */
-	public $old;
+     * Old filename, which will be removed
+     *
+     * @var string
+     */
+    public $old;
 
     /**
-    * Current filename, which is uploading
-    *
-    * @var string
-    */
-	public $filename;
-
-
-    /**
-    * Set the file and file type to properties if exist
-    *
-    * @param $file
-    * @return void
-    */
-	public function __construct($file = null){
-		$this->file = $file;
-		if ($file) {
-			$imageExtensions = ['jpg','jpeg','png','JPG','JPEG','PNG'];
-			if (in_array($file->getClientOriginalExtension(), $imageExtensions)) {
-				$this->isImage = true;
-			}else{
-				$this->isImage = false;
-			}
-		}
-	}
+     * Current filename, which is uploading
+     *
+     * @var string
+     */
+    public $filename;
 
     /**
-    * File upload process
-    *
-    * @return void
-    */
-	public function upload(){
+     * Set the file and file type to properties if it exists
+     *
+     * @param $file
+     * @return void
+     */
+    public function __construct($file = null)
+    {
+        $this->file = $file;
+        if ($file) {
+            $imageExtensions = ['jpg', 'jpeg', 'png', 'JPG', 'JPEG', 'PNG'];
+            if (in_array($file->getClientOriginalExtension(), $imageExtensions)) {
+                $this->isImage = true;
+            } else {
+                $this->isImage = false;
+            }
+        }
+    }
 
-        //create the directory if doesn't exists
-		$path = $this->makeDirectory();
-		if (!$path) throw new \Exception('File could not been created.');
+    /**
+     * File upload process
+     *
+     * @return void
+     */
+    public function upload()
+    {
+        // Create the directory if it doesn't exist
+        $path = $this->makeDirectory();
+        if (!$path) throw new \Exception('File could not be created.');
 
-        //remove the old file if exist
-		if ($this->old) {
+        // Remove the old file if it exists
+        if ($this->old) {
             $this->removeFile();
-	    }
+        }
 
-        //get the filename
-        if(!$this->filename){
+        // Get the filename
+        if (!$this->filename) {
             $this->filename = $this->getFileName();
         }
 
-        //upload file or image
-	    if ($this->isImage == true) {
-	    	$this->uploadImage();
-	    }else{
-	    	$this->uploadFile();
-	    }
-	}
+        // Upload file or image
+        if ($this->isImage == true) {
+            $this->uploadImage();
+        } else {
+            $this->uploadFile();
+        }
+    }
 
     /**
-    * Upload the file if this is image
-    *
-    * @return void
-    */
-	protected function uploadImage(){
-		$image = Image::make($this->file);
+     * Upload the file if it is an image
+     *
+     * @return void
+     */
+    protected function uploadImage()
+    {
+        try {
+            // Load the image using the read() method
+            $image = Image::read($this->file);
 
-        //resize the
-	    if ($this->size) {
-	        $size = explode('x', strtolower($this->size));
-	        $image->resize($size[0], $size[1]);
-	    }
-        //save the image
-	    $image->save($this->path . '/' . $this->filename);
-
-        //save the image as thumbnail version
-	    if ($this->thumb) {
-            if ($this->old) {
-                $this->removeFile($this->path . '/thumb_' . $this->old);
+            // Resize the image if size is specified
+            if ($this->size) {
+                $size = explode('x', strtolower($this->size));
+                $image->scale(width: (int)$size[0], height: (int)$size[1]);
             }
-	        $thumb = explode('x', $this->thumb);
-	        Image::make($this->file)->resize($thumb[0], $thumb[1])->save($this->path . '/thumb_' . $this->filename);
-	    }
-	}
 
+            // Save the image
+            $image->save($this->path . '/' . $this->filename);
 
-    /**
-    * Upload the file if this is not a image
-    *
-    * @return void
-    */
-	protected function uploadFile(){
-	    $this->file->move($this->path,$this->filename);
-	}
-    
-    /**
-    * Make directory doesn't exists
-    * Developer can also call this method statically
-    *
-    * @param $location
-    * @return string
-    */
-	public function makeDirectory($location = null){
-		if (!$location) $location = $this->path;
-		if (file_exists($location)) return true;
-    	return mkdir($location, 0755, true);
-	}
+            // Save the image as a thumbnail version
+            if ($this->thumb) {
+                if ($this->old) {
+                    $this->removeFile($this->path . '/thumb_' . $this->old);
+                }
+                $thumb = explode('x', $this->thumb);
+                Image::read($this->file)
+                    ->scale(width: (int)$thumb[0], height: (int)$thumb[1])
+                    ->save($this->path . '/thumb_' . $this->filename);
+            }
+        } catch (\Exception $e) {
+            throw new \Exception('Image upload failed: ' . $e->getMessage());
+        }
+    }
 
     /**
-    * Remove all directory inside the location
-    * Developer can also call this method statically
-    *
-    * @param $location
-    * @return void
-    */
-	public function removeDirectory($location = null){
-		if (!$location) $location = $this->path;
-		if (! is_dir($location)) {
-	        throw new \InvalidArgumentException("$location must be a directory");
-	    }
-	    if (substr($location, strlen($location) - 1, 1) != '/') {
-	        $location .= '/';
-	    }
-	    $files = glob($location . '*', GLOB_MARK);
-	    foreach ($files as $file) {
-	        if (is_dir($file)) {
-	            static::removeDirectory($file);
-	        } else {
-	            unlink($file);
-	        }
-	    }
-	    rmdir($location);
-	}
+     * Upload the file if it is not an image
+     *
+     * @return void
+     */
+    protected function uploadFile()
+    {
+        $this->file->move($this->path, $this->filename);
+    }
 
     /**
-    * Remove the file if exists
-    * Developer can also call this method statically
-    *
-    * @param $path
-    * @return void
-    */
-	public function removeFile($path = null)
-	{
-		if (!$path) $path = $this->path . '/' . $this->old;
-
-	    file_exists($path) && is_file($path) ? @unlink($path) : false;
-
-	    if ($this->thumb) {
-	    	if (!$path) $path = $this->path . '/thumb_' . $this->old;
-	    	file_exists($path) && is_file($path) ? @unlink($path) : false;
-	    }
-	}
+     * Make directory if it doesn't exist
+     * Developer can also call this method statically
+     *
+     * @param $location
+     * @return string
+     */
+    public function makeDirectory($location = null)
+    {
+        if (!$location) $location = $this->path;
+        if (file_exists($location)) return true;
+        return mkdir($location, 0755, true);
+    }
 
     /**
-    * Generating the filename which is uploading
-    *
-    * @return string
-    */
-	protected function getFileName(){
-		return uniqid() . time() . '.' . $this->file->getClientOriginalExtension();
-	}
+     * Remove all directories inside the location
+     * Developer can also call this method statically
+     *
+     * @param $location
+     * @return void
+     */
+    public function removeDirectory($location = null)
+    {
+        if (!$location) $location = $this->path;
+        if (!is_dir($location)) {
+            throw new \InvalidArgumentException("$location must be a directory");
+        }
+        if (substr($location, strlen($location) - 1, 1) != '/') {
+            $location .= '/';
+        }
+        $files = glob($location . '*', GLOB_MARK);
+        foreach ($files as $file) {
+            if (is_dir($file)) {
+                static::removeDirectory($file);
+            } else {
+                unlink($file);
+            }
+        }
+        rmdir($location);
+    }
 
     /**
-    * Get access of array from fileInfo method as non-static method.
-    * Also get some others method
-    *
-    * @return string|void
-    */
-	public function __call($method,$args){
+     * Remove the file if it exists
+     * Developer can also call this method statically
+     *
+     * @param $path
+     * @return void
+     */
+    public function removeFile($path = null)
+    {
+        if (!$path) $path = $this->path . '/' . $this->old;
+
+        if (file_exists($path) && is_file($path)) {
+            unlink($path);
+        }
+
+        if ($this->thumb) {
+            $thumbPath = $this->path . '/thumb_' . $this->old;
+            if (file_exists($thumbPath) && is_file($thumbPath)) {
+                unlink($thumbPath);
+            }
+        }
+    }
+
+    /**
+     * Generating the filename which is being uploaded
+     *
+     * @return string
+     */
+    protected function getFileName()
+    {
+        return uniqid() . time() . '.' . $this->file->getClientOriginalExtension();
+    }
+
+    /**
+     * Get access of array from fileInfo method as a non-static method.
+     * Also get some other methods
+     *
+     * @return string|void
+     */
+    public function __call($method, $args)
+    {
         $fileInfo = new FileInfo;
-		$filePaths = $fileInfo->fileInfo();
-		if (array_key_exists($method, $filePaths)) {
-			$path = json_decode(json_encode($filePaths[$method]));
-			return $path;
-		}else{
-			if (method_exists($this,$method)) {
-				$this->$method(...$args);
-			}else{
-				throw new \Exception('File key or method doesn\'t exists.');
-			}
-		}
-	}
+        $filePaths = $fileInfo->fileInfo();
+        if (array_key_exists($method, $filePaths)) {
+            $path = json_decode(json_encode($filePaths[$method]));
+            return $path;
+        } else {
+            if (method_exists($this, $method)) {
+                $this->$method(...$args);
+            } else {
+                throw new \Exception('File key or method doesn\'t exist.');
+            }
+        }
+    }
 
     /**
-    * Get access some non-static method as static method
-    *
-    * @return void
-    */
-	public static function __callStatic($method,$args){
-		$selfClass = new FileManager;
-		$selfClass->$method(...$args);
-	}
-
+     * Get access to some non-static methods as static methods
+     *
+     * @return void
+     */
+    public static function __callStatic($method, $args)
+    {
+        $selfClass = new FileManager;
+        $selfClass->$method(...$args);
+    }
 }

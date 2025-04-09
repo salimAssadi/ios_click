@@ -13,14 +13,24 @@
             {{ Form::select('iso_system_id', $isoSystems, null, ['class' => 'form-control showsearch', 'id' => 'iso_system']) }}
         </div> --}}
 
-        <div class="form-group col-md-12">
-            {{ Form::label('procedure_name', __('Procedure Name') . ' <span class="text-danger">*</span>', ['class' => 'form-label'], false) }}
-            {{ Form::text('procedure_name', null, ['class' => 'form-control', 'placeholder' => __('Enter Procedure Name'), 'required' => 'required']) }}
+        <div class="form-group col-md-6">
+            {{ Form::label('procedure_name_ar', __('Procedure Name (arabic)') . ' <span class="text-danger">*</span>', ['class' => 'form-label'], false) }}
+            {{ Form::text('procedure_name_ar', null, ['class' => 'form-control', 'placeholder' => __('Enter Procedure Name (arabic)'), 'required' => 'required']) }}
         </div>
 
-        <div class="form-group col-md-12">
-            {{ Form::label('procedure_description', __('Procedure Description'), ['class' => 'form-label']) }}
-            {{ Form::textarea('procedure_description', null, ['class' => 'form-control', 'placeholder' => __('Enter Procedure Description'), 'rows' => 2]) }}
+        <div class="form-group col-md-6">
+            {{ Form::label('procedure_name_en', __('Procedure Name (english)') . ' <span class="text-danger">*</span>', ['class' => 'form-label'], false) }}
+            {{ Form::text('procedure_name_en', null, ['class' => 'form-control', 'placeholder' => __('Enter Procedure Name (english)'), 'required' => 'required']) }}
+        </div>
+
+        <div class="form-group col-md-6">
+            {{ Form::label('procedure_description_ar', __('Procedure Description (arabic)'), ['class' => 'form-label']) }}
+            {{ Form::textarea('procedure_description_ar', null, ['class' => 'form-control', 'placeholder' => __('Enter Procedure Description (arabic)'), 'rows' => 2]) }}
+        </div>
+
+        <div class="form-group col-md-6">
+            {{ Form::label('procedure_description_en', __('Procedure Description (english)'), ['class' => 'form-label']) }}
+            {{ Form::textarea('procedure_description_en', null, ['class' => 'form-control', 'placeholder' => __('Enter Procedure Description (english)'), 'rows' => 2]) }}
         </div>
 
         <!-- is_optional -->
@@ -48,6 +58,28 @@
                 {{ Form::label('status_inactive', __('Inactive'), ['class' => 'form-check-label']) }}
             </div>
         </div>
+        <div class="form-group gap-3">
+            <div class="form-check form-check-inline">
+                {!! Form::checkbox('enable_upload_file', 1, null, ['class' => 'form-check-input', 'id' => 'enable_upload_file']) !!}
+                {!! Form::label('enable_upload_file', __('Enable Upload File'), ['class' => 'form-check-label']) !!}
+            </div>
+
+            <div class="form-check form-check-inline">
+                {!! Form::checkbox('enable_editor', 1, null, ['class' => 'form-check-input', 'id' => 'enable_editor']) !!}
+                {!! Form::label('enable_editor', __('Enable Editor'), ['class' => 'form-check-label']) !!}
+            </div>
+
+            <div class="form-check form-check-inline">
+                {!! Form::checkbox('has_menual_config', 1, null, ['class' => 'form-check-input', 'id' => 'has_menual_config']) !!}
+                {!! Form::label('has_menual_config', __('Has Manual Config'), ['class' => 'form-check-label']) !!}
+            </div>
+        </div>
+
+        <!-- Blade View Field -->
+        <div class="form-group" id="blade-view-field" style="display: none;">
+            {!! Form::label('blade_view', __('Blade View')) !!}
+            {!! Form::text('blade_view', null, ['class' => 'form-control', 'id'=>'blade_view']) !!}
+        </div>
     </div>
 </div>
 <div class="modal-footer">
@@ -56,6 +88,20 @@
 {{ Form::close() }}
 <script>
     $(document).ready(function() {
+        function toggleBladeViewField() {
+            if ($('#has_menual_config').is(':checked')) {
+                $('#blade-view-field').show(); // Show the field
+            } else {
+                $('#blade-view-field').hide(); // Hide the field
+                $('#blade_view').val('');
+            }
+        }
+
+        toggleBladeViewField();
+
+        $('#has_menual_config').on('change', function () {
+            toggleBladeViewField();
+        });
         $('#category').on('change', function() {
             var selectedValue = $(this).val();
             if (selectedValue == 2) {

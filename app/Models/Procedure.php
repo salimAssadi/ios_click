@@ -11,11 +11,18 @@ class Procedure extends Model
     use HasFactory, Searchable;
     protected $fillable =
     [
-        'procedure_name',
-        'description',
+        'procedure_name_ar',
+        'procedure_name_en',
+        'description_ar',
+        'description_en',
         'template_path',
         'is_optional',
         'form_id',
+        'content',
+        'enable_upload_file',
+        'enable_editor',
+        'has_menual_config',
+        'blade_view',
         'status'
     ];
     public function form()

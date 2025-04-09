@@ -1,46 +1,46 @@
-{{ Form::model($user, ['route' => ['users.update', $user->id], 'method' => 'PUT']) }}
+{{ Form::model($isoSystem, ['url' => 'iso_dic/iso_systems/' . $isoSystem->id, 'method' => 'put', 'files' => true]) }}
 <div class="modal-body">
     <div class="row">
-        @if (\Auth::user()->type != 'super admin')
-            <div class="form-group col-md-6">
-                {{ Form::label('role', __('Assign Role'), ['class' => 'form-label']) }}
-                {!! Form::select('role', $userRoles, !empty($user->roles) ? $user->roles[0]->id : null, [
-                    'class' => 'form-control hidesearch ',
-                    'required' => 'required',
-                ]) !!}
-            </div>
-        @endif
-        @if (\Auth::user()->type == 'super admin')
-            <div class="form-group col-md-6">
-                {{ Form::label('name', __('Name'), ['class' => 'form-label']) }}
-                {{ Form::text('name', null, ['class' => 'form-control', 'placeholder' => __('Enter Name'), 'required' => 'required']) }}
-            </div>
-        @else
-            <div class="form-group col-md-6">
-                {{ Form::label('first_name', __('First Name'), ['class' => 'form-label']) }}
-                {{ Form::text('first_name', null, ['class' => 'form-control', 'placeholder' => __('Enter First Name'), 'required' => 'required']) }}
-            </div>
-            <div class="form-group col-md-6">
-                {{ Form::label('last_name', __('Last Name'), ['class' => 'form-label']) }}
-                {{ Form::text('last_name', null, ['class' => 'form-control', 'placeholder' => __('Enter Name'), 'required' => 'required']) }}
-            </div>
-        @endif
         <div class="form-group col-md-6">
-            {{ Form::label('name', __('Name'), ['class' => 'form-label']) }}
-            {{ Form::text('name', null, ['class' => 'form-control', 'placeholder' => __('Enter Name'), 'required' => 'required']) }}
+            {{ Form::label('name_ar', __('name ar') . ' <span class="text-danger">*</span>', ['class' => 'form-label'], false) }}
+            {{ Form::text('name_ar', null, ['class' => 'form-control', 'placeholder' => __('Enter Name'), 'required' => 'required']) }}
         </div>
         <div class="form-group col-md-6">
-            {{ Form::label('email', __('Email'), ['class' => 'form-label']) }}
-            {{ Form::text('email', null, ['class' => 'form-control', 'placeholder' => __('Enter Email'), 'required' => 'required']) }}
+            {{ Form::label('name_en', __('name en'). ' <span class="text-danger">*</span>', ['class' => 'form-label'], false) }}
+            {{ Form::text('name_en', null, ['class' => 'form-control', 'placeholder' => __('Enter Name'), 'required' => 'required']) }}
         </div>
         <div class="form-group col-md-6">
-            {{ Form::label('phone_number', __('Phone Number'), ['class' => 'form-label']) }}
-            {{ Form::text('phone_number', null, ['class' => 'form-control', 'placeholder' => __('Enter Phone Number')]) }}
+            {{ Form::label('code', __('code'). ' <span class="text-danger">*</span>', ['class' => 'form-label'], false) }}
+            {{ Form::text('code', null, ['class' => 'form-control', 'placeholder' => __('Enter code'), 'required' => 'required']) }}
         </div>
+        <div class="form-group col-md-6">
+            {{ Form::label('symbole', __('symbole'). ' <span class="text-danger">*</span>', ['class' => 'form-label'], false) }}
+            {{ Form::text('symbole', null, ['class' => 'form-control', 'placeholder' => __('Enter symbole'), 'required' => 'required']) }}
+        </div>
+        <div class="form-group col-md-6">
+            {{ Form::label('iso_image', __('ios image'), ['class' => 'form-label'], false) }}
+            {{ Form::file('iso_image', ['class' => 'form-control', 'placeholder' => __('Enter ios image')]) }}
+            @if (!empty($isoSystem->image))
+                {{-- <img src="{{getFilePath('isoIcon') . '/' . $isoSystem->image }}" alt="ISO Image" > --}}
+                <img src="{{ getISOImage(getFilePath('isoIcon').'/'. $isoSystem->image)}}" alt="@lang('Image')" style="max-width: 100px; margin-top: 10px;">
 
+            @endif
+        </div>
+        <div class="form-group col-md-6">
+            {{ Form::label('version', __('version'). ' <span class="text-danger">*</span>', ['class' => 'form-label'], false) }}
+            {{ Form::text('version', null, ['class' => 'form-control', 'placeholder' => __('Enter version'), 'required' => 'required']) }}
+        </div>
+        <div class="form-group col-md-6">
+            {{ Form::label('status', __('iso status') . ' <span class="text-danger">*</span>', ['class' => 'form-label'], false) }}
+            {{ Form::select('status', ['1' => __('Active'), '0' => __('Inactive')], null, ['class' => 'form-control', 'placeholder' => __('Select status'), 'required' => 'required']) }}
+        </div>
+        <div class="form-group col-md-12">
+            {{ Form::label('specification', __('specification'), ['class' => 'form-label']) }}
+            {{ Form::textarea('specification', null, ['class' => 'form-control', 'placeholder' => __('Enter specification'),'rows'=>2]) }}
+        </div>
     </div>
 </div>
 <div class="modal-footer">
-    {{ Form::submit(__('Update'), ['class' => 'btn btn-secondary btn-rounded']) }}
+    {{ Form::submit(__('Update'), ['class' => 'btn btn-secondary ml-10']) }}
 </div>
 {{ Form::close() }}

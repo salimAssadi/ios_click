@@ -68,7 +68,13 @@
                     <label>{{ __('Business Management') }}</label>
                     <i class="ti ti-chart-arcs"></i>
                 </li>
-
+                <li
+                    class="pc-item {{ in_array($routeName, ['countries.index']) ? 'active' : '' }}">
+                    <a href="{{ route('iso_dic.countries.index') }}" class="pc-link">
+                        <span class="pc-micon"><i class="ti ti-squares-filled"></i></span>
+                        <span class="pc-mtext">{{ __('Countries') }} & {{ __('Cities') }} </span>
+                    </a>
+                </li>
                 <li
                     class="pc-item {{ Request::route()->getName() == 'iso_dic.document.index' || Request::route()->getName() == 'iso_dic.document.show' || Request::route()->getName() == 'iso_dic.document.comment' || Request::route()->getName() == 'iso_dic.document.reminder' || Request::route()->getName() == 'iso_dic.document.version.history' || Request::route()->getName() == 'iso_dic.document.share' || Request::route()->getName() == 'iso_dic.document.send.email' ? 'active' : '' }}">
                     <a href="{{ route('iso_dic.document.index') }}" class="pc-link">

@@ -21,7 +21,7 @@
     <td>
         <div class="flex-grow-1 ms-3">
             <h5 class="mb-1">
-                {{ $sample->procedure->procedure_name}}
+                {{ $sample->procedure->procedure_name_ar}}
 
             </h5>
         </div>
@@ -54,6 +54,7 @@
 
             <a class="avtar avtar-xs btn-link-primary text-primary"
                 data-bs-toggle="tooltip"
+                target="blank"
                 data-bs-original-title="{{ __('Attachments') }}"
                 href="{{ route('iso_dic.samples.configure', \Illuminate\Support\Facades\Crypt::encrypt($sample->id)) }}"
                 data-title="{{ __('Edit User') }}">
@@ -71,13 +72,20 @@
                 href="#"><i class="ti ti-trash fs-2"></i>
 
             </a>
-            <a class="avtar avtar-xs btn-link-warning text-warning"
+            <a class="avtar avtar-xs btn-link-warning text-warning" target="blank"
                 data-bs-toggle="tooltip" data-bs-original-title="{{ __('preview') }}"
                 href="{{ route('iso_dic.samples.sample.preview', \Illuminate\Support\Facades\Crypt::encrypt($sample->id)) }}"
                 data-title="{{ __('preview') }}">
                 <i class="ti ti-eye fs-2"></i>
             </a>
             {!! Form::close() !!}
+            <a class="avtar avtar-xs btn-link-secondary text-secondary customModal"
+            data-bs-toggle="tooltip" data-size="lg"
+            data-bs-original-title="{{ __('Show Upload') }}" href="#"
+            data-url="{{ route('iso_dic.samples.showuploadview', $sample->id) }}"
+            data-title="{{ __('Show Upkoad') }}">
+            <i class="ti ti-download fs-2"></i>
+        </a>
         </div>
 
     </td>

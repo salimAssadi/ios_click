@@ -21,6 +21,10 @@ return new class extends Migration
             $table->unsignedInteger('form_id')->default(0);
             $table->longText('content')->nullable();
             $table->boolean('status')->default(false);
+            $table->boolean('enable_upload_file')->default(false);
+            $table->boolean('enable_editor')->default(false);
+            $table->boolean('has_menual_config')->default(false);
+            $table->text('blade_view')->nullable();
             $table->timestamps();
         });
     }

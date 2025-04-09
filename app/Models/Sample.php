@@ -18,6 +18,10 @@ class Sample extends Model
         'procedure_id',
         'content',
         'form_id',
+        'enable_upload_file',
+        'enable_editor',
+        'has_menual_config',
+        'blade_view',
         'status'
     ];
     public function form()

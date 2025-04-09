@@ -1,5 +1,5 @@
 {{ Form::open(['url' => 'iso_dic/specification_items', 'method' => 'post']) }}
-<div class="modal-body">
+<div class="modal-body model-xxl">
     <div class="row">
         <!-- Select ISO System -->
         <div class="form-group col-md-6">
@@ -10,22 +10,36 @@
         <!-- Select Parent Item -->
         <div class="form-group col-md-6">
             {{ Form::label('parent_id', __('Parent Item'), ['class' => 'form-label']) }}
-            {{ Form::select('parent_id',  $parentItems, null, ['class' => 'form-control  showsearch', 'placeholder' => __('Select Parent Item (optional)')]) }}
+            {{ Form::select('parent_id', $parentItems, null, ['class' => 'form-control  showsearch', 'placeholder' => __('Select Parent Item (optional)')]) }}
         </div>
 
-       
 
-        <!-- Inspection Question -->
-        <div class="form-group col-md-12">
-            {{ Form::label('inspection_question', __('Inspection Question'), ['class' => 'form-label']) }}
-            {{ Form::textarea('inspection_question', null, ['class' => 'form-control', 'id' => 'inspection_question', 'placeholder' => __('Enter Inspection Question'),'rows'=>2]) }}
+        <div class="row">
+            <!-- Inspection Question -->
+            <div class="form-group col-md-6">
+                {{ Form::label('inspection_question_ar', __('Arabic Inspection Question'), ['class' => 'form-label']) }}
+                {{ Form::textarea('inspection_question_ar', null, ['class' => 'form-control', 'id' => 'inspection_question', 'placeholder' => __('Enter Arabic Inspection Question'), 'rows' => 2]) }}
+            </div>
+
+            <!-- Inspection Question -->
+            <div class="form-group col-md-6">
+                {{ Form::label('inspection_question_en', __('English Inspection Question'), ['class' => 'form-label']) }}
+                {{ Form::textarea('inspection_question_en', null, ['class' => 'form-control', 'id' => 'inspection_question_en', 'placeholder' => __('Enter English Inspection Question'), 'rows' => 2]) }}
+            </div>
         </div>
 
-       
         <!-- Additional Text -->
-        <div class="form-group col-md-12">
-            {{ Form::label('additional_text', __('Additional Text'), ['class' => 'form-label']) }}
-            {{ Form::textarea('additional_text', null, ['class' => 'form-control', 'id' => 'additional_text', 'placeholder' => __('Enter Additional Text') ,'rows'=>2]) }}
+        <div class="row">
+
+            <div class="form-group col-md-6">
+                {{ Form::label('additional_text_ar', __('Arabic Additional Text'), ['class' => 'form-label']) }}
+                {{ Form::textarea('additional_text_ar', null, ['class' => 'form-control', 'id' => 'additional_text', 'placeholder' => __('Enter Arabic Additional Text'), 'rows' => 2]) }}
+            </div>
+            <!-- Additional Text -->
+            <div class="form-group col-md-6">
+                {{ Form::label('additional_text_en', __('English Additional Text'), ['class' => 'form-label']) }}
+                {{ Form::textarea('additional_text_en', null, ['class' => 'form-control', 'id' => 'additional_text', 'placeholder' => __('Enter English Additional Text'), 'rows' => 2]) }}
+            </div>
         </div>
 
         <!-- Attachment -->

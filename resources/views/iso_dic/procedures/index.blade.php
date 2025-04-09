@@ -27,7 +27,7 @@
                         </div>
                         <div class="col-auto">
                             <a href="#" class="btn btn-secondary customModal" data-size="lg"
-                                data-url="{{ route('iso_dic.procedures.create') }}" data-title="{{ __('Create ISO procedure') }}">
+                                data-url="{{ route('iso_dic.procedures.create') }}" data-title="{{ __('Create Procedure') }}">
 
                                 <i class="ti ti-circle-plus align-text-bottom"></i>
                                 {{ __('Create Procedure') }}
@@ -53,7 +53,7 @@
                                         <td>
                                             <div class="flex-grow-1 ms-3">
                                                 <h5 class="mb-1">
-                                                    {{ $procedure->procedure_name }}
+                                                    {{ $procedure->procedure_name_ar }}
 
                                                 </h5>
                                             </div>
@@ -64,7 +64,7 @@
                                         <td>
                                             <div class="flex-grow-1 ms-3">
                                                 <h5 class="mb-1">
-                                                    {{ $procedure->description }}
+                                                    {{ $procedure->description_ar }}
 
                                                 </h5>
                                             </div>

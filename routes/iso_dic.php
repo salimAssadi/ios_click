@@ -11,7 +11,9 @@ use App\Http\Controllers\FileManagerController;
 use Alexusmai\LaravelFileManager\Controllers\LfmController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\DocController;
+use App\Http\Controllers\iso_dic\CountryController;
 use App\Http\Controllers\iso_dic\ProcedureController;
+use App\Http\Controllers\iso_dic\ProductScopeController;
 use App\Http\Controllers\iso_dic\SampleController;
 use App\Http\Controllers\PdfController;
 use App\Http\Controllers\iso_dic\SettingController;
@@ -37,6 +39,7 @@ Route::prefix('iso_dic')->middleware(['XSS'])->name('iso_dic.')->group(function 
             'document' => DocumentController::class,
             'procedures' => ProcedureController::class,
             'samples' => SampleController::class,
+            'countries' => CountryController::class,
             'category' => CategoryController::class,
             'sub-category' => SubCategoryController::class,
             'tag' => TagController::class,
@@ -54,7 +57,14 @@ Route::prefix('iso_dic')->middleware(['XSS'])->name('iso_dic.')->group(function 
             Route::get('{cid}/sample/create', 'addSample')->name('sample.create');
            
         });
+        Route::post('/getstates', [CountryController::class, 'getStates'])->name('country.getstates');
 
+        Route::prefix('samples/product-scope')->group(function () {
+            Route::get('/', [ProductScopeController::class, 'index'])->name('samples.product-scope.index');
+            Route::post('/', [ProductScopeController::class, 'store'])->name('samples.product-scope.store');; // Create a new item
+            Route::put('/{id}', [ProductScopeController::class, 'update'])->name('samples.product-scope.update'); // Update an item
+            Route::delete('/{id}', [ProductScopeController::class, 'destroy'])->name('samples.product-scope.destroy'); // Delete an item
+        });
         // Route::controller(IsoSystemController::class)
         // ->prefix('iso_systems')
         // ->name('iso_systems.')
@@ -120,10 +130,12 @@ Route::prefix('iso_dic')->middleware(['XSS'])->name('iso_dic.')->group(function 
 
         Route::controller(SampleController::class)->prefix('samples')->name('samples.')->group(function () {
             Route::get('all', 'all')->name('all');
+            Route::get('showuploadview/{id}', 'showuploadview')->name('showuploadview');
             Route::post('save/{id?}', 'save')->name('save');
             Route::get('configure/{id}', 'configure')->name('configure');
             Route::post('configure/{id}/save', 'saveConfigure')->name('saveConfigure');;
             Route::post('configure/{id}', 'saveTemplatePath')->name('saveTemplatePath');
+            Route::post('uploadsample', 'uploadSample')->name('uploadsample');
             Route::post('status/{id}', 'status')->name('status');
             Route::get('{id}/preview', 'preview')->name('sample.preview');
             Route::get('{id}/download', 'download')->name('sample.download');

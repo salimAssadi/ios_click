@@ -6,15 +6,17 @@
         border: 5px double #393bc7 !important;
         border-top: none;
         border-bottom: none;
-        direction: rtl;
+        direction: rtl !important;
         font-size: 15px ;
         font-family: "almarai", sans-serif;
     }
    
-   header {
-    
-        font-weight: bold !important;
+    body * {
+        direction: rtl !important;
 
+    }
+   header {
+    font-weight: bold !important;
     }
     header tr{
         border: 4px double #393bc7;
@@ -29,7 +31,7 @@
         color: #666;
         text-align: center;
     } */
-    .text-center {
+    header .text-center {
         text-align: center;
     }
 
@@ -54,6 +56,13 @@
 
     th,
     td {
+        border: 1px solid;
+        padding: 5px;
+        text-align: center;
+        white-space: nowrap;
+        /* line-height: 20px; */
+    }
+    .headerthtd {
         border: 1px solid;
         padding: 5px;
         text-align: center;

@@ -31,6 +31,7 @@
 @endsection
 
 @section('content')
+
     <div class="row mb-3">
         <div class="  d-flex justify-content-between align-items-center">
             <div class="col-md-6">
@@ -63,7 +64,7 @@
                 <button id="show-table" class="btn btn-outline-secondary"><i data-feather="list"></i></button>
                 <a href="#" class="btn btn-secondary customModal" data-size="lg"
                    data-url="{{ route('iso_dic.specification_items.create') }}"
-                   data-title="{{ __('Create ISO System') }}">
+                   data-title="{{ __('Create Specification Item') }}">
                     <i class="ti ti-circle-plus align-text-bottom"></i>
                     {{ __('Create Specification Item') }}
                 </a>
@@ -97,7 +98,39 @@
 @endsection
 
 <script src="{{ asset('assets/js/extended-ui-treeview.js') }}"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-x
+    $(document).ready(function() {
+        // Toggle Children on Button Click
+        $('.toggle-children').on('click', function() {
+            const target = $(this).data('target');
+            const icon = $(this).find('i');
+
+            $(target).collapse('toggle'); // Toggle collapse/expand
+
+            // Update Icon
+            if ($(target).hasClass('show')) {
+                icon.removeClass('ti-chevron-down').addClass('ti-chevron-up');
+            } else {
+                icon.removeClass('ti-chevron-up').addClass('ti-chevron-down');
+            }
+        });
+
+        // Toggle Criteria on Button Click
+        $('.toggle-criteria').on('click', function() {
+            const target = $(this).data('target');
+            const icon = $(this).find('i');
+
+            $(target).collapse('toggle'); // Toggle collapse/expand
+
+            // Update Icon
+            if ($(target).hasClass('show')) {
+                icon.removeClass('ti-chevron-down').addClass('ti-chevron-up');
+            } else {
+                icon.removeClass('ti-chevron-up').addClass('ti-chevron-down');
+            }
+        });
+    });
 </script>
+
 

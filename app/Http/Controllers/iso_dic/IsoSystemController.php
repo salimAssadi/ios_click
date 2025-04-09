@@ -4,6 +4,7 @@ namespace App\Http\Controllers\iso_dic;
 
 use App\Http\Controllers\Controller;
 use App\Models\Document;
+use App\Models\IsoSpecificationItem;
 use App\Models\IsoSystem;
 use App\Models\IsoSystemForm;
 use App\Models\IsoSystemProcedure;
@@ -65,14 +66,12 @@ class IsoSystemController extends Controller
 
 
                 if ($request->hasFile('iso_image')) {
-                    // dd(true);
                     try {
-                        $file = fileUploader($request->iso_image, getFilePath('isoIcon'), getFileSize('isoIcon'), null);
+                        $file = fileUploader($request->iso_image, getFilePath('isoIcon').null, null);
                     } catch (\Exception $exp) {
-                        return redirect()->back()->with('error', __('Couldn\'t upload your image'));
+                        return redirect()->back()->with('error',  $exp->getMessage());
                     }
                 }
-                dd($file);
                 // Create a new IosSystem record
                 $iosSystem = new IsoSystem();
                 $iosSystem->name_ar       = $request->name_ar;
@@ -115,6 +114,14 @@ class IsoSystemController extends Controller
             return redirect()->route('iso_systems.index')->with('error', __('ISO System not found.'));
         }
 
+        $specificationItems = IsoSpecificationItem::whereNull('parent_id')
+        ->with([
+            'children' => function ($childQuery){
+                $childQuery->orderBy('item_number', 'asc');
+            }
+        ])
+        ->where('iso_system_id', $isoSystem->id)->orderBy('item_number', 'asc')->get();
+
         // Validate filter_id
         $filterId = $request->input('procedure_id', -1);
         if (!is_numeric($filterId)) {
@@ -155,7 +162,8 @@ class IsoSystemController extends Controller
             'procedures',
             'forms',
             'selectedProcedureId',
-            'latestVersion'
+            'latestVersion',
+            'specificationItems'
         ));
     }
 
@@ -167,7 +175,21 @@ class IsoSystemController extends Controller
      */
     public function edit($id)
     {
-        //
+        try {
+            if (\Auth::user()->type == 'super admin') {
+    
+                $isoSystem = IsoSystem::find($id);
+                if (!$isoSystem) {
+                    return redirect()->back()->with('error', __('ISO System not found.'));
+                }
+    
+            return view($this->iso_dic_path . '.iso_systems.edit', compact('isoSystem'));
+            }
+    
+            return redirect()->back()->with('error', __('Permission Denied.'));
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', __('An error occurred while loading the edit page.'));
+        }
     }
 
     public function download($id)
@@ -261,7 +283,69 @@ class IsoSystemController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        try {
+            // Check if the user has permission to edit an ISO and is a super admin
+            if (\Auth::user()->type == 'super admin') {
+                // Validate the request data
+                $validator = Validator::make(
+                    $request->all(),
+                    [
+                        'name_ar'       => 'required|string|max:255',
+                        'name_en'       => 'required|string|max:255',
+                        'symbole'       => 'required|string',
+                        'code'          => 'required|string|max:50|unique:iso_systems,code,' . $id,
+                        'iso_image'     => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                        'version'       => 'required|string|max:50',
+                        'status'        => 'required|in:0,1',
+                        'specification' => 'nullable|string',
+                    ]
+                );
+    
+                if ($validator->fails()) {
+                    $messages = $validator->getMessageBag();
+                    return redirect()->back()->with('error', $messages->first());
+                }
+    
+                // Find the ISO system by ID
+                $iosSystem = IsoSystem::find($id);
+    
+                if (!$iosSystem) {
+                    return redirect()->back()->with('error', __('ISO System not found.'));
+                }
+    
+                // Handle file upload (if a new image is provided)
+                if ($request->hasFile('iso_image')) {
+                    try {
+                        // Delete the old image if it exists
+                        if (!empty($iosSystem->image)) {
+                            $file = fileUploader($request->iso_image, getFilePath('isoIcon'),null,  $iosSystem->image);
+                        }
+                        $iosSystem->image = $file;
+                    } catch (\Exception $exp) {
+                        return redirect()->back()->with('error', __('Couldn\'t upload your image'));
+                    }
+                }
+    
+                // Update the ISO system fields
+                $iosSystem->name_ar       = $request->name_ar;
+                $iosSystem->name_en       = $request->name_en;
+                $iosSystem->code          = $request->code;
+                $iosSystem->symbole       = $request->symbole;
+                $iosSystem->version       = $request->version;
+                $iosSystem->status        = $request->status;
+                $iosSystem->specification = $request->specification;
+    
+                // Save the updated record
+                $iosSystem->save();
+    
+                return redirect()->route('iso_dic.iso_systems.index')
+                    ->with('success', __('ISO System successfully updated.'));
+            }
+    
+            return redirect()->back()->with('error', __('Permission Denied.'));
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error',$e->getMessage());
+        }
     }
 
     /**

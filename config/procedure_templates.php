@@ -8,4 +8,5 @@ return [
     'forms_title' => 'forms',
     'procedure_title' => 'procedure',
     'risk_matrix_title' => 'risk_matrix',
+    'kpis' => 'kpis',
 ];

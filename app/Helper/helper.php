@@ -1922,6 +1922,20 @@ if (!function_exists('authPage')) {
         return new FileManager();
     }
 
+    function uploadFiles($file, $path, $useOriginalName = false, $disk = 'public')
+    {
+        try {
+            $fileName = $useOriginalName
+                ? $file->getClientOriginalName()
+                : uniqid() . '_' . time() . '.' . $file->getClientOriginalExtension();
+    
+            $filePath = $file->storeAs($path, $fileName, $disk);
+    
+            return $filePath;
+        } catch (\Exception $e) {
+            throw new \Exception('File upload failed: ' . $e->getMessage());
+        }
+    }
     function getFilePath($key)
     {
         return fileManager()->$key()->path;
@@ -1972,5 +1986,30 @@ if (!function_exists('authPage')) {
             $formattedProcedureId = sprintf('%02d', $procedureId);
             return "{$type}-{$isoSystemSymbol}-" . $formattedProcedureId;
         }
+    }
+
+    function getImage($image, $size = null, $avatar = false)
+    {
+        $clean = '';
+        if (file_exists($image) && is_file($image)) {
+            return asset($image) . $clean;
+        }
+        if ($size) {
+            return route('placeholder.image', $size);
+        }
+
+        if ($avatar) {
+            return asset('assets/images/avatar.png');
+        }
+
+        return asset('assets/images/default.png');
+    }
+    function getISOImage($image)
+    {
+        $clean = '';
+        if (file_exists($image) && is_file($image)) {
+            return asset($image) . $clean;
+        }
+        return asset('assets/images/isoIcon/defualt.png');
     }
 }

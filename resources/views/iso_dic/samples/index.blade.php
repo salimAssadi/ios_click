@@ -32,7 +32,7 @@
 "                                            <option value="-1">{{__('All Procedures')}}</option>
 "                                            @foreach ($procedures as $procedure)
                                                 <option value="{{ $procedure->id }}" {{ $selectedProcedureId == $procedure->id ? 'selected' : '' }}>
-                                                    {{ $procedure->procedure_name }}
+                                                    {{ $procedure->procedure_name_ar }}
                                                 </option>
                                             @endforeach
                                         </select>
@@ -91,5 +91,6 @@
                 }
             });
         });
+  
     });
 </script>
