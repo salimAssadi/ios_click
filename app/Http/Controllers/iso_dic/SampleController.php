@@ -10,12 +10,16 @@ use App\Models\Form;
 use App\Models\Procedure;
 use App\Models\ProductScope;
 use App\Models\Sample;
+use App\Models\SampleAttachment;
 use Exception;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Meneses\LaravelMpdf\Facades\LaravelMpdf;
 use Illuminate\Support\Facades\Redirect;
 
@@ -27,7 +31,7 @@ class SampleController extends Controller
     public function index(Request $request)
     {
 
-        $samplesQuery = Sample::searchable(['sample_name'])->with('procedure');
+        $samplesQuery = Sample::searchable(['sample_name'])->with(['procedure', 'sampleAttachments']);
         $filterId = $request->input('procedure_id', -1); // Default to -1 if not provided
         if (!is_numeric($filterId)) {
             $filterId = -1;
@@ -62,27 +66,35 @@ class SampleController extends Controller
      */
     public function store(Request $request)
     {
-        try {
+        if (!\Auth::check()) {
+            return redirect()->back()->with('error', __('Unauthorized'));
+        }
 
+        try {
             // Define validation rules
-            $validator =    Validator::make($request->all(), [
-                'sample_name' => 'required|string|max:255',
-                'sample_description' => 'nullable|string|max:1000',
+            $validator = Validator::make($request->all(), [
+                'sample_name_ar' => 'required|string|max:255',
+                'sample_name_en' => 'required|string|max:255',
+                'sample_description_ar' => 'nullable|string|max:1000',
+                'sample_description_en' => 'nullable|string|max:1000',
                 'is_optional' => 'required|boolean',
                 'status' => 'required|boolean',
-                'has_menual_config' => 'nullable|boolean', 
-        
+                'has_menual_config' => 'nullable|boolean',
+                'attachments.*' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx|max:10240',
             ]);
 
-            // Check if validation fails
             if ($validator->fails()) {
                 return redirect()->back()->withErrors($validator)->withInput();
             }
 
+            DB::beginTransaction();
+
             // Store the sample data
             $sample = new Sample();
-            $sample->sample_name = $request->input('sample_name');
-            $sample->description = $request->input('sample_description');
+            $sample->sample_name_ar = $request->input('sample_name_ar');
+            $sample->sample_name_en = $request->input('sample_name_en');
+            $sample->description_ar = $request->input('sample_description_ar');
+            $sample->description_en = $request->input('sample_description_en');
             $sample->is_optional = $request->input('is_optional');
             $sample->procedure_id = $request->input('procedure_id');
             $sample->template_path = "";
@@ -90,21 +102,32 @@ class SampleController extends Controller
             $sample->has_menual_config = $request->has('has_menual_config') ? 1 : 0; 
             $sample->enable_upload_file = $request->has('enable_upload_file') ? 1 : 0; 
             $sample->enable_editor = $request->has('enable_editor') ? 1 : 0; 
-            $sample->blade_view = $request->input('blade_view',''); 
-            // // Handle file upload
-            // if ($request->hasFile('template_path')) {
-            //     $file = $request->file('template_path');
-            //     $filePath = $file->store('samples/templates', 'public'); // Save file in storage/app/public/samples/templates
-            //     $sample->template_path = $filePath;
-            // }
-
-            // Save the sample
+            $sample->blade_view = $request->input('blade_view','');
             $sample->save();
 
-            // Redirect with success message
+            // Handle file uploads
+            if ($request->hasFile('attachments')) {
+                foreach ($request->file('attachments') as $file) {
+                    $fileName = time() . '_' . $file->getClientOriginalName();
+                    $filePath = $file->storeAs('sample_attachments', $fileName, 'public');
+                    
+                    SampleAttachment::create([
+                        'sample_id' => $sample->id,
+                        'file_name' => $fileName,
+                        'original_name' => $file->getClientOriginalName(),
+                        'file_path' => $filePath,
+                        'mime_type' => $file->getMimeType(),
+                        'file_size' => $file->getSize()
+                    ]);
+                }
+            }
+
+            DB::commit();
             return redirect()->back()->with('success', __('Sample created successfully!'));
-        } catch (Exception $e) {
-            return redirect()->back()->with('error', __('Failed to create sample. Please try again later.'));
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error creating sample: ' . $e->getMessage());
+            return redirect()->back()->with('error', $e->getMessage());
         }
     }
 
@@ -130,7 +153,9 @@ class SampleController extends Controller
     public function edit(string $id)
     {
         $sample = Sample::find($id);
-        return view($this->iso_dic_path . '.samples.edit', compact('sample'));
+        $procedures = Procedure::where('status', Status::ENABLE)->get()->pluck('procedure_name_ar', 'id');
+        $sample->load('sampleAttachments'); 
+        return view($this->iso_dic_path . '.samples.edit', compact('sample', 'procedures'));
     }
 
     /**
@@ -138,7 +163,69 @@ class SampleController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        if (!\Auth::check()) {
+            return redirect()->back()->with('error', __('Unauthorized'));
+        }
+
+        try {
+            // Define validation rules
+            $validator = Validator::make($request->all(), [
+                'sample_name_ar' => 'required|string|max:255',
+                'sample_name_en' => 'required|string|max:255',
+                'description_ar' => 'nullable|string|max:1000',
+                'description_en' => 'nullable|string|max:1000',
+                'is_optional' => 'required|boolean',
+                'status' => 'required|boolean',
+                'has_menual_config' => 'nullable|boolean',
+                'attachments.*' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx|max:10240',
+            ]);
+
+            if ($validator->fails()) {
+                return redirect()->back()->withErrors($validator)->withInput();
+            }
+
+            DB::beginTransaction();
+
+            $sample = Sample::findOrFail($id);
+            
+            // Update the sample data
+            $sample->sample_name_ar = $request->input('sample_name_ar');
+            $sample->sample_name_en = $request->input('sample_name_en');
+            $sample->description_ar = $request->input('description_ar');
+            $sample->description_en = $request->input('description_en');
+            $sample->is_optional = $request->input('is_optional');
+            $sample->procedure_id = $request->input('procedure_id');
+            $sample->status = $request->input('status');
+            $sample->has_menual_config = $request->has('has_menual_config') ? 1 : 0; 
+            $sample->enable_upload_file = $request->has('enable_upload_file') ? 1 : 0; 
+            $sample->enable_editor = $request->has('enable_editor') ? 1 : 0; 
+            $sample->blade_view = $request->input('blade_view','');
+            $sample->save();
+
+            // Handle file uploads
+            if ($request->hasFile('attachments')) {
+                foreach ($request->file('attachments') as $file) {
+                    $fileName = time() . '_' . $file->getClientOriginalName();
+                    $filePath = $file->storeAs('sample_attachments', $fileName, 'public');
+                    $sampleAttachment = new SampleAttachment();
+                    $sampleAttachment->sample_id = $sample->id;
+                    $sampleAttachment->file_name = $fileName;
+                    $sampleAttachment->original_name = $file->getClientOriginalName();
+                    $sampleAttachment->file_path = $filePath;
+                    $sampleAttachment->mime_type = $file->getMimeType();
+                    $sampleAttachment->file_size = $file->getSize();
+                    $sampleAttachment->save();
+                    
+                }
+            }
+
+            DB::commit();
+            return redirect()->back()->with('success', __('Sample updated successfully'));
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error updating sample: ' . $e->getMessage());
+            return redirect()->back()->with('error', $e->getMessage());
+        }
     }
 
     /**
@@ -146,7 +233,27 @@ class SampleController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        if (!\Auth::check()) {
+            return redirect()->back()->with('error', __('Unauthorized'));
+        }
+
+        try {
+            $sample = Sample::findOrFail($id);
+            
+            // Delete attachments first
+            foreach($sample->attachments as $attachment) {
+                Storage::disk('public')->delete($attachment->file_path);
+                $attachment->delete();
+            }
+            
+            // Then delete the sample
+            // $sample->delete();
+            
+            return redirect()->route('iso_dic.samples.index')->with('success', __('Sample successfully deleted.'));
+        } catch (\Exception $e) {
+            Log::error('Error deleting sample: ' . $e->getMessage());
+            return redirect()->back()->with('error', $e->getMessage());
+        }
     }
 
     public function configure($id)

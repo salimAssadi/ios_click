@@ -65,11 +65,11 @@ return [
 
         'iso_dic' => [
             'driver' => 'mysql',
-            'host' => env('DB_iso_dic_HOST', '127.0.0.1'),
-            'port' => env('DB_iso_dic_PORT', '3306'),
-            'database' => env('DB_iso_dic_DATABASE', 'forge'),
-            'username' => env('DB_iso_dic_USERNAME', 'forge'),
-            'password' => env('DB_iso_dic_PASSWORD', ''),
+            'host' => env('DB_ISO_DIC_HOST', '127.0.0.1'),
+            'port' => env('DB_ISO_DIC_PORT', '3306'),
+            'database' => env('DB_ISO_DIC_DATABASE', 'forge'),
+            'username' => env('DB_ISO_DIC_USERNAME', 'forge'),
+            'password' => env('DB_ISO_DIC_PASSWORD', ''),
             'unix_socket' => env('DB_SOCKET', ''),
             'charset' => 'utf8mb4',
             'collation' => 'utf8mb4_unicode_ci',

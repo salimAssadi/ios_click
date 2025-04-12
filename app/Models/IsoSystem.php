@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\Localizable;
 
 class IsoSystem extends Model
 {
     use HasFactory;
+    use Localizable;
 
     protected $table = 'iso_systems'; 
 
@@ -25,6 +27,10 @@ class IsoSystem extends Model
     public function attachments()
     {
         return $this->hasMany(IsoAttachment::class);
+    }
+    public function getNameAttribute()
+    {
+        return $this->getLocalizedAttribute('name');
     }
     public function procedures()
     {

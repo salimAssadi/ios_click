@@ -11,11 +11,14 @@ use App\Models\Form;
 use App\Models\IsoSystem;
 use App\Models\IsoSystemProcedure;
 use App\Models\Procedure;
+use App\Models\ProcedureAttachment;
 use App\Models\ProcedureTemplate;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Database\QueryException;
@@ -27,7 +30,7 @@ class ProcedureController extends Controller
      */
     public function index()
     {
-        $procedures = Procedure::searchable(['name'])->with(['form', 'document.category'])->paginate(getPaginate());
+        $procedures = Procedure::searchable(['name'])->with(['form','attachments', 'document.category'])->paginate(getPaginate());
         return view($this->iso_dic_path . '.procedures.index', compact('procedures'));
     }
 
@@ -48,22 +51,29 @@ class ProcedureController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    {
+    {   
         // Define validation rules
         $validator = Validator::make($request->all(), [
-            'procedure_name' => 'required|string|max:255',
-            'procedure_description' => 'nullable|string|max:1000',
+            'procedure_name_en' => 'required|string|max:255',
+            'procedure_name_ar' => 'required|string|max:255',
+            'procedure_description_en' => 'nullable|string|max:1000',
+            'procedure_description_ar' => 'nullable|string|max:1000',
             'is_optional' => 'required|boolean',
             'status' => 'required|boolean',
+            'attachments.*' => 'file|mimes:pdf,doc,docx,xls,xlsx|max:10240',
+
         ]);
 
         if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator)->withInput();
+            return redirect()->route('iso_dic.procedures.index')->with('error', $validator->errors());
         }
+        DB::beginTransaction();
         try {
             $procedure = new Procedure();
-            $procedure->procedure_name = $request->input('procedure_name');
-            $procedure->description = $request->input('procedure_description');
+            $procedure->procedure_name_ar = $request->input('procedure_name_ar');
+            $procedure->procedure_name_en = $request->input('procedure_name_en');
+            $procedure->description_ar = $request->input('procedure_description_ar');
+            $procedure->description_en = $request->input('procedure_description_en');
             $procedure->is_optional = $request->input('is_optional');
             $procedure->template_path = "";
             $procedure->status = $request->input('status');
@@ -72,9 +82,30 @@ class ProcedureController extends Controller
             $procedure->enable_editor = $request->has('enable_editor') ? 1 : 0; 
             $procedure->blade_view = $request->input('blade_view',''); 
             $procedure->save();
-            return redirect()->back()->with('success', __('Procedure created successfully!'));
+
+            // Handle file uploads
+            if ($request->hasFile('attachments')) {
+                foreach ($request->file('attachments') as $file) {
+                    $fileName = time() . '_' . $file->getClientOriginalName();
+                    $filePath = $file->storeAs('procedure_attachments', $fileName, 'public');
+                    // Create new attachment without triggering the procedure's deleting event
+                    ProcedureAttachment::create([
+                        'procedure_id' => $procedure->id,
+                        'file_name' => $fileName,
+                        'original_name' => $file->getClientOriginalName(),
+                        'file_path' => $filePath,
+                        'mime_type' => $file->getMimeType(),
+                        'file_size' => $file->getSize()
+                    ]); 
+                }
+            }
+
+            DB::commit();
+            return redirect()->route('iso_dic.procedures.index')->with('success', __('Procedure created successfully!'));
         } catch (Exception $e) {
-            return redirect()->back()->with('error', $e->getMessage());
+            DB::rollBack();
+            Log::error('Error creating procedure: ' . $e->getMessage());
+            return redirect()->route('iso_dic.procedures.index')->with('error','error');
         }
     }
 
@@ -87,6 +118,7 @@ class ProcedureController extends Controller
         $id = Crypt::decrypt($id);
         $procedure = Procedure::find($id);
         if ($procedure) {
+            $procedure->load('attachments');
             $form = $procedure->form()->where('act', 'procedure_' . $id)->first();
             $pageTitle =  $procedure->procedure_name;
             $identifier = 'procedure_' . $id;
@@ -119,121 +151,139 @@ class ProcedureController extends Controller
      */
     public function update(Request $request, $id)
     {
-
         // Define validation rules
         $validator = Validator::make($request->all(), [
-            'procedure_name' => 'required|string|max:255',
-            'procedure_description' => 'nullable|string|max:1000',
+            'procedure_name_en' => 'required|string|max:255',
+            'procedure_name_ar' => 'required|string|max:255',
+            'procedure_description_en' => 'nullable|string|max:1000',
+            'procedure_description_ar' => 'nullable|string|max:1000',
             'is_optional' => 'required|boolean',
             'status' => 'required|boolean',
+            'attachments.*' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx|max:10240',
         ]);
-
 
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();
         }
+
+        DB::beginTransaction();
         try {
-
             $procedure = Procedure::findOrFail($id);
-            if (!$procedure) {
-                return redirect()->back()->with('error', __('Procedure not found!'));
-            }
-
+            
             // Update the procedure data
-            $procedure->procedure_name = $request->input('procedure_name');
-            $procedure->description = $request->input('procedure_description');
+            $procedure->procedure_name_ar = $request->input('procedure_name_ar');
+            $procedure->procedure_name_en = $request->input('procedure_name_en');
+            $procedure->description_ar = $request->input('procedure_description_ar');
+            $procedure->description_en = $request->input('procedure_description_en');
             $procedure->is_optional = $request->input('is_optional');
             $procedure->status = $request->input('status');
             $procedure->has_menual_config = $request->has('has_menual_config') ? 1 : 0; 
             $procedure->enable_upload_file = $request->has('enable_upload_file') ? 1 : 0; 
             $procedure->enable_editor = $request->has('enable_editor') ? 1 : 0; 
-            $procedure->blade_view = $request->input('blade_view',''); 
+            $procedure->blade_view = $request->input('blade_view','');
             $procedure->save();
-            return redirect()->back()->with('success', __('Procedure updated successfully!'));
+
+            // Handle file uploads
+            if ($request->hasFile('attachments')) {
+                foreach ($request->file('attachments') as $file) {
+                    $fileName = time() . '_' . $file->getClientOriginalName();
+                    $filePath = $file->storeAs('procedure_attachments', $fileName, 'public');
+                    
+                    // Create new attachment without triggering the procedure's deleting event
+                    ProcedureAttachment::create([
+                        'procedure_id' => $procedure->id,
+                        'file_name' => $fileName,
+                        'original_name' => $file->getClientOriginalName(),
+                        'file_path' => $filePath,
+                        'mime_type' => $file->getMimeType(),
+                        'file_size' => $file->getSize()
+                    ]);
+                }
+            }
+
+            DB::commit();
+            return redirect()->back()->with('success', __('Procedure updated successfully'));
         } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error updating procedure: ' . $e->getMessage());
             return redirect()->back()->with('error', $e->getMessage());
         }
     }
-    // public function update(Request $request, $id)
-    // {
-    //     try {
-    //     // Define validation rules
-    //     $validator = Validator::make($request->all(), [
-    //         'category_id' => 'required|exists:categories,id',
-    //         'iso_system_id' => 'nullable|exists:iso_systems,id',
-    //         'procedure_name' => 'required|string|max:255',
-    //         'procedure_description' => 'nullable|string|max:1000',
-    //         'is_optional' => 'required|boolean',
-    //         'status' => 'required|boolean',
-    //     ]);
-
-    //     $validator->sometimes('iso_system_id', 'required|exists:iso_systems,id', function ($input) {
-    //         return $input->category_id == 2;
-    //     });
-
-    //     // Check if validation fails
-    //     if ($validator->fails()) {
-    //         return redirect()->back()->withErrors($validator)->withInput();
-    //     }
-
-
-    //         DB::beginTransaction();
-    //         $procedure = Procedure::findOrFail($id);
-    //         if (!$procedure) {
-    //             return redirect()->back()->with('error', __('Procedure not found!'));
-    //         }
-
-    //         // Update the procedure data
-    //         $procedure->procedure_name = $request->input('procedure_name');
-    //         $procedure->description = $request->input('procedure_description');
-    //         $procedure->is_optional = $request->input('is_optional');
-    //         $procedure->status = $request->input('status');
-    //         $procedure->save();
-    //         $type = 'P';
-    //         $isoSystemSymbol=getIsoSystemSymbol($request->iso_system_id);
-    //         $formattedProcedureId = sprintf('%02d', $procedure->id); // o
-    //         // Fetch the associated document
-    //         $IsoSystemProcedure = IsoSystemProcedure::where('procedure_id', $procedure->id)->where('iso_system_id', $request->iso_system_id)->first();
-    //         if (!$IsoSystemProcedure) {
-    //             // insert the document data
-    //             $IsoSystemProcedure = new IsoSystemProcedure();
-    //             $IsoSystemProcedure->name = $request->procedure_name;
-    //             $IsoSystemProcedure->category_id = $request->category_id;
-    //             $IsoSystemProcedure->iso_system_id = $request->iso_system_id ?? 0;
-    //             $IsoSystemProcedure->procedure_id = $procedure->id;
-    //             $IsoSystemProcedure->procedure_coding ="{$type}-{$isoSystemSymbol}-{$formattedProcedureId}";
-    //             $IsoSystemProcedure->description = $request->procedure_description;
-    //             $IsoSystemProcedure->created_by = \Auth::user()->id;
-    //             $IsoSystemProcedure->parent_id = parentId();
-    //         }else {
-    //             // Update the IsoSystemProcedure data
-    //             $IsoSystemProcedure->name = $request->procedure_name;
-    //             $IsoSystemProcedure->category_id = $request->category_id;
-    //             $IsoSystemProcedure->iso_system_id = $request->iso_system_id ?? 0;
-    //             $IsoSystemProcedure->procedure_id = $procedure->id;
-    //             $IsoSystemProcedure->procedure_coding ="{$type}-{$isoSystemSymbol}-{$formattedProcedureId}";
-    //             $IsoSystemProcedure->description = $request->procedure_description;
-    //             $IsoSystemProcedure->created_by = \Auth::user()->id;
-    //             $IsoSystemProcedure->parent_id = parentId();
-    //         }
-    //         $IsoSystemProcedure->save();
-    //         DB::commit();
-    //         return redirect()->back()->with('success', __('Procedure updated successfully!'));
-    //     } catch (\Exception $e) {
-    //         DB::rollBack();
-    //         return redirect()->back()->with('error', $e->getMessage());
-    //     }
-    // }
 
     /**
      * Remove the specified resource from storage.
      */
     public function destroy($id)
     {
-        if (\Auth::check()) {
-            $procedures = Procedure::find($id);
-            $procedures->delete();
-            return redirect()->route('iso_dic.procedures')->with('success', __('iosSystem successfully deleted.'));
+        if (!\Auth::check()) {
+            return redirect()->back()->with('error', __('Unauthorized'));
+        }
+        try {
+            $procedure = Procedure::findOrFail($id);
+            
+            // Delete attachments first
+            foreach($procedure->attachments as $attachment) {
+                $attachment->delete();
+            }
+            
+            // Then delete the procedure
+            // $procedure->delete();
+            
+            return redirect()->route('iso_dic.procedures.index')->with('success', __('Procedure successfully deleted.'));
+        } catch (\Exception $e) {
+            Log::error('Error deleting procedure: ' . $e->getMessage());
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+    }
+
+    /**
+     * Force delete the procedure and its attachments
+     */
+    public function forceDelete($id)
+    {
+        if (!\Auth::check()) {
+            return redirect()->back()->with('error', __('Unauthorized'));
+        }
+
+        try {
+            DB::beginTransaction();
+            
+            $procedure = Procedure::withTrashed()->findOrFail($id);
+            
+            // Force delete attachments first
+            foreach($procedure->attachments()->withTrashed()->get() as $attachment) {
+                $attachment->forceDelete();
+            }
+            
+            // Then force delete the procedure
+            $procedure->forceDelete();
+            
+            DB::commit();
+            return redirect()->route('iso_dic.procedures.index')->with('success', __('Procedure permanently deleted.'));
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error force deleting procedure: ' . $e->getMessage());
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+    }
+
+    /**
+     * Restore a soft-deleted procedure
+     */
+    public function restore($id)
+    {
+        if (!\Auth::check()) {
+            return redirect()->back()->with('error', __('Unauthorized'));
+        }
+
+        try {
+            $procedure = Procedure::withTrashed()->findOrFail($id);
+            $procedure->restore(); // This will trigger restore on both procedure and its attachments
+            
+            return redirect()->route('iso_dic.procedures.index')->with('success', __('Procedure successfully restored.'));
+        } catch (\Exception $e) {
+            Log::error('Error restoring procedure: ' . $e->getMessage());
+            return redirect()->back()->with('error', $e->getMessage());
         }
     }
 
@@ -323,6 +373,28 @@ class ProcedureController extends Controller
     //     $procedure->save();
     //     return redirect()->back()->with('success', __('Procedure configured successfully'));
     // }
+
+    public function downloadAttachment(ProcedureAttachment $attachment)
+    {
+        return Storage::download($attachment->file_path, $attachment->original_name);
+    }
+
+    public function deleteAttachment($id)
+    {
+        try {
+            $attachment = ProcedureAttachment::findOrFail($id);
+            
+            // Delete the file from storage
+            Storage::disk('public')->delete($attachment->file_path);
+            
+            // Delete the record from database
+            $attachment->delete();
+            
+            return response()->json(['success' => true, 'message' => __('Attachment deleted successfully')]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
 
     public function status($id)
     {

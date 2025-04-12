@@ -17,6 +17,9 @@ use App\Http\Controllers\iso_dic\ProductScopeController;
 use App\Http\Controllers\iso_dic\SampleController;
 use App\Http\Controllers\PdfController;
 use App\Http\Controllers\iso_dic\SettingController;
+use App\Http\Controllers\iso_dic\IsoReferenceController;
+use App\Http\Controllers\iso_dic\IsoInstructionController;
+use App\Http\Controllers\iso_dic\IsoPolicyController;
 
 // Group all ISO_DIC routes under a common prefix
 Route::prefix('iso_dic')->middleware(['XSS'])->name('iso_dic.')->group(function () {
@@ -93,7 +96,44 @@ Route::prefix('iso_dic')->middleware(['XSS'])->name('iso_dic.')->group(function 
             Route::delete('logged/{id}/history', 'loggedHistoryDestroy')->name('logged.history.destroy');
         });
 
+        Route::prefix('references')->name('references.')->group(function () {
+            Route::get('/', [IsoReferenceController::class, 'index'])->name('index');
+            Route::get('/create', [IsoReferenceController::class, 'create'])->name('create');
+            Route::post('/', [IsoReferenceController::class, 'store'])->name('store');
+            Route::get('/{reference}/edit', [IsoReferenceController::class, 'edit'])->name('edit');
+            Route::put('/{reference}', [IsoReferenceController::class, 'update'])->name('update');
+            Route::delete('/{reference}', [IsoReferenceController::class, 'destroy'])->name('destroy');
+            Route::get('/attachments/{attachment}/download', [IsoReferenceController::class, 'downloadAttachment'])->name('attachments.download');
+            Route::delete('/attachments/{attachment}', [IsoReferenceController::class, 'deleteAttachment'])->name('attachments.destroy');
+        });
 
+        Route::prefix('instructions')->name('instructions.')->group(function () {
+            Route::get('/', [IsoInstructionController::class, 'index'])->name('index');
+            Route::get('/create', [IsoInstructionController::class, 'create'])->name('create');
+            Route::post('/', [IsoInstructionController::class, 'store'])->name('store');
+            Route::get('/{instruction}/edit', [IsoInstructionController::class, 'edit'])->name('edit');
+            Route::put('/{instruction}', [IsoInstructionController::class, 'update'])->name('update');
+            Route::delete('/{instruction}', [IsoInstructionController::class, 'destroy'])->name('destroy');
+            Route::get('/attachments/{attachment}/download', [IsoInstructionController::class, 'downloadAttachment'])->name('attachments.download');
+            Route::delete('/attachments/{attachment}', [IsoInstructionController::class, 'deleteAttachment'])->name('attachments.destroy');
+        });
+
+        Route::prefix('policies')->name('policies.')->group(function () {
+            Route::get('/', [IsoPolicyController::class, 'index'])->name('index');
+            Route::get('/create', [IsoPolicyController::class, 'create'])->name('create');
+            Route::post('/', [IsoPolicyController::class, 'store'])->name('store');
+            Route::get('/{policy}/edit', [IsoPolicyController::class, 'edit'])->name('edit');
+            Route::put('/{policy}', [IsoPolicyController::class, 'update'])->name('update');
+            Route::delete('/{policy}', [IsoPolicyController::class, 'destroy'])->name('destroy');
+            Route::get('/attachments/{attachment}/download', [IsoPolicyController::class, 'downloadAttachment'])->name('attachments.download');
+            Route::delete('/attachments/{attachment}', [IsoPolicyController::class, 'deleteAttachment'])->name('attachments.destroy');
+        });
+
+        Route::prefix('procedures')->name('procedures.')->group(function () {
+            Route::get('/attachments/{attachment}/download', [ProcedureController::class, 'downloadAttachment'])->name('attachments.download');
+            Route::delete('/attachments/{attachment}', [ProcedureController::class, 'deleteAttachment'])->name('attachments.destroy');
+        });
+    
         // Settings Controller Routes
         Route::controller(SettingController::class)->prefix('settings')->name('setting.')->group(function () {
             Route::get('/', 'index')->name('index');

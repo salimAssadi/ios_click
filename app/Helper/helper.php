@@ -1946,7 +1946,7 @@ if (!function_exists('authPage')) {
         return fileManager()->$key()->size;
     }
 
-    function getPaginate($paginate = 20)
+    function getPaginate($paginate = 100)
     {
         return $paginate;
     }

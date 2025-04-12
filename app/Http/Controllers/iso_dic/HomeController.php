@@ -17,7 +17,14 @@ use App\Models\Reminder;
 use App\Models\SubCategory;
 use App\Models\Subscription;
 use App\Models\Support;
+use App\Models\Sample;
+use App\Models\IsoSpecificationItem;
+use App\Models\Procedure;
+use App\Models\IsoReference;
+use App\Models\IsoInstruction;
+use App\Models\IsoPolicy;
 use App\Models\User;
+use App\Models\IsoSystem;
 use Carbon\Carbon;
 
 class HomeController extends Controller
@@ -30,11 +37,13 @@ class HomeController extends Controller
             if (\Auth::user()->type == 'super admin') {
               
                 $result['totalUser'] = User::where('parent_id', parentId())->count();
-                $result['totalDocument'] = Document::where('parent_id', parentId())->count();
-                $result['todayDocument'] = Document::whereDate('created_at', Carbon::today())->where('parent_id', parentId())->count();
-                $result['totalCategory'] = Category::where('parent_id', parentId())->count();
-                $result['totalReminder'] = Reminder::where('parent_id', parentId())->count();
-                $result['todayReminder'] = Reminder::whereDate('date', Carbon::today())->where('parent_id', parentId())->count();
+                $result['totalISOSystem'] = IsoSystem::count();
+                $result['totalSpecificationItem'] = IsoSpecificationItem::count();
+                $result['totalProcedures'] = Procedure::count();
+                $result['totalSamples'] = Sample::count();
+                $result['totalReferences'] = IsoReference::count();
+                $result['totalInstructions'] = IsoInstruction::count();
+                $result['totalPolicies'] = IsoPolicy::count();
 
                 // $result['totalContact'] = Contact::where('parent_id', \Auth::user()->id)->count();
 

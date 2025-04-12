@@ -2,15 +2,16 @@
 
 namespace App\Models;
 
+use App\Traits\Localizable;
 use App\Traits\Searchable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Procedure extends Model
 {
-    use HasFactory, Searchable;
-    protected $fillable =
-    [
+    use HasFactory, Searchable, Localizable;
+    
+    protected $fillable = [
         'procedure_name_ar',
         'procedure_name_en',
         'description_ar',
@@ -23,27 +24,35 @@ class Procedure extends Model
         'enable_editor',
         'has_menual_config',
         'blade_view',
-        'status'
+        'status',
     ];
+
     public function form()
     {
         return $this->belongsTo(Form::class);
     }
-    // public function sample()
-    // {
-    //     return $this->hasOne(Procedure::class);
-    // }
-    public function document()
+
+    public function getProcedureNameAttribute()
     {
-        return $this->hasOne(Document::class,'reference_id')->where('remark', 'procedure');
+        return $this->getLocalizedAttribute('procedure_name');
     }
 
-    public function getCodeAttribute(): string
+    public function document()
     {
-        $companySymbol= getCompanySymbol();
-        $procedureCode = $this->procedure->code;
-        $sampleId = str_pad($this->id, 2, '0', STR_PAD_LEFT);
-        
-        return "{$procedureCode}-{$sampleId}";
+        return $this->hasOne(Document::class, 'reference_id')->where('remark', 'procedure');
     }
+
+    public function attachments()
+    {
+        return $this->hasMany(ProcedureAttachment::class);
+    }
+
+    // public function getCodeAttribute(): string
+    // {
+    //     $companySymbol = getCompanySymbol();
+    //     $procedureCode = $this->procedure->code;
+    //     $sampleId = str_pad($this->id, 2, '0', STR_PAD_LEFT);
+
+    //     return "{$procedureCode}-{$sampleId}";
+    // }
 }

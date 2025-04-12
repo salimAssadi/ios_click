@@ -26,8 +26,7 @@
                             </h5>
                         </div>
                         <div class="col-auto">
-                            <a href="#" class="btn btn-secondary customModal" data-size="lg"
-                                data-url="{{ route('iso_dic.procedures.create') }}" data-title="{{ __('Create Procedure') }}">
+                            <a href="{{ route('iso_dic.procedures.create') }}" class="btn btn-secondary">
 
                                 <i class="ti ti-circle-plus align-text-bottom"></i>
                                 {{ __('Create Procedure') }}
@@ -42,7 +41,7 @@
                                 <tr class="align-center">
                                     <th>{{ __('Procedure Name') }}</th>
                                     <th>{{ __('Procedure Description') }}</th>
-                                    <th>{{ __('Required Procedure') }}</th>
+                                    <th>{{ __('Attachments') }}</th>
                                     <th>{{ __('status') }}</th>
                                     <th>{{ __('Action') }}</th>
                                 </tr>
@@ -70,18 +69,22 @@
                                             </div>
                                         </td>
 
-                                       
+
 
                                         <td>
                                             <div class="flex-grow-1 ms-3">
-                                                @if ($procedure->is_optional == 1)
-                                                    <span class="d-inline badge  text-bg-danger px-4">{{ __('NO') }}</span>
-                                                @else
-                                                    <span class="d-inline badge text-bg-success px-3">{{ __('Yes') }}</span>
-                                                @endif
+                                                @foreach ($procedure->attachments as $attachment)
+                                                    <div class="d-flex align-items-center mb-1">
+                                                        <a href="{{ route('iso_dic.procedures.attachments.download', $attachment->id) }}"
+                                                            class="btn btn-sm btn-light me-2">
+                                                            <i class="ti ti-download"></i>
+                                                        </a>
+                                                        <span>{{ $attachment->original_name }}</span>
+                                                    </div>
+                                                @endforeach
                                             </div>
                                         </td>
-                                        
+
                                         <td>
                                             <div class="flex-grow-1 ms-3">
                                                 @if ($procedure->status == 1)
@@ -103,10 +106,8 @@
                                                     data-title="{{ __('Edit User') }}">
                                                     <i class="ti ti-settings fs-2"></i>
                                                 </a>
-                                                <a class="avtar avtar-xs btn-link-secondary text-secondary customModal"
-                                                    data-bs-toggle="tooltip" data-size="lg"
-                                                    data-bs-original-title="{{ __('Edit') }}" href="#"
-                                                    data-url="{{ route('iso_dic.procedures.edit', $procedure->id) }}"
+                                                <a class="avtar avtar-xs btn-link-secondary text-secondary"
+                                                    href="{{ route('iso_dic.procedures.edit', $procedure->id) }}"
                                                     data-title="{{ __('Edit Procedure') }}">
                                                     <i class="ti ti-edit fs-2"></i>
                                                 </a>

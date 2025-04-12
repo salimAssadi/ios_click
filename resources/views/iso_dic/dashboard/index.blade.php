@@ -181,9 +181,9 @@
                             </div>
                         </div>
                         <div class="flex-grow-1 ms-3">
-                            <p class="mb-1">{{ __('Total Document') }}</p>
+                            <p class="mb-1">{{ __('Total ISO System') }}</p>
                             <div class="d-flex align-items-center justify-content-between">
-                                <h4 class="mb-0">{{ $result['totalDocument'] }}</h4>
+                                <h4 class="mb-0">{{ $result['totalISOSystem'] }}</h4>
                             </div>
                         </div>
                     </div>
@@ -200,9 +200,9 @@
                             </div>
                         </div>
                         <div class="flex-grow-1 ms-3">
-                            <p class="mb-1">{{ __('Today Document') }}</p>
+                            <p class="mb-1">{{ __('Total Specification Item') }}</p>
                             <div class="d-flex align-items-center justify-content-between">
-                                <h4 class="mb-0">{{ $result['todayDocument'] }}</h4>
+                                <h4 class="mb-0">{{ $result['totalSpecificationItem'] }}</h4>
                             </div>
                         </div>
                     </div>
@@ -219,16 +219,16 @@
                             </div>
                         </div>
                         <div class="flex-grow-1 ms-3">
-                            <p class="mb-1">{{ __('Total Category') }}</p>
+                            <p class="mb-1">{{ __('Total Procedures') }}</p>
                             <div class="d-flex align-items-center justify-content-between">
-                                <h4 class="mb-0">{{ $result['totalCategory'] }}</h4>
+                                <h4 class="mb-0">{{ $result['totalProcedures'] }}</h4>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        {{-- <div class="col-lg-3 col-md-6">
+         <div class="col-lg-3 col-md-6">
             <div class="card">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
@@ -238,9 +238,9 @@
                             </div>
                         </div>
                         <div class="flex-grow-1 ms-3">
-                            <p class="mb-1">{{ __('Total Reminder') }}</p>
+                            <p class="mb-1">{{ __('Total Samples') }}</p>
                             <div class="d-flex align-items-center justify-content-between">
-                                <h4 class="mb-0">{{ $result['totalReminder'] }}
+                                <h4 class="mb-0">{{ $result['totalSamples'] }}
                                 </h4>
                             </div>
                         </div>
@@ -249,6 +249,68 @@
             </div>
         </div>
         <div class="col-lg-3 col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="avtar bg-light-danger">
+                                <i class="ti ti-credit-card f-24"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <p class="mb-1">{{ __('Total References') }}</p>
+                            <div class="d-flex align-items-center justify-content-between">
+                                <h4 class="mb-0">{{ $result['totalReferences'] }}
+                                </h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="avtar bg-light-danger">
+                                <i class="ti ti-credit-card f-24"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <p class="mb-1">{{ __('Total Instructions') }}</p>
+                            <div class="d-flex align-items-center justify-content-between">
+                                <h4 class="mb-0">{{ $result['totalInstructions'] }}
+                                </h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="avtar bg-light-danger">
+                                <i class="ti ti-credit-card f-24"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <p class="mb-1">{{ __('Total policies') }}</p>
+                            <div class="d-flex align-items-center justify-content-between">
+                                <h4 class="mb-0">{{ $result['totalPolicies'] }}
+                                </h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>                              
+
+
+        {{-- <div class="col-lg-3 col-md-6">
             <div class="card">
                 <div class="card-body">
                     <div class="d-flex align-items-center">

@@ -32,7 +32,7 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    {{ Form::open(['route' =>   'iso_dic.iso_systems.procedure.save','method' => 'post'])}}
+                    {{ Form::open(['route' =>   'iso_dic.iso_systems.procedure.save','method' => 'post', 'enctype' => 'multipart/form-data'])}}
                     <div class="card-body">
                         <div class="row">
                             <div class="form-check ">
@@ -52,6 +52,7 @@
                         </div>
                     </div>
 
+                    
                    
                     <div class="form-group mt-20 ">
                         <div class="form-check custom-check text-start form-check-inline col-5  ">

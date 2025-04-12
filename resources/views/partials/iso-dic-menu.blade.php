@@ -62,7 +62,35 @@
                     </a>
                 </li>
 
-               
+                 <!-- References Menu Item -->
+                 <li class="pc-item {{ Request::route()->getName() == 'iso_dic.references.index' ? ' active' : '' }}">
+                    <a href="{{ route('iso_dic.references.index') }}" class="pc-link">
+                        <span class="pc-micon">
+                            <i class="ti ti-book"></i>
+                        </span>
+                        <span class="pc-mtext">{{ __('References') }}</span>
+                    </a>
+                </li>
+                
+                <!-- Instructions Menu Item -->
+                <li class="pc-item {{ Request::route()->getName() == 'iso_dic.instructions.index' ? ' active' : '' }}">
+                    <a href="{{ route('iso_dic.instructions.index') }}" class="pc-link">
+                        <span class="pc-micon">
+                            <i class="ti ti-file-invoice"></i>
+                        </span>
+                        <span class="pc-mtext">{{ __('Instructions') }}</span>
+                    </a>
+                </li>
+                
+                <!-- Policies Menu Item -->
+                <li class="pc-item {{ Request::route()->getName() == 'iso_dic.policies.index' ? ' active' : '' }}">
+                    <a href="{{ route('iso_dic.policies.index') }}" class="pc-link">
+                        <span class="pc-micon">
+                            <i class="ti ti-file-certificate"></i>
+                        </span>
+                        <span class="pc-mtext">{{ __('Policies') }}</span>
+                    </a>
+                </li>
 
                 <li class="pc-item pc-caption">
                     <label>{{ __('Business Management') }}</label>
@@ -83,6 +111,7 @@
                     </a>
                 </li>
 
+               
 
                 {{-- <li class="pc-item {{ Request::route()->getName() == 'my-reminder' ? 'active' : '' }}">
                     <a href="{{ route('my-reminder') }}" class="pc-link">

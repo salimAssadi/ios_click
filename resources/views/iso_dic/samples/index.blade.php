@@ -41,8 +41,7 @@
                             </form>      
                         </div>
                         <div class="col-auto">
-                            <a href="#" class="btn btn-secondary customModal" data-size="lg"
-                                data-url="{{ route('iso_dic.samples.create') }}" data-title="{{ __('Create Sample') }}">
+                            <a href="{{ route('iso_dic.samples.create') }}" class="btn btn-secondary">
 
                                 <i class="ti ti-circle-plus align-text-bottom"></i>
                                 {{ __('Create Sample') }}
@@ -52,13 +51,13 @@
                 </div>
                 <div class="card-body pt-0">
                     <div class="dt-responsive table-responsive">
-                        <table class="table table-hover advance-datatable">
+                        <table class="table table-hover basic-datatable">
                             <thead>
                                 <tr class="align-center">
                                     <th>{{ __('no') }}</th>
                                     <th>{{ __('Sample Name') }}</th>
                                     <th>{{ __('Procedure Name')}}</th>
-                                    <th>{{ __('Required Sample') }}</th>
+                                    <th>{{ __('Attachments') }}</th>
                                     <th>{{ __('status') }}</th>
                                     <th>{{ __('Action') }}</th>
                                 </tr>

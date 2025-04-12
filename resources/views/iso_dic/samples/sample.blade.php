@@ -27,17 +27,20 @@
         </div>
     </td>
 
-
     <td>
         <div class="flex-grow-1 ms-3">
-            @if ($sample->is_optional == 1)
-                <span class="d-inline badge  text-bg-danger px-4">{{ __('NO') }}</span>
-            @else
-                <span class="d-inline badge text-bg-success px-3">{{ __('Yes') }}</span>
-            @endif
+            @foreach ($sample->sampleAttachments as $attachment)
+                <div class="d-flex align-items-center mb-1">
+                    <a href=""
+                        class="btn btn-sm btn-light me-2">
+                        <i class="ti ti-download"></i>
+                    </a>
+                    <span>{{ $attachment->original_name }}</span>
+                </div>
+            @endforeach
         </div>
     </td>
-    
+
     <td>
         <div class="flex-grow-1 ms-3">
             @if ($sample->status == 1)
@@ -60,11 +63,8 @@
                 data-title="{{ __('Edit User') }}">
                 <i class="ti ti-settings fs-2"></i>
             </a>
-            <a class="avtar avtar-xs btn-link-secondary text-secondary customModal"
-                data-bs-toggle="tooltip" data-size="lg"
-                data-bs-original-title="{{ __('Edit') }}" href="#"
-                data-url="{{ route('iso_dic.samples.edit', $sample->id) }}"
-                data-title="{{ __('Edit Procedure') }}">
+            <a class="avtar avtar-xs btn-link-secondary text-secondary"
+                href="{{ route('iso_dic.samples.edit', $sample->id) }}">
                 <i class="ti ti-edit fs-2"></i>
             </a>
             <a class="avtar avtar-xs btn-link-danger text-danger confirm_dialog"
