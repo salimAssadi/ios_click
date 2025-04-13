@@ -12,6 +12,7 @@ class IsoPolicy extends Model
 
     protected $connection = 'iso_dic';
 
+   
     protected $fillable = [
         'name_ar',
         'name_en',
@@ -24,6 +25,7 @@ class IsoPolicy extends Model
         'approved_by',
         'is_published'
     ];
+
 
     protected $casts = [
         'is_published' => 'boolean',
@@ -63,5 +65,19 @@ class IsoPolicy extends Model
     public function googleDoc()
     {
         return $this->hasOne(GoogleDocMapping::class, 'document_id')->where('document_type', 'policy');
+    }
+
+    public function getStatusBadgeAttribute()
+    {
+        $badgeClasses = [
+            'draft' => 'badge bg-secondary',
+            'pending' => 'badge bg-warning text-dark',
+            'approved' => 'badge bg-success',
+            'rejected' => 'badge bg-danger',
+        ];
+        $status = strtolower($this->attributes['status']);
+        $badgeClass = $badgeClasses[$status] ?? 'badge bg-info';
+
+        return '<span class="' . $badgeClass . '">' . ucfirst($status) . '</span>';
     }
 }

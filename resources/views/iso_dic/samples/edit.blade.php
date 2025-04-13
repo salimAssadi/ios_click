@@ -156,7 +156,7 @@
     </div>
 @endsection
 
-@push('scripts')
+@push('script-page')
 <script>
     $(document).ready(function() {
         function toggleBladeViewField() {

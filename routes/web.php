@@ -95,6 +95,5 @@ Route::get('page/{slug}', [PageController::class, 'page'])->name('page');
 //-------------------------------FAQ-------------------------------------------
 Route::impersonate();
 
-
 Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
 ->name('logout');

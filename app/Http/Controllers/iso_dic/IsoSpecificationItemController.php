@@ -39,7 +39,7 @@ class IsoSpecificationItemController extends Controller
                 }
             ])
             ->where('iso_system_id', $selectedIsoId)->orderBy('item_number', 'asc');
-            $specificationItems = $query->get();
+            $specificationItems = $query->paginate();
 
         // if ($filter !== 'all') {
         //     $query->where(function ($q) use ($filter) {

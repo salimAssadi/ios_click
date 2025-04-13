@@ -21,12 +21,13 @@ use Illuminate\Support\Facades\DB;
 use Meneses\LaravelMpdf\Facades\LaravelMpdf;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Str;
+
 class IsoSystemController extends Controller
 {
     public function index()
     {
         if (\Auth::user()->type == 'super admin') {
-            $iso_systems = IsoSystem::get();
+            $iso_systems = IsoSystem::paginate(getPaginate());
             return view($this->iso_dic_path . '.iso_systems.index', compact('iso_systems'));
         }
     }
@@ -35,8 +36,6 @@ class IsoSystemController extends Controller
     {
         return view($this->iso_dic_path . '.iso_systems.create');
     }
-
-
 
     public function store(Request $request)
     {
@@ -64,7 +63,6 @@ class IsoSystemController extends Controller
                     return redirect()->back()->with('error', $messages->first());
                 }
 
-
                 if ($request->hasFile('iso_image')) {
                     try {
                         $file = fileUploader($request->iso_image, getFilePath('isoIcon').null, null);
@@ -88,13 +86,10 @@ class IsoSystemController extends Controller
                     ->with('success', __('iso System successfully created.'));
             }
             return redirect()->back()->with('error', __('Permission Denied.'));
-        } catch (Exceptionn $e) {
+        } catch (Exception $e) {
             return redirect()->back()->with('error', __('An error occurred while creating the iso System.'));
         }
     }
-
-
-
 
     public function show(Request $request, $id)
     {
@@ -167,12 +162,6 @@ class IsoSystemController extends Controller
         ));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function edit($id)
     {
         try {
@@ -274,13 +263,6 @@ class IsoSystemController extends Controller
         ];
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request, $id)
     {
         try {
@@ -348,12 +330,6 @@ class IsoSystemController extends Controller
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function destroy($id)
     {
         if (\Auth::check()) {
@@ -394,7 +370,6 @@ class IsoSystemController extends Controller
         return view($this->iso_dic_path . '.iso_systems.add_procedure', compact('pageTitle', 'targetIsoSystemId', 'procedures', 'isoSystemProcedures'));
     }
 
-
     public function saveProcedure(Request $request)
     {
         // Validate the request data
@@ -429,6 +404,7 @@ class IsoSystemController extends Controller
             return redirect()->back()->with('error', $e->getMessage());
         }
     }
+
     private function insertProcedure(Procedure $procedure, int $isoSystemId, bool $includeSample = false)
     {
         $type = 'P';
@@ -489,65 +465,46 @@ class IsoSystemController extends Controller
         ]);
     }
 
-    // public function updateProcedure(Request $request, $id)
-    // {
-    //     $validator = \Validator::make($request->all(), [
-    //         'isoSystemId' => 'required|exists:iso_systems,id',
-    //         'procedures' => 'required|array',
-    //         'procedures.*' => 'exists:procedures,id',
-    //     ]);
+    
+    public function procedures($id)
+    {   
+        $id = Crypt::decrypt($id);
+        $isoSystem = IsoSystem::findOrFail($id);
+        $procedures = $isoSystem->procedures()->paginate(getPaginate());
+        if (request()->ajax()) {
+            return view('iso_dic.iso_systems._procedures', compact('procedures'))->render();
+        }
+        return $procedures;
+    }
 
-    //     if ($validator->fails()) {
-    //         $messages = $validator->getMessageBag();
-    //         return redirect()->back()->with('error', $messages->first());
-    //     }
+    public function samples($id)
+    {
+        $id = Crypt::decrypt($id);
+        $isoSystem = IsoSystem::findOrFail($id);
+        $query = $isoSystem->forms();
+        
+        if (request('procedure_id') && request('procedure_id') != -1) {
+            $query->where('procedure_id', request('procedure_id'));
+        }
+        
+        $forms = $query->paginate(getPaginate());
+        
+        if (request()->ajax()) {
+            return view('iso_dic.iso_systems._samples', compact('forms'))->render();
+        }
+        return $forms;
+    }
 
-    //     // Extract request data
-    //     $isoSystemId = $request->isoSystemId;
-    //     $includeSample = $request->input('includeSample') === 'on'; // Check if includeSample is enabled
-
-    //     try {
-    //         DB::beginTransaction();
-
-    //         $isoSystemProcedure = IsoSystemProcedure::findOrFail($id);
-
-    //         $this->updateIsoSystemProcedure($isoSystemProcedure, $request, $isoSystemId, $includeSample);
-
-    //         DB::commit();
-    //         return redirect()->back()->with('success', __('Procedure updated successfully!'));
-    //     } catch (\Exception $e) {
-    //         DB::rollBack();
-    //         return redirect()->back()->with('error', __('An error occurred while updating the procedure.'));
-    //     }
-    // }
-
-    // private function updateIsoSystemProcedure(
-    //     IsoSystemProcedure $isoSystemProcedure,
-    //     Request $request,
-    //     int $isoSystemId,
-    //     bool $includeSample = false
-    // ) {
-    //     $type = 'P'; // Default type for procedures (you can make this dynamic if needed)
-    //     $isoSystemSymbol = getIsoSystemSymbol($isoSystemId); // Helper function to get ISO system symbol
-    //     $procedureCoding = generateProcedureCoding($isoSystemSymbol, $isoSystemProcedure->procedure_id);
-
-    //     // Update the IsoSystemProcedure record
-    //     $isoSystemProcedure->update([
-    //         'name' => $request->procedure_name ?? $isoSystemProcedure->name,
-    //         'category_id' => 1,
-    //         'iso_system_id' => $isoSystemId,
-    //         'procedure_coding' => $procedureCoding,
-    //         'description' => $request->procedure_description ?? $isoSystemProcedure->description,
-    //     ]);
-
-    //     // If includeSample is true, update related samples
-    //     if ($includeSample) {
-    //         $samples = Sample::where('procedure_id', $isoSystemProcedure->procedure_id)->get(); // Get related samples
-    //         foreach ($samples as $sample) {
-    //             $this->updateIsoSystemProcedureSample($isoSystemProcedure, $sample);
-    //         }
-    //     }
-    // }
+    public function specificationItems($id)
+    {
+        $id = Crypt::decrypt($id);
+        $isoSystem = IsoSystem::findOrFail($id);
+        $specificationItems = $isoSystem->specificationItems()->paginate(getPaginate());
+        if (request()->ajax()) {
+            return view('iso_dic.specification_items.table', compact('specificationItems'))->render();
+        }
+        return $specificationItems;
+    }
 
     public function addSample($id)
     {

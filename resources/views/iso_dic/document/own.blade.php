@@ -1,111 +1,142 @@
-@extends('layouts.app')
+@extends('layouts.admin-app')
 @section('page-title')
-    {{ __('Document') }}
+    {{ __('ISO Systems') }}
+@endsection
+@section('breadcrumb')
+    <li class="breadcrumb-item">
+        <a href="{{ route('home') }}">{{ __('Dashboard') }}</a>
+    </li>
+    <li class="breadcrumb-item" aria-current="page">{{ __('My Documents') }}</li>
 @endsection
 
-@section('breadcrumb')
-        <li class="breadcrumb-item">
-            <a href="{{ route('dashboard') }}">{{ __('Dashboard') }}</a>
-        </li>
-        <li class="breadcrumb-item active">
-            <a href="#">{{ __('Document') }}</a>
-        </li>
-@endsection
-@section('card-action-btn')
-    @if (Gate::check('create my document'))
-        <a class="btn btn-secondary btn-sm ml-20 customModal" href="#" data-size="md"
-            data-url="{{ route('document.create') }}" data-title="{{ __('Create Document') }}"> <i
-                class="ti-plus mr-5"></i>{{ __('Create Document') }}</a>
-    @endif
-@endsection
 @section('content')
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <div class="row align-items-center g-2">
-                        <div class="col">
-                            <h5>
-                                {{ __('Document') }}
-                            </h5>
-                        </div>
-                        @if (Gate::check('create document')|| Gate::check('create my document'))
-                            <div class="col-auto">
-                                <a class="btn btn-secondary customModal" href="#" data-size="md"
-                                    data-url="{{ route('document.create') }}" data-title="{{ __('Create Document') }}">
-                                    <i class="ti ti-circle-plus align-text-bottom"></i>{{ __('Create Document') }}</a>
-                            </div>
-                        @endif
+<div class="row">
+    <div class="col-sm-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="row align-items-center g-3">
+                    <div class="col">
+                        <h4 class="mb-0">{{ __('My Documents') }}</h4>
+                    </div>
+                    <div class="col-auto">
+                        <a href="{{ route('iso_dic.document.create') }}" class="btn btn-primary">
+                            <i class="ti ti-plus me-1"></i>
+                            {{ __('Create Document') }}
+                        </a>
                     </div>
                 </div>
-                <div class="card-body pt-0">
-                    <div class="dt-responsive table-responsive">
-                        <table class="table table-hover advance-datatable">
-                            <thead>
+            </div>
+            
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>{{ __('Document Name') }}</th>
+                                <th>{{ __('Category') }}</th>
+                                <th>{{ __('Version') }}</th>
+                                <th class="w-15">{{ __('Attachments') }}</th>
+                                <th class="w-10">{{ __('Status') }}</th>
+                                <th class="w-15 text-end">{{ __('Action') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse ($documents as $document)
                                 <tr>
-                                    <th>{{ __('Name') }}</th>
-                                    <th>{{ __('Category') }}</th>
-                                    <th>{{ __('Sub Category') }}</th>
-                                    <th>{{ __('Tags') }}</th>
-                                    <th>{{ __('Created By') }}</th>
-                                    <th>{{ __('Created At') }}</th>
-                                    <th>{{ __('Expired At') }}</th>
-                                    @if (Gate::check('edit my document') || Gate::check('delete my document') || Gate::check('show my document'))
-                                        <th class="text-right">{{ __('Action') }}</th>
-                                    @endif
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($documents as $document)
-                                    <tr role="row">
-                                        <td>{{ $document->name }}</td>
-                                        <td>
-                                            {{ !empty($document->category) ? $document->category->title : '-' }}
-                                        </td>
-                                        <td>
-                                            {{ !empty($document->subCategory) ? $document->subCategory->title : '-' }}
-                                        </td>
-                                        <td>
-                                            @foreach ($document->tags() as $tag)
-                                                {{ $tag->title }} <br>
-                                            @endforeach
-                                        </td>
-                                        <td>{{ !empty($document->createdBy) ? $document->createdBy->name : '' }}</td>
-                                        <td>{{ dateFormat($document->created_at) }}</td>
-                                        <td>{{ dateFormat($document->created_at) }}</td>
-                                        @if (Gate::check('edit my document') || Gate::check('delete my document') || Gate::check('show my document'))
-                                            <td class="text-right">
-                                                <div class="cart-action">
-                                                    {!! Form::open(['method' => 'DELETE', 'route' => ['document.destroy', $document->id]]) !!}
-                                                    @if (Gate::check('show my document'))
-                                                        <a class="avtar avtar-xs btn-link-warning text-warning" data-bs-toggle="tooltip"
-                                                            data-bs-original-title="{{ __('Show Details') }}"
-                                                            href="{{ route('document.show', \Illuminate\Support\Facades\Crypt::encrypt($document->id)) }}">
-                                                            <i data-feather="eye"></i></a>
-                                                    @endif
-                                                    @if (Gate::check('edit my document'))
-                                                        <a class="avtar avtar-xs btn-link-secondary text-secondary customModal" data-bs-toggle="tooltip"
-                                                            data-bs-original-title="{{ __('Edit') }}" href="#"
-                                                            data-url="{{ route('document.edit', $document->id) }}"
-                                                            data-title="{{ __('Edit Support') }}"> <i
-                                                                data-feather="edit"></i></a>
-                                                    @endif
-                                                    @if (Gate::check('delete my document'))
-                                                        <a class=" avtar avtar-xs btn-link-danger text-danger confirm_dialog" data-bs-toggle="tooltip"
-                                                            data-bs-original-title="{{ __('Detete') }}" href="#"> <i
-                                                                data-feather="trash-2"></i></a>
-                                                    @endif
-                                                    {!! Form::close() !!}
-                                                </div>
-                                            </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div>
+                                                <h6 class="mb-0">{{ $document->name }}</h6>
+                                                @if($document->description)
+                                                    <small class="text-body-secondary">{{ $document->description }}</small>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary">{{ $document->category->name }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info-subtle text-info">v{{ $document->version }}</span>
+                                    </td>
+                                    <td>
+                                        @if($document->attachments->count() > 0)
+                                            <div class="d-flex flex-column gap-1">
+                                                @foreach ($document->attachments as $attachment)
+                                                    <div class="d-inline-flex align-items-center">
+                                                        <a href="{{ route('iso_dic.document.attachments.download', $attachment->id) }}"
+                                                            class="btn btn-sm btn-icon btn-light-secondary me-1">
+                                                            <i class="ti ti-download"></i>
+                                                        </a>
+                                                        <small class="text-truncate" style="max-width: 150px;" title="{{ $attachment->original_name }}">
+                                                            {{ $attachment->original_name }}
+                                                        </small>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        @else
+                                            <span class="text-body-secondary">{{ __('No attachments') }}</span>
                                         @endif
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
+                                    </td>
+                                    <td>
+                                        @if ($document->status == 'approved')
+                                            <span class="badge bg-success-subtle text-success">{{ __('Approved') }}</span>
+                                        @elseif ($document->status == 'pending')
+                                            <span class="badge bg-warning-subtle text-warning">{{ __('Pending') }}</span>
+                                        @else
+                                            <span class="badge bg-danger-subtle text-danger">{{ __('Rejected') }}</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        <div class="d-flex justify-content-end gap-2">
+                                            {!! Form::open(['method' => 'DELETE', 'route' => ['iso_dic.document.destroy', $document->id], 'class' => 'd-inline']) !!}
+                                            
+                                            <a href="{{ route('iso_dic.document.edit', $document->id) }}"
+                                                class="btn btn-sm btn-icon btn-light-info"
+                                                data-bs-toggle="tooltip"
+                                                data-bs-placement="top"
+                                                title="{{ __('Edit') }}">
+                                                <i class="ti ti-edit"></i>
+                                            </a>
+
+                                            <button type="button"
+                                                class="btn btn-sm btn-icon btn-light-danger confirm_dialog"
+                                                data-bs-toggle="tooltip"
+                                                data-bs-placement="top"
+                                                title="{{ __('Delete') }}">
+                                                <i class="ti ti-trash"></i>
+                                            </button>
+
+                                            <a href="{{ route('iso_dic.document.show', $document->id) }}"
+                                                class="btn btn-sm btn-icon btn-light-warning"
+                                                data-bs-toggle="tooltip"
+                                                data-bs-placement="top"
+                                                title="{{ __('Preview') }}">
+                                                <i class="ti ti-eye"></i>
+                                            </a>
+                                            {!! Form::close() !!}
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="6" class="text-center py-4">
+                                        <div class="d-flex flex-column align-items-center">
+                                            <i class="ti ti-file-off text-secondary mb-2" style="font-size: 24px;"></i>
+                                            <p class="text-body-secondary mb-0">{{ __('No documents found') }}</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex justify-content-end mt-4">
+                    {{ $documents->links('pagination::bootstrap-5') }}
                 </div>
             </div>
         </div>
     </div>
+</div>
 @endsection

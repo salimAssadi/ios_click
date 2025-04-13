@@ -30,7 +30,7 @@ class ProcedureController extends Controller
      */
     public function index()
     {
-        $procedures = Procedure::searchable(['name'])->with(['form','attachments', 'document.category'])->paginate(getPaginate());
+        $procedures = Procedure::searchable(['name'])->with(['form','attachments', 'document.category'])->paginate(10);
         return view($this->iso_dic_path . '.procedures.index', compact('procedures'));
     }
 

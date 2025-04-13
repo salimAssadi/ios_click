@@ -52,12 +52,21 @@ Route::prefix('iso_dic')->middleware(['XSS'])->name('iso_dic.')->group(function 
         ->prefix('iso_systems')
         ->name('iso_systems.')
         ->group(function () {
+            Route::get('procedures', 'procedures')->name('procedures');
+            Route::get('samples', 'samples')->name('samples');
+            Route::get('specification-items', 'specificationItems')->name('specification_items');
             Route::get('{cid}/procedure/create', 'addProcedure')->name('procedure.create');
             Route::get('procedure/{id}/preview', 'preview')->name('procedure.preview');
             Route::get('procedure/{id}/download', 'download')->name('procedure.download');
             Route::post('procedure/save', 'saveProcedure')->name('procedure.save');
             Route::delete('procedure/{id}/delete', 'deleteProcedure')->name('procedure.delete');
             Route::get('{cid}/sample/create', 'addSample')->name('sample.create');
+            Route::get('samples/{id}/download', 'download')->name('sample.download');
+            Route::get('samples/{id}/preview', 'preview')->name('sample.preview');
+            Route::delete('samples/{id}/delete', 'deleteSample')->name('sample.delete');
+            Route::get('procedures/{id}/edit', 'editProcedure')->name('procedure.edit');
+            Route::put('procedures/{id}', 'updateProcedure')->name('procedure.update');
+
            
         });
         Route::post('/getstates', [CountryController::class, 'getStates'])->name('country.getstates');
@@ -101,6 +110,7 @@ Route::prefix('iso_dic')->middleware(['XSS'])->name('iso_dic.')->group(function 
             Route::get('/create', [IsoReferenceController::class, 'create'])->name('create');
             Route::post('/', [IsoReferenceController::class, 'store'])->name('store');
             Route::get('/{reference}/edit', [IsoReferenceController::class, 'edit'])->name('edit');
+            Route::get('/{reference}/show', [IsoReferenceController::class, 'show'])->name('show');
             Route::put('/{reference}', [IsoReferenceController::class, 'update'])->name('update');
             Route::delete('/{reference}', [IsoReferenceController::class, 'destroy'])->name('destroy');
             Route::get('/attachments/{attachment}/download', [IsoReferenceController::class, 'downloadAttachment'])->name('attachments.download');

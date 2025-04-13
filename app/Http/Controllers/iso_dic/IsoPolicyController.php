@@ -31,7 +31,8 @@ class IsoPolicyController extends Controller
             'description_en' => 'nullable|string',
             'content' => 'nullable|string',
             'attachments.*' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx|max:10240',
-            'is_published' => 'boolean'
+            'is_published' => 'boolean',
+            'status' => 'required|in:draft,pending,approved,rejected'
         ]); 
 
         DB::beginTransaction();
@@ -42,7 +43,8 @@ class IsoPolicyController extends Controller
                 'description_ar' => $request->description_ar,
                 'description_en' => $request->description_en,
                 'content' => $request->content,
-                'is_published' => $request->is_published ?? false
+                'is_published' => $request->is_published ?? false,
+                'status' => $request->status
             ]);
            
             if ($request->hasFile('attachments')) {
@@ -80,18 +82,20 @@ class IsoPolicyController extends Controller
             'description_en' => 'nullable|string',
             'content' => 'nullable|string',
             'attachments.*' => 'file|mimes:pdf,doc,docx,xls,xlsx|max:10240',
-            'is_published' => 'boolean'
+            'is_published' => 'boolean',
+            'status' => 'required|in:draft,pending,approved,rejected'
         ]);
 
         DB::beginTransaction();
         try {
             $policy->update([
                 'name_ar' => $request->name_ar,
-                'name_en' => $request->name_en,
+                'name_en' => $request->name_en, 
                 'description_ar' => $request->description_ar,
                 'description_en' => $request->description_en,
                 'content' => $request->content,
-                'is_published' => $request->is_published ?? false
+                'is_published' => $request->is_published ?? false,
+                'status' => $request->status
             ]);
 
             if ($request->hasFile('attachments')) {

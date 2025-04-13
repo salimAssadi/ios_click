@@ -183,8 +183,9 @@ function datatable() {
     if ($(".basic-datatable").length > 0) {
         $(".basic-datatable").DataTable({
             scrollX: true,
-            // dom: "Bfrtip",
-            // buttons: ["copy", "csv", "excel", "print"],
+            stateSave: true,
+            
+            // paging: false,
         });
     }
 

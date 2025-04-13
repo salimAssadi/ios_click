@@ -41,7 +41,7 @@ class SampleController extends Controller
             $samplesQuery->where('procedure_id', $filterId);
         }
         // dd($samplesQuery);
-        $samples = $samplesQuery->paginate(getPaginate());
+        $samples = $samplesQuery->paginate();
         $procedures = Procedure::get();
         if ($request->ajax()) {
             return view('iso_dic.samples.sample', compact('samples'));
