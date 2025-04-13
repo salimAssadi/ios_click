@@ -81,7 +81,7 @@
                                                             <form action=""
                                                                 method="POST" class="d-inline-block">
                                                                 @csrf
-                                                                @method('DELETE')
+                                                                {{-- @method('DELETE') --}}
                                                                 <a href="#" class="text-danger delete-record"
                                                                     data-confirm="{{ __('Are you sure you want to delete this attachment?') }}">
                                                                     <i class="ti ti-trash fs-2"></i>

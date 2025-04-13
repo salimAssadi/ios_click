@@ -233,27 +233,27 @@ class SampleController extends Controller
      */
     public function destroy(string $id)
     {
-        if (!\Auth::check()) {
-            return redirect()->back()->with('error', __('Unauthorized'));
-        }
+        // if (!\Auth::check()) {
+        //     return redirect()->back()->with('error', __('Unauthorized'));
+        // }
 
-        try {
-            $sample = Sample::findOrFail($id);
+        // try {
+        //     $sample = Sample::findOrFail($id);
             
-            // Delete attachments first
-            foreach($sample->attachments as $attachment) {
-                Storage::disk('public')->delete($attachment->file_path);
-                $attachment->delete();
-            }
+        //     // Delete attachments first
+        //     foreach($sample->attachments as $attachment) {
+        //         Storage::disk('public')->delete($attachment->file_path);
+        //         $attachment->delete();
+        //     }
             
-            // Then delete the sample
-            // $sample->delete();
+        //     // Then delete the sample
+        //     // $sample->delete();
             
-            return redirect()->route('iso_dic.samples.index')->with('success', __('Sample successfully deleted.'));
-        } catch (\Exception $e) {
-            Log::error('Error deleting sample: ' . $e->getMessage());
-            return redirect()->back()->with('error', $e->getMessage());
-        }
+        //     return redirect()->route('iso_dic.samples.index')->with('success', __('Sample successfully deleted.'));
+        // } catch (\Exception $e) {
+        //     Log::error('Error deleting sample: ' . $e->getMessage());
+        //     return redirect()->back()->with('error', $e->getMessage());
+        // }
     }
 
     public function configure($id)

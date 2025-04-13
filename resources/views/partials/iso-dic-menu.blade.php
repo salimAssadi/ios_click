@@ -38,32 +38,29 @@
                     </a>
                 </li>
 
-                <li
-                    class="pc-item {{ in_array($routeName, ['iso_dic.filemanager']) ? 'active' : '' }}">
+                <li class="pc-item {{ in_array($routeName, ['iso_dic.filemanager']) ? 'active' : '' }}">
                     <a href="{{ route('iso_dic.filemanager') }}" class="pc-link">
                         <span class="pc-micon"><i class="ti ti-folder"></i></span>
                         <span class="pc-mtext">{{ __('File Manager') }}</span>
                     </a>
                 </li>
 
-                <li
-                    class="pc-item {{ in_array($routeName, ['procedures.index']) ? 'active' : '' }}">
+                <li class="pc-item {{ in_array($routeName, ['procedures.index']) ? 'active' : '' }}">
                     <a href="{{ route('iso_dic.procedures.index') }}" class="pc-link">
                         <span class="pc-micon"><i class="ti ti-propeller"></i></span>
                         <span class="pc-mtext">{{ __('Procedures') }}</span>
                     </a>
                 </li>
 
-                <li
-                    class="pc-item {{ in_array($routeName, ['samples.index']) ? 'active' : '' }}">
+                <li class="pc-item {{ in_array($routeName, ['samples.index']) ? 'active' : '' }}">
                     <a href="{{ route('iso_dic.samples.index') }}" class="pc-link">
                         <span class="pc-micon"><i class="ti ti-squares-filled"></i></span>
                         <span class="pc-mtext">{{ __('Samples') }}</span>
                     </a>
                 </li>
 
-                 <!-- References Menu Item -->
-                 <li class="pc-item {{ Request::route()->getName() == 'iso_dic.references.index' ? ' active' : '' }}">
+                <!-- References Menu Item -->
+                <li class="pc-item {{ Request::route()->getName() == 'iso_dic.references.index' ? ' active' : '' }}">
                     <a href="{{ route('iso_dic.references.index') }}" class="pc-link">
                         <span class="pc-micon">
                             <i class="ti ti-book"></i>
@@ -71,7 +68,7 @@
                         <span class="pc-mtext">{{ __('References') }}</span>
                     </a>
                 </li>
-                
+
                 <!-- Instructions Menu Item -->
                 <li class="pc-item {{ Request::route()->getName() == 'iso_dic.instructions.index' ? ' active' : '' }}">
                     <a href="{{ route('iso_dic.instructions.index') }}" class="pc-link">
@@ -81,7 +78,7 @@
                         <span class="pc-mtext">{{ __('Instructions') }}</span>
                     </a>
                 </li>
-                
+
                 <!-- Policies Menu Item -->
                 <li class="pc-item {{ Request::route()->getName() == 'iso_dic.policies.index' ? ' active' : '' }}">
                     <a href="{{ route('iso_dic.policies.index') }}" class="pc-link">
@@ -92,26 +89,27 @@
                     </a>
                 </li>
 
-                <li class="pc-item pc-caption">
-                    <label>{{ __('Business Management') }}</label>
-                    <i class="ti ti-chart-arcs"></i>
-                </li>
-                <li
-                    class="pc-item {{ in_array($routeName, ['countries.index']) ? 'active' : '' }}">
+                <li class="pc-item {{ in_array($routeName, ['countries.index']) ? 'active' : '' }}">
                     <a href="{{ route('iso_dic.countries.index') }}" class="pc-link">
                         <span class="pc-micon"><i class="ti ti-squares-filled"></i></span>
                         <span class="pc-mtext">{{ __('Countries') }} & {{ __('Cities') }} </span>
                     </a>
                 </li>
+
+                {{-- <li class="pc-item pc-caption">
+                    <label>{{ __('Business Management') }}</label>
+                    <i class="ti ti-chart-arcs"></i>
+                </li>
+
                 <li
                     class="pc-item {{ Request::route()->getName() == 'iso_dic.document.index' || Request::route()->getName() == 'iso_dic.document.show' || Request::route()->getName() == 'iso_dic.document.comment' || Request::route()->getName() == 'iso_dic.document.reminder' || Request::route()->getName() == 'iso_dic.document.version.history' || Request::route()->getName() == 'iso_dic.document.share' || Request::route()->getName() == 'iso_dic.document.send.email' ? 'active' : '' }}">
                     <a href="{{ route('iso_dic.document.index') }}" class="pc-link">
                         <span class="pc-micon"><i data-feather="file-text"></i></span>
                         <span class="pc-mtext">{{ __('All Documents') }}</span>
                     </a>
-                </li>
+                </li> --}}
 
-               
+
 
                 {{-- <li class="pc-item {{ Request::route()->getName() == 'my-reminder' ? 'active' : '' }}">
                     <a href="{{ route('my-reminder') }}" class="pc-link">
