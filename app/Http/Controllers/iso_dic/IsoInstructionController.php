@@ -53,7 +53,7 @@ class IsoInstructionController extends Controller
 
             if ($request->hasFile('attachments')) {
                 foreach ($request->file('attachments') as $file) {
-                    $path = $file->store('instructions');
+                    $path = $file->store('instructions', 'public');
                     $instruction->attachments()->create([
                         'file_path' => $path,
                         'original_name' => $file->getClientOriginalName(),
@@ -107,7 +107,7 @@ class IsoInstructionController extends Controller
 
             if ($request->hasFile('attachments')) {
                 foreach ($request->file('attachments') as $file) {
-                    $path = $file->store('instructions');
+                    $path = $file->store('instructions', 'public');
                     $instruction->attachments()->create([
                         'file_path' => $path,
                         'original_name' => $file->getClientOriginalName(),

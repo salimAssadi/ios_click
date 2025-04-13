@@ -49,7 +49,7 @@ class IsoPolicyController extends Controller
            
             if ($request->hasFile('attachments')) {
                 foreach ($request->file('attachments') as $file) {
-                    $path = $file->store('policies');
+                    $path = $file->store('policies', 'public');
                     $policy->attachments()->create([
                         'file_path' => $path,
                         'original_name' => $file->getClientOriginalName(),
@@ -100,7 +100,7 @@ class IsoPolicyController extends Controller
 
             if ($request->hasFile('attachments')) {
                 foreach ($request->file('attachments') as $file) {
-                    $path = $file->store('policies');
+                    $path = $file->store('policies', 'public');
                     $policy->attachments()->create([
                         'file_path' => $path,
                         'original_name' => $file->getClientOriginalName(),

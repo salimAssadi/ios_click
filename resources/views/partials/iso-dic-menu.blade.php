@@ -95,7 +95,12 @@
                         <span class="pc-mtext">{{ __('Countries') }} & {{ __('Cities') }} </span>
                     </a>
                 </li>
-
+                <li class="pc-item {{ in_array($routeName, ['setting.index']) ? 'active' : '' }} ">
+                    <a href="{{ route('iso_dic.setting.index') }}" class="pc-link">
+                        <span class="pc-micon"><i class="ti ti-settings"></i></span>
+                        <span class="pc-mtext">{{ __('Settings') }}</span>
+                    </a>
+                </li>
                 {{-- <li class="pc-item pc-caption">
                     <label>{{ __('Business Management') }}</label>
                     <i class="ti ti-chart-arcs"></i>
@@ -152,12 +157,7 @@
                     <i class="ti ti-chart-arcs"></i>
                 </li>
 
-                <li class="pc-item {{ in_array($routeName, ['setting.index']) ? 'active' : '' }} ">
-                    <a href="{{ route('setting.index') }}" class="pc-link">
-                        <span class="pc-micon"><i class="ti ti-settings"></i></span>
-                        <span class="pc-mtext">{{ __('Settings') }}</span>
-                    </a>
-                </li>
+             
                 <li class="pc-item {{ in_array($routeName, ['users.index', 'users.show']) ? 'active' : '' }}">
                     <a href="{{ route('users.index') }}" class="pc-link">
                         <span class="pc-micon"><i class="ti ti-user-plus"></i></span>

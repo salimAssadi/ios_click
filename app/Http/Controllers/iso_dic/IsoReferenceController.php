@@ -47,7 +47,7 @@ class IsoReferenceController extends Controller
 
             if ($request->hasFile('attachments')) {
                 foreach ($request->file('attachments') as $file) {
-                    $path = $file->store('references');
+                    $path = $file->store('references', 'public');
                     $reference->attachments()->create([
                         'file_path' => $path,
                         'original_name' => $file->getClientOriginalName(),
@@ -100,7 +100,7 @@ class IsoReferenceController extends Controller
             // Add new attachments if any, but don't delete existing ones
             if ($request->hasFile('attachments')) {
                 foreach ($request->file('attachments') as $file) {
-                    $path = $file->store('references');
+                    $path = $file->store('references', 'public');
                     $reference->attachments()->create([
                         'file_path' => $path,
                         'original_name' => $file->getClientOriginalName(),

@@ -10,6 +10,7 @@ return [
      *
      * Default - DefaultConfigRepository get config from this file
      */
+    
     'configRepository'  => DefaultConfigRepository::class,
 
     /**
@@ -102,7 +103,7 @@ return [
      *
         * default - false(OFF)
         */
-    'acl'               => true,
+    'acl'               => false,
 
     /**
      * Hide files and folders from file-manager if user doesn't have access
@@ -152,10 +153,10 @@ return [
         1 => [
             ['disk' => 'public', 'path' => 'ISO_DIC/*', 'access' => 2],
         ],
-       " 1    => [
+        2 => [
             //['disk' => 'public', 'path' => 'images/arch*.jpg', 'access' => 2],
             //['disk' => 'public', 'path' => 'files/*', 'access' => 1],
-        ],"
+        ],
     ],
 
     /**
