@@ -123,6 +123,7 @@ Route::prefix('iso_dic')->middleware(['XSS'])->name('iso_dic.')->group(function 
             Route::post('/', [IsoInstructionController::class, 'store'])->name('store');
             Route::get('/{instruction}/edit', [IsoInstructionController::class, 'edit'])->name('edit');
             Route::put('/{instruction}', [IsoInstructionController::class, 'update'])->name('update');
+            Route::get('/{instruction}/show', [IsoInstructionController::class, 'show'])->name('show');
             Route::delete('/{instruction}', [IsoInstructionController::class, 'destroy'])->name('destroy');
             Route::get('/attachments/{attachment}/download', [IsoInstructionController::class, 'downloadAttachment'])->name('attachments.download');
             Route::delete('/attachments/{attachment}', [IsoInstructionController::class, 'deleteAttachment'])->name('attachments.destroy');

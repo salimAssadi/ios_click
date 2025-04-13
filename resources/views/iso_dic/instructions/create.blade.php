@@ -7,7 +7,9 @@
     <li class="breadcrumb-item"><a href="{{ route('iso_dic.instructions.index') }}">{{ __('Instructions') }}</a></li>
     <li class="breadcrumb-item">{{ __('Create') }}</li>
 @endsection
-
+@push('script-page')
+    <script src="{{ asset('assets/js/plugins/tinymce/tinymce.min.js') }}"></script>
+@endpush
 @section('content')
     <div class="row">
         <div class="col-12">
@@ -76,6 +78,16 @@
                                     </div>
                                     @error('procedures')
                                         <span class="invalid-feedback d-block">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label class="form-label">{{ __('Content') }}</label>
+                                    <textarea name="content" class="form-control summernote @error('content') is-invalid @enderror"
+                                        rows="5">{{ old('content') }}</textarea>
+                                    @error('content')
+                                        <span class="invalid-feedback">{{ $message }}</span>
                                     @enderror
                                 </div>
                             </div>
