@@ -27,6 +27,7 @@ use Illuminate\Support\Facades\Storage;
 use PragmaRX\Google2FAQRCode\Google2FA;
 use Spatie\Permission\Models\Role;
 
+
 if (!function_exists('settingsKeys')) {
     function settingsKeys()
     {
@@ -1919,7 +1920,7 @@ if (!function_exists('authPage')) {
 
     function fileManager()
     {
-        return new FileManager();
+        return new  FileManager();
     }
 
     function uploadFiles($file, $path, $useOriginalName = false, $disk = 'public')
