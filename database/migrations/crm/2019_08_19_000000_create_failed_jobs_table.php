@@ -1,19 +1,20 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
+use App\Database\Migrations\CrmMigration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateFailedJobsTable extends Migration
+class CreateFailedJobsTable extends CrmMigration
 {
     /**
      * Run the migrations.
      *
      * @return void
      */
+    protected $connection = 'crm';  
     public function up()
     {
-        Schema::create('failed_jobs', function (Blueprint $table) {
+        Schema::connection($this->connection)->create('failed_jobs', function (Blueprint $table) {
             $table->id();
             $table->text('connection');
             $table->text('queue');
@@ -30,6 +31,8 @@ class CreateFailedJobsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('failed_jobs');
+        Schema::connection($this->connection)->dropIfExists('failed_jobs');
     }
 }
+
+

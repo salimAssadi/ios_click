@@ -22,7 +22,7 @@
                         <h4 class="mb-0">{{ __('ISO Systems') }}</h4>
                     </div>
                     <div class="col-auto">
-                        <a href="{{ route('iso_dic.iso_systems.create') }}" class="btn btn-primary">
+                        <a href="#"  class="btn btn-secondary customModal" data-size="lg" data-url="{{ route('iso_dic.iso_systems.create') }}" data-title="{{ __('Create ISO System') }}">
                             <i class="ti ti-plus me-1"></i>
                             {{ __('Create ISO System') }}
                         </a>

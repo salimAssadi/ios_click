@@ -68,6 +68,7 @@
                 </div>
                 @yield('content')
             </div>
+            
             @if (!empty($authPage) && $authPage->section == 1)
                 <div class="auth-sidecontent">
                     <div class="p-3 px-lg-5 text-center">

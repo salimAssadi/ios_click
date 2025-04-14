@@ -1,6 +1,6 @@
 {
   "Unlimited Days Left": "تبقى أيام غير محدودة",
-  " Days Left": " تبقى أيام",
+  "Days Left": "تبقى أيام",
   "Permission Denied!": "تم رفض الإذن!",
   "Select Category": "حدد الفئة",
   "Your document limit is over, please upgrade your subscription.": "انتهى حد المستند الخاص بك ، يرجى ترقية اشتراكك.",
@@ -597,7 +597,7 @@
   "Transactions History": "تاريخ المعاملات",
   "Phone": "هاتف",
   "Are you sure want to Change Package?": "هل أنت متأكد من تغيير الحزمة؟",
-  "This record can not be restore after change. Do you want to confirm?": "لا يمكن استعادة هذا السجل بعد التغيير. ",
+  "This record can not be restore after change. Do you want to confirm?": "لا يمكن استعادة هذا السجل بعد التغيير. هل تريد التأكيد؟",
   "Select": "يختار",
   "Customer List": "قائمة العملاء",
   "User List": "قائمة المستخدم",
@@ -849,5 +849,10 @@
   "Enter Description (English)": "أدخل وصف (إنجليزي)",
   "Add New Attachments": "إضافة مرفقات جديدة",
   "Allowed file types: PDF, DOC, DOCX, XLS, XLSX. Max size: 10MB": "الملفات المسموح بها: PDF, DOC, DOCX, XLS, XLSX. الحجم الأقصى: 10MB",
-  "Policy Name": "اسم السياسة"
+  "Policy Name": "اسم السياسة",
+  "Document Management System": "نظام إدارة المستندات",
+  "Welcome to ISO Click": "مرحبًا بك في ISO Click",
+  "Streamline your ISO documentation": "",
+  "Company Name": "اسم الشركة"
+
 }

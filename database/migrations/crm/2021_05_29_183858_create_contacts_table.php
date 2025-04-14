@@ -1,10 +1,10 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
+use App\Database\Migrations\CrmMigration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateContactsTable extends Migration
+class CreateContactsTable extends CrmMigration
 {
     /**
      * Run the migrations.
@@ -37,3 +37,5 @@ class CreateContactsTable extends Migration
         Schema::dropIfExists('contacts');
     }
 }
+
+

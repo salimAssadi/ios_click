@@ -9,6 +9,7 @@ use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
+use Database\Seeders\ConsultingCompanySeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -35,5 +36,9 @@ class DatabaseSeeder extends Seeder
         ];
         $systemSuperAdmin = User::create($superAdminData);
         // $systemSuperAdmin->assignRole($systemSuperAdminRole);
+
+        $this->call([
+            ConsultingCompanySeeder::class
+        ]);
     }
 }

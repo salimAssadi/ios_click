@@ -22,10 +22,10 @@ class DatabaseSwitcher
                 DB::reconnect('iso_dic'); 
                 break;
 
-            case 'iso_stream':
-                Config::set('database.default', 'iso_stream');
-                DB::purge('iso_stream');
-                DB::reconnect('iso_stream');
+            case 'tenant':
+                Config::set('database.default', 'tenant');
+                DB::purge('tenant');
+                DB::reconnect('tenant');
                 break;
 
             case 'crm':

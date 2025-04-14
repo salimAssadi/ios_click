@@ -160,6 +160,8 @@ return [
          * Package Service Providers...
          */
 
+        Nwidart\Modules\LaravelModulesServiceProvider::class,
+
         /*
          * Application Service Providers...
          */
@@ -171,6 +173,7 @@ return [
         Alexusmai\LaravelFileManager\FileManagerServiceProvider::class,
         Meneses\LaravelMpdf\LaravelMpdfServiceProvider::class,
         Intervention\Image\Laravel\ServiceProvider::class,
+        Modules\Tenant\Providers\TenantServiceProvider::class,
         
 
 

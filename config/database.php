@@ -78,13 +78,13 @@ return [
             'engine' => null,
         ],
 
-        'iso_stream' => [
+        'tenant' => [
             'driver' => 'mysql',
-            'host' => env('DB_ISO_STREAM_HOST', '127.0.0.1'),
-            'port' => env('DB_ISO_STREAM_PORT', '3306'),
-            'database' => env('DB_ISO_STREAM_DATABASE', 'forge'),
-            'username' => env('DB_ISO_STREAM_USERNAME', 'forge'),
-            'password' => env('DB_ISO_STREAM_PASSWORD', ''),
+            'host' => env('DB_TENANT_HOST', '127.0.0.1'),
+            'port' => env('DB_TENANT_PORT', '3306'),
+            'database' => env('DB_TENANT_DATABASE', 'forge'),
+            'username' => env('DB_TENANT_USERNAME', 'forge'),
+            'password' => env('DB_TENANT_PASSWORD', ''),
             'unix_socket' => env('DB_SOCKET', ''),
             'charset' => 'utf8mb4',
             'collation' => 'utf8mb4_unicode_ci',

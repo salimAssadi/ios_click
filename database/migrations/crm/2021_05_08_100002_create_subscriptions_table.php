@@ -1,10 +1,10 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
+use App\Database\Migrations\CrmMigration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateSubscriptionsTable extends Migration
+class CreateSubscriptionsTable extends CrmMigration
 {
     /**
      * Run the migrations.
@@ -38,3 +38,5 @@ class CreateSubscriptionsTable extends Migration
         Schema::dropIfExists('subscriptions');
     }
 }
+
+

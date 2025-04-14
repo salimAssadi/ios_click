@@ -1,19 +1,20 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
+use App\Database\Migrations\CrmMigration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreatePasswordResetsTable extends Migration
+class CreatePasswordResetsTable extends CrmMigration
 {
     /**
      * Run the migrations.
      *
      * @return void
      */
+    protected $connection = 'crm';
     public function up()
     {
-        Schema::create('password_resets', function (Blueprint $table) {
+        Schema::connection($this->connection)->create('password_resets', function (Blueprint $table) {
             $table->string('email')->index();
             $table->string('token');
             $table->timestamp('created_at')->nullable();
@@ -27,6 +28,8 @@ class CreatePasswordResetsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('password_resets');
+        Schema::connection($this->connection)->dropIfExists('password_resets');
     }
 }
+
+
