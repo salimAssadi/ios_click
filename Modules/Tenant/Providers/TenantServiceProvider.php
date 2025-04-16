@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Blade;
 use Modules\Tenant\Http\Middleware\TenantMiddleware;
 use Modules\Tenant\Http\Middleware\XSSMiddleware;
 use Illuminate\Support\Facades\Auth;
+// use App\Http\Middleware\TenantMiddleware;
 
 class TenantServiceProvider extends ServiceProvider
 {

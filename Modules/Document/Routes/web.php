@@ -13,8 +13,10 @@
 
 use Modules\Document\Http\Controllers\DocumentController;
 use Modules\Document\Http\Controllers\FileManagerController;
+use Modules\Tenant\Http\Middleware\TenantMiddleware;
+use Modules\Tenant\Http\Middleware\XSSMiddleware;
 
-Route::prefix('document')->name('tenant.document.')->group(function() {
+Route::prefix('document')->name('tenant.document.')->middleware(['auth:tenant','XSS', 'tenant'])->group(function() {
     Route::get('/', [DocumentController::class, 'index'])->name('index');
     Route::get('/create', [DocumentController::class, 'create'])->name('create');
     Route::get('/templates', [DocumentController::class, 'getTemplates'])->name('templates');

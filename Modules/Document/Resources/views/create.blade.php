@@ -1,5 +1,7 @@
 @extends('tenant::layouts.app')
 
+@section('page-title', __('Create New Document'))
+
 @section('breadcrumb')
     <li class="breadcrumb-item"><a href="{{ route('tenant.dashboard') }}">{{ __('Dashboard') }}</a></li>
     <li class="breadcrumb-item"><a href="{{ route('tenant.document.index') }}">{{ __('Documents') }}</a></li>
@@ -58,7 +60,7 @@
             <div class="col-md-12">
                 <!-- Progress Bar -->
                 <div class="progress my-3" style="height: 25px;">
-                    <div class="progress-bar bg-teal-200 text-black" role="progressbar" style="width: 25%;" aria-valuenow="25"
+                    <div class="progress-bar bg-gray-300 text-black" role="progressbar" style="width: 25%;" aria-valuenow="25"
                         aria-valuemin="0" aria-valuemax="100">
                         <span class="progress-text">{{ __('Step 1: ISO System') }}</span>
                     </div>
@@ -70,17 +72,17 @@
                     @csrf
                     <!-- Step 1: ISO System Selection -->
                     <div id="step1" class="card mb-4">
-                        <div class="card-header bg-teal-200 text-white d-flex justify-content-between align-items-center">
+                        <div class="card-header bg-gray-300 text-white d-flex justify-content-between align-items-center">
                             <h5 class="mb-0">{{ __('Select ISO System') }}</h5>
                             <span class="badge bg-light text-primary">{{ __('Step 1 of 4') }}</span>
                         </div>
-                        <div class="card-body">
+                        <div class="card-body ">
                             <div class="row">
                                 @foreach ($isoSystems as $system)
                                     <div class="col-md-6 mb-3">
                                         <div class="card h-100 cursor-pointer iso-system-card @error('iso_system_id') is-invalid @enderror"
                                             data-system-id="{{ $system->id }}">
-                                            <div class="card-body">
+                                            <div class="card-body shadow-sm rounded bg-gray-100">
                                                 <div class="form-check">
                                                     <input type="radio" name="iso_system_id" id="iso_{{ $system->id }}"
                                                         value="{{ $system->id }}" class="form-check-input"
@@ -112,7 +114,7 @@
 
                     <!-- Step 2: Document Type Selection -->
                     <div id="step2" class="card mb-4 d-none">
-                        <div class="card-header bg-teal-200 text-white d-flex justify-content-between align-items-center">
+                        <div class="card-header bg-gray-300 text-white d-flex justify-content-between align-items-center">
                             <h5 class="mb-0">{{ __('Select Document Type') }}</h5>
                             <span class="badge bg-light text-primary">{{ __('Step 2 of 4') }}</span>
                         </div>
@@ -146,7 +148,7 @@
 
                     <!-- Step 3: Template Selection -->
                     <div id="step3" class="card mb-4 d-none">
-                        <div class="card-header bg-teal-200 text-white d-flex justify-content-between align-items-center">
+                        <div class="card-header bg-gray-300 text-white d-flex justify-content-between align-items-center">
                             <h5 class="mb-0">{{ __('Select Template') }}</h5>
                             <span class="badge bg-light text-primary">{{ __('Step 3 of 4') }}</span>
                         </div>
@@ -165,7 +167,7 @@
 
                     <!-- Step 4: Document Details -->
                     <div id="step4" class="card mb-4 d-none">
-                        <div class="card-header bg-teal-200 text-white d-flex justify-content-between align-items-center">
+                        <div class="card-header bg-gray-300 text-white d-flex justify-content-between align-items-center">
                             <h5 class="mb-0">{{ __('Document Details') }}</h5>
                             <span class="badge bg-light text-primary">{{ __('Step 4 of 4') }}</span>
                         </div>
@@ -372,9 +374,13 @@
             $('.iso-system-card, .document-type-card').click(function() {
                 const $card = $(this);
                 const $radio = $card.find('input[type="radio"]');
-
+                
                 // Update visual selection
-                $card.siblings().removeClass('selected');
+                if ($card.hasClass('iso-system-card')) {
+                    $('.iso-system-card').removeClass('selected');
+                } else if ($card.hasClass('document-type-card')) {
+                    $('.document-type-card').removeClass('selected');
+                }
                 $card.addClass('selected');
 
                 // Update radio button

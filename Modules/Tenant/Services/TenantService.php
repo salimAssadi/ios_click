@@ -33,7 +33,7 @@ class TenantService
             }
 
             // The database name is the same as company name (you might want to use a different naming convention)
-            $databaseName = 'iso_' . strtolower(str_replace(' ', '_', $company->name_en));
+            $databaseName = 'isoclick_' . strtolower(str_replace(' ', '_', $company->name_en));
 
             // Set up the new connection configuration
             $config = [
@@ -79,7 +79,7 @@ class TenantService
     public function createTenantDatabase(int $companyId)
     {
         try {
-            $databaseName = 'iso_'. $companyId;
+            $databaseName = 'isoclick_'. $companyId;
             DB::statement("CREATE DATABASE IF NOT EXISTS {$databaseName}");
             return true;
         } catch (\Exception $e) {

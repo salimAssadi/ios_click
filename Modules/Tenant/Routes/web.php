@@ -44,90 +44,90 @@ Route::prefix('tenant')->name('tenant.')->middleware(['XSS'])->group(function() 
         Route::get('/', [HomeController::class, 'index'])->name('dashboard');
         Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 
-        // Document Management
-        Route::resource('documents', DocumentController::class);
-        Route::get('document/history', [DocumentController::class, 'history'])->name('document.history');
-        Route::get('document/{id}/comment', [DocumentController::class, 'comment'])->name('document.comment');
-        Route::get('document/{id}/version-history', [DocumentController::class, 'versionHistory'])->name('document.version.history');
+        // // Document Management
+        // Route::resource('documents', DocumentController::class);
+        // Route::get('document/history', [DocumentController::class, 'history'])->name('document.history');
+        // Route::get('document/{id}/comment', [DocumentController::class, 'comment'])->name('document.comment');
+        // Route::get('document/{id}/version-history', [DocumentController::class, 'versionHistory'])->name('document.version.history');
 
-        // Audit Management
-        Route::resource('audits', AuditController::class);
+        // // Audit Management
+        // Route::resource('audits', AuditController::class);
         
-        // Risk Management
-        Route::resource('risks', RiskController::class);
+        // // Risk Management
+        // Route::resource('risks', RiskController::class);
         
-        // Corrective Actions
-        Route::resource('corrective-actions', CorrectiveActionController::class);
+        // // Corrective Actions
+        // Route::resource('corrective-actions', CorrectiveActionController::class);
         
-        // Training Management
-        Route::resource('trainings', TrainingController::class);
+        // // Training Management
+        // Route::resource('trainings', TrainingController::class);
         
-        // Meeting Management
-        Route::resource('meetings', MeetingController::class);
+        // // Meeting Management
+        // Route::resource('meetings', MeetingController::class);
         
-        // KPI Management
-        Route::resource('kpis', KpiController::class);
+        // // KPI Management
+        // Route::resource('kpis', KpiController::class);
         
-        // Signature and Authority
-        Route::resource('signatures', SignatureController::class);
+        // // Signature and Authority
+        // Route::resource('signatures', SignatureController::class);
 
-        // ISO Systems
-        Route::resource('iso-systems', IsoSystemController::class);
-        Route::get('iso-systems/{id}/procedures', [IsoSystemController::class, 'procedures'])->name('iso-systems.procedures');
-        Route::get('iso-systems/{id}/samples', [IsoSystemController::class, 'samples'])->name('iso-systems.samples');
+        // // ISO Systems
+        // Route::resource('iso-systems', IsoSystemController::class);
+        // Route::get('iso-systems/{id}/procedures', [IsoSystemController::class, 'procedures'])->name('iso-systems.procedures');
+        // Route::get('iso-systems/{id}/samples', [IsoSystemController::class, 'samples'])->name('iso-systems.samples');
 
-        // ISO Policies
-        Route::resource('policies', IsoPolicyController::class);
-        Route::get('policies/{id}/attachments', [IsoPolicyController::class, 'attachments'])->name('policies.attachments');
+        // // ISO Policies
+        // Route::resource('policies', IsoPolicyController::class);
+        // Route::get('policies/{id}/attachments', [IsoPolicyController::class, 'attachments'])->name('policies.attachments');
 
-        // ISO Instructions
-        Route::resource('instructions', IsoInstructionController::class);
-        Route::get('instructions/{id}/attachments', [IsoInstructionController::class, 'attachments'])->name('instructions.attachments');
+        // // ISO Instructions
+        // Route::resource('instructions', IsoInstructionController::class);
+        // Route::get('instructions/{id}/attachments', [IsoInstructionController::class, 'attachments'])->name('instructions.attachments');
 
-        // ISO References
-        Route::resource('references', IsoReferenceController::class);
-        Route::get('references/{id}/attachments', [IsoReferenceController::class, 'attachments'])->name('references.attachments');
+        // // ISO References
+        // Route::resource('references', IsoReferenceController::class);
+        // Route::get('references/{id}/attachments', [IsoReferenceController::class, 'attachments'])->name('references.attachments');
 
-        // Procedures
-        Route::resource('procedures', ProcedureController::class);
-        Route::get('procedures/{id}/configure', [ProcedureController::class, 'configure'])->name('procedures.configure');
-        Route::post('procedures/{id}/save-config', [ProcedureController::class, 'saveConfig'])->name('procedures.save-config');
+        // // Procedures
+        // Route::resource('procedures', ProcedureController::class);
+        // Route::get('procedures/{id}/configure', [ProcedureController::class, 'configure'])->name('procedures.configure');
+        // Route::post('procedures/{id}/save-config', [ProcedureController::class, 'saveConfig'])->name('procedures.save-config');
 
-        // Samples
-        Route::resource('samples', SampleController::class);
-        Route::get('samples/{id}/configure', [SampleController::class, 'configure'])->name('samples.configure');
-        Route::post('samples/{id}/save-config', [SampleController::class, 'saveConfig'])->name('samples.save-config');
+        // // Samples
+        // Route::resource('samples', SampleController::class);
+        // Route::get('samples/{id}/configure', [SampleController::class, 'configure'])->name('samples.configure');
+        // Route::post('samples/{id}/save-config', [SampleController::class, 'saveConfig'])->name('samples.save-config');
 
-        // Complaints Management
-        Route::resource('complaints', ComplaintController::class);
+        // // Complaints Management
+        // Route::resource('complaints', ComplaintController::class);
         
-        // Compliance Management
-        Route::resource('compliance', ComplianceController::class);
+        // // Compliance Management
+        // Route::resource('compliance', ComplianceController::class);
 
-        // Settings
-        Route::get('settings', [SettingController::class, 'index'])->name('settings.index');
-        Route::post('settings/general', [SettingController::class, 'updateGeneral'])->name('settings.general');
-        Route::post('settings/email', [SettingController::class, 'updateEmail'])->name('settings.email');
-        Route::post('settings/appearance', [SettingController::class, 'updateAppearance'])->name('settings.appearance');
+        // // Settings
+        // Route::get('settings', [SettingController::class, 'index'])->name('settings.index');
+        // Route::post('settings/general', [SettingController::class, 'updateGeneral'])->name('settings.general');
+        // Route::post('settings/email', [SettingController::class, 'updateEmail'])->name('settings.email');
+        // Route::post('settings/appearance', [SettingController::class, 'updateAppearance'])->name('settings.appearance');
 
-        // Users
-        Route::resource('users', UserController::class);
+        // // Users
+        // Route::resource('users', UserController::class);
         
-        // Categories
-        Route::resource('categories', CategoryController::class);
-        Route::resource('subcategories', SubCategoryController::class);
+        // // Categories
+        // Route::resource('categories', CategoryController::class);
+        // Route::resource('subcategories', SubCategoryController::class);
         
-        // Tags
-        Route::resource('tags', TagController::class);
+        // // Tags
+        // Route::resource('tags', TagController::class);
 
-        // Countries and Cities
-        Route::resource('countries', CountryController::class);
-        Route::get('countries/{country}/cities', [CountryController::class, 'cities'])->name('countries.cities');
+        // // Countries and Cities
+        // Route::resource('countries', CountryController::class);
+        // Route::get('countries/{country}/cities', [CountryController::class, 'cities'])->name('countries.cities');
 
-        // File Manager
-        Route::get('file-manager', [FileManagerController::class, 'index'])->name('file-manager.index');
-        Route::get('file-manager/config', [FileManagerController::class, 'getConfig'])->name('file-manager.config');
-        Route::post('file-manager/upload', [FileManagerController::class, 'upload'])->name('file-manager.upload');
+        // // File Manager
+        // Route::get('file-manager', [FileManagerController::class, 'index'])->name('file-manager.index');
+        // Route::get('file-manager/config', [FileManagerController::class, 'getConfig'])->name('file-manager.config');
+        // Route::post('file-manager/upload', [FileManagerController::class, 'upload'])->name('file-manager.upload');
     });
 
 });

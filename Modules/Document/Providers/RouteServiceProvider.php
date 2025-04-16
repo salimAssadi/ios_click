@@ -4,6 +4,8 @@ namespace Modules\Document\Providers;
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
+use Modules\Tenant\Http\Middleware\TenantMiddleware;
+use Modules\Tenant\Http\Middleware\XSSMiddleware;
 
 class RouteServiceProvider extends ServiceProvider
 {
@@ -23,6 +25,8 @@ class RouteServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        $this->app['router']->aliasMiddleware('tenant', TenantMiddleware::class);
+        $this->app['router']->aliasMiddleware('xss', XSSMiddleware::class);
         parent::boot();
     }
 

@@ -21,7 +21,7 @@
                     <i class="ti ti-dashboard"></i>
                 </li>
                 <li class="pc-item {{ in_array($routeName, ['tenant.dashboard', 'home', '']) ? 'active' : '' }}">
-                    <a href="" class="pc-link">
+                    <a href="{{ route('tenant.dashboard') }}" class="pc-link">
                         <span class="pc-micon"><i class="ti ti-dashboard"></i></span>
                         <span class="pc-mtext">{{ __('Dashboard') }}</span>
                     </a>

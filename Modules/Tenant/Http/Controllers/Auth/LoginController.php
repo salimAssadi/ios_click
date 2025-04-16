@@ -62,12 +62,13 @@ class LoginController extends Controller
                     ->withErrors(['email' => 'User not found in tenant database.']);
             }
 
-            // Check if user is already logged in on another device
-            if ($user->session_id && $user->session_id !== session()->getId()) {
-                return back()
-                    ->withInput($request->only('email', 'company_name'))
-                    ->withErrors(['email' => 'User is already logged in on another device. Please logout first.']);
-            }
+            // // Check if user is already logged in on another device
+            // if ($user->session_id && $user->session_id !== session()->getId()) {
+
+            //     return back()
+            //         ->withInput($request->only('email', 'company_name'))
+            //         ->withErrors(['email' => 'User is already logged in on another device. Please logout first.']);
+            // }
 
             if ($user && Hash::check($credentials['password'], $user->password)) {
                 // Update session and login info
