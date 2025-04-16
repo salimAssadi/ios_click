@@ -1,7 +1,7 @@
 @php
     $admin_logo = getSettingsValByName('company_logo');
-    $ids = parentId();
-    $authUser = \App\Models\User::find($ids);
+    // $ids = parentId();
+    // $authUser = \App\Models\User::find($ids);
     // $subscription = \App\Models\Subscription::find($authUser->subscription);
     $routeName = \Request::route()->getName();
     // $pricing_feature_settings = getSettingsValByIdName(1, 'pricing_feature');
@@ -36,7 +36,7 @@
                     </a>
                     <ul class="pc-submenu">
                         <li class="pc-item {{ $routeName == 'document.create' ? 'active' : '' }}">
-                            <a href="" class="pc-link">
+                            <a href="{{ route('tenant.document.create') }}" class="pc-link">
                                 <span class="pc-mtext">{{ __('Create New Document') }}</span>
                             </a>
                         </li>
@@ -249,7 +249,10 @@
                     <ul class="pc-submenu">
                         <li class="pc-item {{ $routeName == 'settings.index' ? 'active' : '' }}">
                             <a href="" class="pc-link">
-                                <span class="pc-mtext">{{ __('All Settings') }}</span>
+                                <span class="pc-mtext">{{ __('Company Profile') }}</span>
+                            </a>
+                            <a href="" class="pc-link">
+                                <span class="pc-mtext">{{ __('') }}</span>
                             </a>
                         </li>
                     </ul>

@@ -1,7 +1,7 @@
 @php
-    $users = \Auth::user();
+    $users = auth('tenant')->user();
     $languages = \App\Models\Custom::languages();
-    $userLang = \Auth::user()->lang;
+    $userLang = auth('tenant')->user()->lang;
     $profile = asset(Storage::url('upload/profile'));
 @endphp
 
@@ -43,7 +43,7 @@
 
                     </div>
                 </li>
-                @if (\Auth::user()->type == 'super admin' || \Auth::user()->type == 'owner')
+                @if (auth('tenant')->user()->type == 'super admin' || auth('tenant')->user()->type == 'owner')
                     <li class="dropdown pc-h-item pc-mega-menu" data-bs-toggle="tooltip" data-bs-original-title="{{__('Theme Settings')}}" data-bs-placement="bottom">
                         <a href="#" class="pc-head-link head-link-secondary dropdown-toggle arrow-none me-0"
                             data-bs-toggle="offcanvas" data-bs-target="#offcanvas_pc_layout">
@@ -63,9 +63,9 @@
                         <div class="dropdown-header">
                             <h4>
                                 {{ __('Good Morning') }},
-                                <span class="small text-muted">{{\Auth::user()->name}}</span>
+                                <span class="small text-muted">{{auth('tenant')->user()->name}}</span>
                             </h4>
-                            <p class="text-muted">{{\Auth::user()->type}}</p>
+                            <p class="text-muted">{{auth('tenant')->user()->type}}</p>
 
                             <div class="profile-notification-scroll position-relative"
                                 style="max-height: calc(100vh - 280px)">

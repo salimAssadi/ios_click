@@ -1,15 +1,15 @@
 {
     "Tenant": true,
-    "DocumentControl": true,
-    "AuditManagement": true,
-    "CorrectiveActions": true,
+    "Document": true,
+    "CorrectiveAction": true,
     "NonConformance": true,
-    "TrainingManagement": true,
-    "RiskManagement": true,
     "ManagementReview": true,
     "Report": true,
-    "RolesPermissions": true,
-    "ComplaintsManagement": true,
-    "ComplianceManagement": true,
-    "Setting": true
+    "Setting": true,
+    "Audit": true,
+    "Risk": true,
+    "Role": true,
+    "Training": true,
+    "Complaint": true,
+    "Compliance": true
 }

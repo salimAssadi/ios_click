@@ -4,11 +4,14 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use App\Services\TenantService;
+use Modules\Tenant\Services\TenantService;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Config;
 
 class TenantMiddleware
 {
     protected $tenantService;
+
 
     public function __construct(TenantService $tenantService)
     {
@@ -22,33 +25,45 @@ class TenantMiddleware
      * @param  \Closure  $next
      * @return mixed
      */
-//     public function handle(Request $request, Closure $next)
-//     {
-//         // Skip if not authenticated
-//         if (!auth()->check()) {
-//             return $next($request);
-//         }
+    public function handle(Request $request, Closure $next)
+    {
+        // Skip if not authenticated with tenant guard
+        if (!Auth::guard('tenant')->check()) {
+            return redirect()->route('tenant.login');
+        }
 
-//         // Get company details from session
-//         $companyName = session('company_name');
-//         $companyEmail = session('company_email');
+        // Get company details from session
+        $companyName = session('company_name');
+        $companyEmail = session('company_email');
 
-//         if (!$companyName || !$companyEmail) {
-//             return redirect()->route('login');
-//         }
+        if (!$companyName || !$companyEmail) {
+            Auth::guard('tenant')->logout();
+            session()->flush();
+            return redirect()->route('tenant.login')->with('error', 'Company information not found');
+        }
 
-//         // Try to set up tenant connection
-//         $connection = $this->tenantService->setUpTenantConnection($companyName, $companyEmail);
+        // Try to set up tenant connection
+        $connection = $this->tenantService->setUpTenantConnection($companyName, $companyEmail);
         
-//         if (!$connection) {
-//             auth()->logout();
-//             session()->flush();
-//             return redirect()->route('login')->with('error', 'Company not found');
-//         }
+        if (!$connection) {
+            Auth::guard('tenant')->logout();
+            session()->flush();
+            return redirect()->route('tenant.login')->with('error', 'Company not found');
+        }
 
-//         // Store tenant info in the request for later use
-//         $request->merge(['tenant' => $connection]);
+        // Configure database connection for tenant
+        Config::set('database.default', 'tenant');
+        Config::set('database.connections.tenant', array_merge(
+            Config::get('database.connections.mysql'),
+            [
+                'database' => $connection['database'],
+            ]
+        ));
 
-//         return $next($request);
-//     }
+        // Store tenant info in the request for later use
+        $request->merge(['tenant' => $connection]);
+
+        return $next($request);
+    }
+
 }

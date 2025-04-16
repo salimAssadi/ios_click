@@ -2,9 +2,9 @@
 @section('page-title')
     {{ __('Dashboard') }}
 @endsection
-{{-- @section('breadcrumb')
+@section('breadcrumb')
     <li class="breadcrumb-item" aria-current="page">{{ __('Dashboard') }}</li>
-@endsection --}}
+@endsection
 @push('script-page')
     <script>
         var documentByCategoryData = {!! json_encode($result['documentByCategory']['data']) !!};

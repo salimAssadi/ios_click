@@ -1,0 +1,13 @@
+{
+    "name": "Risk",
+    "alias": "risk",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Risk\\Providers\\RiskServiceProvider"
+    ],
+    "aliases": {},
+    "files": [],
+    "requires": []
+}

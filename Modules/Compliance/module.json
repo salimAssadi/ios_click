@@ -1,0 +1,13 @@
+{
+    "name": "Compliance",
+    "alias": "compliance",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Compliance\\Providers\\ComplianceServiceProvider"
+    ],
+    "aliases": {},
+    "files": [],
+    "requires": []
+}

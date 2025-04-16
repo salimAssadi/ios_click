@@ -43,9 +43,9 @@ Route::prefix('iso_dic')->middleware(['XSS'])->name('iso_dic.')->group(function 
             'procedures' => ProcedureController::class,
             'samples' => SampleController::class,
             'countries' => CountryController::class,
-            'category' => CategoryController::class,
-            'sub-category' => SubCategoryController::class,
-            'tag' => TagController::class,
+            // 'category' => CategoryController::class,
+            // 'sub-category' => SubCategoryController::class,
+            // 'tag' => TagController::class,
         ]);
 
         Route::controller(IsoSystemController::class)

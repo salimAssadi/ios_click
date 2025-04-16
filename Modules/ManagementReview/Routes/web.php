@@ -12,5 +12,5 @@
 */
 
 Route::prefix('managementreview')->group(function() {
-    Route::get('/', 'ManagementReviewController@index');
+    Route::get('/', 'ManagementReviewController@index')->name('tenant.managementreview.index');
 });
