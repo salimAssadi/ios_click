@@ -6,6 +6,8 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Eloquent\Factory;
 use Illuminate\Support\Facades\Blade;
 use Modules\Tenant\Http\Middleware\TenantMiddleware;
+use Modules\Tenant\Http\Middleware\XSSMiddleware;
+use Illuminate\Support\Facades\Auth;
 
 class TenantServiceProvider extends ServiceProvider
 {
@@ -33,11 +35,21 @@ class TenantServiceProvider extends ServiceProvider
         $this->registerComponents();
         // Register the middleware
         $this->app['router']->aliasMiddleware('tenant', TenantMiddleware::class);
+        $this->app['router']->aliasMiddleware('xss', XSSMiddleware::class);
 
-        // Set locale from session
-        if (session()->has('locale')) {
-            app()->setLocale(session('locale'));
+        // Set locale from user's language preference
+        if(Auth::guard('tenant')->check())
+        {
+            $user = Auth::guard('tenant')->user();
+            \App::setLocale($user->lang ?? 'english');
+            $timezone = getSettingsValByName('timezone') ?? 'UTC';
+            \Config::set('app.timezone', $timezone);
+        }else{
+            \App::setLocale('arabic');
+            \Config::set('app.timezone', 'UTC');
+            
         }
+
     }
 
     /**

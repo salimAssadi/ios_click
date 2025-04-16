@@ -84,7 +84,7 @@ return [
             'port' => env('DB_TENANT_PORT', '3306'),
             'database' => env('DB_TENANT_DATABASE', 'forge'),
             'username' => env('DB_TENANT_USERNAME', 'forge'),
-            'password' => env('DB_TENANT_PASSWORD', ''),
+            'password' => env('DB_TENANT_PASSWORD', '12345678'),
             'unix_socket' => env('DB_SOCKET', ''),
             'charset' => 'utf8mb4',
             'collation' => 'utf8mb4_unicode_ci',

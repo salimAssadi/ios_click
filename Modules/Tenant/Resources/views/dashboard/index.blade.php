@@ -1,60 +1,417 @@
 @extends('tenant::layouts.app')
+@section('page-title')
+    {{ __('Dashboard') }}
+@endsection
+{{-- @section('breadcrumb')
+    <li class="breadcrumb-item" aria-current="page">{{ __('Dashboard') }}</li>
+@endsection --}}
+@push('script-page')
+    <script>
+        var documentByCategoryData = {!! json_encode($result['documentByCategory']['data']) !!};
+        var documentByCategory = {!! json_encode($result['documentByCategory']['category']) !!};
+        var documentBySubCategoryData = {!! json_encode($result['documentBySubCategory']['data']) !!};
+        var documentBySubCategory = {!! json_encode($result['documentBySubCategory']['category']) !!};
+    </script>
+    {{-- <script src="{{ asset('js/dashboard.js') }}"></script> --}}
+    <script>
+        var timezone = '{{ !empty($settings['timezone']) ? $settings['timezone'] : 'Asia/Kolkata' }}';
 
-@section('title', 'Dashboard - ISO Tracker')
+        let today = new Date(new Date().toLocaleString("en-US", {
+            timeZone: timezone
+        }));
+        var curHr = today.getHours()
+        var target = document.getElementById("greetings");
 
+        if (curHr < 12) {
+            target.innerHTML = "{{__('Good Morning,')}}";
+        } else if (curHr < 17) {
+            target.innerHTML = "{{__('Good Afternoon,')}}";
+        } else {
+            target.innerHTML = "{{__('Good Evening,')}}";
+        }
+       
+    </script>
+    <script>
+        var options = {
+            chart: {
+                type: 'area',
+                height: 250,
+                toolbar: {
+                    show: false
+                }
+            },
+            colors: ['#2ca58d', '#0a2342'],
+            dataLabels: {
+                enabled: false
+            },
+            legend: {
+                show: true,
+                position: 'top'
+            },
+            markers: {
+                size: 1,
+                colors: ['#fff', '#fff', '#fff'],
+                strokeColors: ['#2ca58d', '#0a2342'],
+                strokeWidth: 1,
+                shape: 'circle',
+                hover: {
+                    size: 4
+                }
+            },
+            stroke: {
+                width: 2,
+                curve: 'smooth'
+            },
+            fill: {
+                type: 'gradient',
+                gradient: {
+                    shadeIntensity: 1,
+                    type: 'vertical',
+                    inverseColors: false,
+                    opacityFrom: 0.5,
+                    opacityTo: 0
+                }
+            },
+            grid: {
+                show: false
+            },
+            series: [{
+                name: "{{ __('Total Document') }}",
+                data: documentByCategoryData
+            }, ],
+            xaxis: {
+                categories: documentByCategory,
+                tooltip: {
+                    enabled: false
+                },
+                labels: {
+                    hideOverlappingLabels: true
+                },
+                axisBorder: {
+                    show: false
+                },
+                axisTicks: {
+                    show: false
+                }
+            }
+        };
+        var chart = new ApexCharts(document.querySelector('#document_by_cat'), options);
+        chart.render();
+    </script>
+    <script>
+        var options = {
+            chart: {
+                type: 'area',
+                height: 250,
+                toolbar: {
+                    show: false
+                }
+            },
+            colors: ['#2ca58d', '#0a2342'],
+            dataLabels: {
+                enabled: false
+            },
+            legend: {
+                show: true,
+                position: 'top'
+            },
+            markers: {
+                size: 1,
+                colors: ['#fff', '#fff', '#fff'],
+                strokeColors: ['#2ca58d', '#0a2342'],
+                strokeWidth: 1,
+                shape: 'circle',
+                hover: {
+                    size: 4
+                }
+            },
+            stroke: {
+                width: 2,
+                curve: 'smooth'
+            },
+            fill: {
+                type: 'gradient',
+                gradient: {
+                    shadeIntensity: 1,
+                    type: 'vertical',
+                    inverseColors: false,
+                    opacityFrom: 0.5,
+                    opacityTo: 0
+                }
+            },
+            grid: {
+                show: false
+            },
+            series: [{
+                name: "{{ __('Total Document') }}",
+                data: documentBySubCategoryData
+            }, ],
+            xaxis: {
+                categories: documentBySubCategory,
+                tooltip: {
+                    enabled: false
+                },
+                labels: {
+                    hideOverlappingLabels: true
+                },
+                axisBorder: {
+                    show: false
+                },
+                axisTicks: {
+                    show: false
+                }
+            }
+        };
+        var chart = new ApexCharts(document.querySelector('#document_by_subcat'), options);
+        chart.render();
+    </script>
+@endpush
 @section('content')
-<div class="py-12">
-    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-            <div class="p-6 text-gray-900">
-                <h3 class="text-lg font-medium mb-4">Welcome back, {{ Auth::user()->name }}!</h3>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- Documents Overview -->
-                    <div class="bg-white p-6 rounded-lg shadow">
-                        <h4 class="font-semibold text-lg mb-4">Documents</h4>
-                        <div class="space-y-4">
-                            <div class="flex justify-between items-center">
-                                <span class="text-gray-600">Total Documents</span>
-                                <span class="font-semibold">0</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <span class="text-gray-600">Pending Review</span>
-                                <span class="font-semibold">0</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <span class="text-gray-600">Recently Updated</span>
-                                <span class="font-semibold">0</span>
+    <div class="row">
+        <div class="col-lg-12 col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="avtar bg-light-warning">
+                                <i class="ti ti-user f-24"></i>
                             </div>
                         </div>
-                        <div class="mt-6">
-                            <a href="" class="text-indigo-600 hover:text-indigo-900">View all documents →</a>
-                        </div>
-                    </div>
-
-                    <!-- Quick Actions -->
-                    <div class="bg-white p-6 rounded-lg shadow">
-                        <h4 class="font-semibold text-lg mb-4">Quick Actions</h4>
-                        <div class="space-y-4">
-                            <a href="" class="block px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 text-center">
-                                Create New Document
-                            </a>
-                            <a href="#" class="block px-4 py-2 border border-gray-300 text-gray-700 rounded hover:bg-gray-50 text-center">
-                                Import from Google Docs
-                            </a>
-                        </div>
-                    </div>
-
-                    <!-- Recent Activity -->
-                    <div class="bg-white p-6 rounded-lg shadow">
-                        <h4 class="font-semibold text-lg mb-4">Recent Activity</h4>
-                        <div class="space-y-4">
-                            <p class="text-gray-600 text-center py-8">No recent activity</p>
+                        <div class="flex-grow-1 ms-3">
+                            <p class="mb-1" ><span id="greetings"> </span> {{ Auth::user()->name }}</p>
+                            <p>{{ __('we guide you through preparing your required documentation, quality manual, and documented processes.') }}</p>
+                           
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="avtar bg-light-secondary">
+                                <i class="ti ti-users f-24"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <p class="mb-1">{{ __('Total Users') }}</p>
+                            <div class="d-flex align-items-center justify-content-between">
+                                <h4 class="mb-0">{{ $result['totalUser'] }}</h4>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="avtar bg-light-warning">
+                                <i class="ti ti-package f-24"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <p class="mb-1">{{ __('Total ISO System') }}</p>
+                            <div class="d-flex align-items-center justify-content-between">
+                                <h4 class="mb-0">{{ $result['totalISOSystem'] }}</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="avtar bg-light-warning">
+                                <i class="ti ti-package f-24"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <p class="mb-1">{{ __('Total Specification Item') }}</p>
+                            <div class="d-flex align-items-center justify-content-between">
+                                <h4 class="mb-0">{{ $result['totalSpecificationItem'] }}</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="avtar bg-light-primary">
+                                <i class="ti ti-history f-24"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <p class="mb-1">{{ __('Total Procedures') }}</p>
+                            <div class="d-flex align-items-center justify-content-between">
+                                <h4 class="mb-0">{{ $result['totalProcedures'] }}</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+         <div class="col-lg-3 col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="avtar bg-light-danger">
+                                <i class="ti ti-credit-card f-24"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <p class="mb-1">{{ __('Total Samples') }}</p>
+                            <div class="d-flex align-items-center justify-content-between">
+                                <h4 class="mb-0">{{ $result['totalSamples'] }}
+                                </h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="avtar bg-light-danger">
+                                <i class="ti ti-credit-card f-24"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <p class="mb-1">{{ __('Total References') }}</p>
+                            <div class="d-flex align-items-center justify-content-between">
+                                <h4 class="mb-0">{{ $result['totalReferences'] }}
+                                </h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="avtar bg-light-danger">
+                                <i class="ti ti-credit-card f-24"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <p class="mb-1">{{ __('Total Instructions') }}</p>
+                            <div class="d-flex align-items-center justify-content-between">
+                                <h4 class="mb-0">{{ $result['totalInstructions'] }}
+                                </h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="avtar bg-light-danger">
+                                <i class="ti ti-credit-card f-24"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <p class="mb-1">{{ __('Total policies') }}</p>
+                            <div class="d-flex align-items-center justify-content-between">
+                                <h4 class="mb-0">{{ $result['totalPolicies'] }}
+                                </h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>                              
+
+
+        {{-- <div class="col-lg-3 col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="avtar bg-light-danger">
+                                <i class="ti ti-credit-card f-24"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <p class="mb-1">{{ __('Today Reminder') }}</p>
+                            <div class="d-flex align-items-center justify-content-between">
+                                <h4 class="mb-0">{{ $result['todayReminder'] }}
+                                </h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div> --}}
+        {{-- <div class="col-lg-3 col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="avtar bg-light-danger">
+                                <i class="ti ti-file f-24"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <p class="mb-1">{{ __('Total Contact') }}</p>
+                            <div class="d-flex align-items-center justify-content-between">
+                                <h4 class="mb-0">{{ $result['totalContact'] }}
+                                </h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div> --}}
+
+        <div class="col-lg-12 col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div>
+                            <h5 class="mb-1">{{ __('Document By Category') }}</h5>
+                        </div>
+
+                    </div>
+                    <div id="document_by_cat"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-12 col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div>
+                            <h5 class="mb-1">{{ __('Document By Sub Category') }}</h5>
+                        </div>
+
+                    </div>
+                    <div id="document_by_subcat"></div>
+                </div>
+            </div>
+        </div>
+
     </div>
-</div>
 @endsection

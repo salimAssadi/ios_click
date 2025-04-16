@@ -15,12 +15,17 @@ class LocaleController extends Controller
      */
     public function setLocale($locale)
     {
-        if (! in_array($locale, ['en', 'ar'])) {
-            abort(400);
+        $validLocale = in_array($locale, ['ar', 'en']) ? $locale : 'en';
+        $langValue = $validLocale === 'ar' ? 'arabic' : 'english';
+        
+        // Update user's language preference if authenticated
+        if (auth()->guard('tenant')->check()) {
+            auth()->guard('tenant')->user()->update(['lang' => $langValue]);
         }
 
-        session()->put('locale', $locale);
-
+        // Also store in session for guests
+        session()->put('locale', $validLocale);
+        
         return redirect()->back();
     }
 }

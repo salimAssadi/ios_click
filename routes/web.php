@@ -41,9 +41,9 @@ use App\Http\Controllers\RequestController;
 
 // require __DIR__ . '/auth.php';
 
-// Route::get('/',function(){
-//     return redirect('/iso_dic/login');
-// });
+Route::get('/',function(){
+    return redirect('/iso_dic/login');
+});
 
 // Route::get('/', [HomeController::class, 'index'])->middleware(
 //     [

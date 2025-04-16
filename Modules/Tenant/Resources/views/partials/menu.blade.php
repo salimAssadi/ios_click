@@ -21,380 +21,239 @@
                     <i class="ti ti-dashboard"></i>
                 </li>
                 <li class="pc-item {{ in_array($routeName, ['tenant.dashboard', 'home', '']) ? 'active' : '' }}">
-                    <a href="{{ route('tenant.dashboard') }}" class="pc-link">
+                    <a href="" class="pc-link">
                         <span class="pc-micon"><i class="ti ti-dashboard"></i></span>
                         <span class="pc-mtext">{{ __('Dashboard') }}</span>
                     </a>
                 </li>
-                {{-- @if (Gate::check('manage isosystem'))
-                    <li
-                        class="pc-item {{ in_array($routeName, ['iso_systems.index', 'iso_systems.show']) ? 'active' : '' }}">
-                        <a href="{{ route('iso_systems.index') }}" class="pc-link">
-                            <span class="pc-micon"><i class="ti ti-apps"></i></span>
-                            <span class="pc-mtext">{{ __('ISO Systems') }}</span>
-                        </a>
-                    </li>
-                @endif
-                @if (Gate::check('manage specification items'))
-                    <li
-                        class="pc-item {{ in_array($routeName, ['specification_items.index', 'specification_items.show']) ? 'active' : '' }}">
-                        <a href="{{ route('specification_items.index') }}" class="pc-link">
-                            <span class="pc-micon"><i class="ti ti-apps"></i></span>
-                            <span class="pc-mtext">{{ __('ISO specification items') }}</span>
-                        </a>
-                    </li>
-                @endif
-                @if (Gate::check('request iso'))
-                    <li
-                        class="pc-item {{ in_array($routeName, ['specification_items.index', 'specification_items.show']) ? 'active' : '' }}">
-                        <a href="{{ route('specification_items.index') }}" class="pc-link">
-                            <span class="pc-micon"><i class="ti ti-download"></i></span>
-                            <span class="pc-mtext">{{ __('Request Iso Certificate') }}</span>
-                        </a>
-                    </li>
-                @endif --}}
-                {{-- @if (Gate::check('manage user'))
-                        <li class="pc-item {{ in_array($routeName, ['iso_systems.index', 'iso_systems.show']) ? 'active' : '' }}">
-                            <a href="{{ route('iso_systems.index') }}" class="pc-link">
-                                <span class="pc-micon"><i class="ti ti-apps"></i></span>
-                                <span class="pc-mtext">{{ __('Organizational units') }}</span>
-                            </a>
-                        </li>
-                @endif --}}
-                {{-- @if (\Auth::user()->type == 'super admin')
-                    @if (Gate::check('manage user'))
-                        <li class="pc-item {{ in_array($routeName, ['users.index', 'users.show']) ? 'active' : '' }}">
-                            <a href="{{ route('users.index') }}" class="pc-link">
-                                <span class="pc-micon"><i class="ti ti-user-plus"></i></span>
-                                <span class="pc-mtext">{{ __('Consulting Company') }}</span>
-                            </a>
-                        </li>
-                    @endif
-                    @if (Gate::check('manage role'))
-                        <li
-                            class="pc-item  {{ in_array($routeName, ['role.index', 'role.create', 'role.edit']) ? 'active' : '' }}">
-                            <a class="pc-link" href="{{ route('role.index') }}">
-                                <span class="pc-micon"><i class="ti ti-report-medical"></i></span>
-                                <span class="pc-mtext">{{ __('Roles') }}</span>
-                            </a>
-                        </li>
-                    @endif
-                @else
-                    @if (Gate::check('manage user') || Gate::check('manage role') || Gate::check('manage logged history'))
-                        <li
-                            class="pc-item pc-hasmenu {{ in_array($routeName, ['users.index', 'logged.history', 'role.index', 'role.create', 'role.edit']) ? 'pc-trigger active' : '' }}">
-                            <a href="#!" class="pc-link">
-                                <span class="pc-micon">
-                                    <i class="ti ti-users"></i>
-                                </span>
-                                <span class="pc-mtext">{{ __('Staff Management') }}</span>
-                                <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
-                            </a>
-                            <ul class="pc-submenu"
-                                style="display: {{ in_array($routeName, ['users.index', 'logged.history', 'role.index', 'role.create', 'role.edit']) ? 'block' : 'none' }}">
-                                @if (Gate::check('manage user'))
-                                    <li class="pc-item {{ in_array($routeName, ['users.index']) ? 'active' : '' }}">
-                                        <a class="pc-link" href="{{ route('users.index') }}">{{ __('Users') }}</a>
-                                    </li>
-                                @endif
-                                @if (Gate::check('manage role'))
-                                    <li
-                                        class="pc-item  {{ in_array($routeName, ['role.index', 'role.create', 'role.edit']) ? 'active' : '' }}">
-                                        <a class="pc-link" href="{{ route('role.index') }}">{{ __('Roles') }} </a>
-                                    </li>
-                                @endif
-                                @if ($pricing_feature_settings == 'off' || $subscription->enabled_logged_history == 1)
-                                    @if (Gate::check('manage logged history'))
-                                        <li
-                                            class="pc-item  {{ in_array($routeName, ['logged.history']) ? 'active' : '' }}">
-                                            <a class="pc-link"
-                                                href="{{ route('logged.history') }}">{{ __('Logged History') }}</a>
-                                        </li>
-                                    @endif
-                                @endif
-                            </ul>
-                        </li>
-                    @endif
-                @endif
-                @if (Gate::check('manage document') ||
-                        Gate::check('manage my document') ||
-                        Gate::check('manage reminder') ||
-                        Gate::check('manage my reminder') ||
-                        Gate::check('manage request') ||
-                        Gate::check('manage my request') ||
-                        Gate::check('manage document history') ||
-                        Gate::check('manage logged history') ||
-                        Gate::check('manage support') ||
-                        Gate::check('manage contact') ||
-                        Gate::check('manage note'))
-                    <li class="pc-item pc-caption">
-                        <label>{{ __('Business Management') }}</label>
-                        <i class="ti ti-chart-arcs"></i>
-                    </li>
-                    @if (Gate::check('manage document'))
-                        <li
-                            class="pc-item {{ Request::route()->getName() == 'document.index' || Request::route()->getName() == 'document.show' || Request::route()->getName() == 'document.comment' || Request::route()->getName() == 'document.reminder' || Request::route()->getName() == 'document.version.history' || Request::route()->getName() == 'document.share' || Request::route()->getName() == 'document.send.email' ? 'active' : '' }}">
-                            <a href="{{ route('document.index') }}" class="pc-link">
-                                <span class="pc-micon"><i data-feather="file-text"></i></span>
-                                <span class="pc-mtext">{{ __('All Documents') }}</span>
-                            </a>
-                        </li>
-                    @endif
-                    @if (Gate::check('manage my document'))
-                        <li
-                            class="pc-item {{ Request::route()->getName() == 'document.my-document' ? 'active' : '' }}">
-                            <a href="{{ route('document.my-document') }}" class="pc-link">
-                                <span class="pc-micon"><i data-feather="file"></i></span>
-                                <span class="pc-mtext">{{ __('My Documents') }}</span>
-                            </a>
-                        </li>
-                    @endif
-                    @if (Gate::check('manage reminder'))
-                        <li class="pc-item {{ Request::route()->getName() == 'reminder.index' ? 'active' : '' }}">
-                            <a href="{{ route('reminder.index') }}" class="pc-link">
-                                <span class="pc-micon"><i data-feather="cpu"></i></span>
-                                <span class="pc-mtext">{{ __('All Reminders') }}</span>
-                            </a>
-                        </li>
-                    @endif
-                    @if (Gate::check('manage my reminder'))
-                        <li class="pc-item {{ Request::route()->getName() == 'my-reminder' ? 'active' : '' }}">
-                            <a href="{{ route('my-reminder') }}" class="pc-link">
-                                <span class="pc-micon"><i data-feather="aperture"></i></span>
-                                <span class="pc-mtext">{{ __('My Reminders') }}</span>
-                            </a>
-                        </li>
-                    @endif
 
-                    @if (Gate::check('manage document history') && !empty($subscription) && $subscription->enabled_document_history == 1)
-                        <li class="pc-item {{ Request::route()->getName() == 'document.history' ? 'active' : '' }}">
-                            <a href="{{ route('document.history') }}" class="pc-link">
-                                <span class="pc-micon"><i data-feather="wind"></i></span>
-                                <span class="pc-mtext">{{ __('Document History') }}</span>
+                <!-- Document Control -->
+                <li class="pc-item pc-hasmenu {{ in_array($routeName, ['document.index', 'document.show']) ? 'active' : '' }}">
+                    <a href="#!" class="pc-link">
+                        <span class="pc-micon"><i class="ti ti-file-text"></i></span>
+                        <span class="pc-mtext">{{ __('Document Control') }}</span>
+                        <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
+                    </a>
+                    <ul class="pc-submenu">
+                        <li class="pc-item {{ $routeName == 'document.create' ? 'active' : '' }}">
+                            <a href="" class="pc-link">
+                                <span class="pc-mtext">{{ __('Create New Document') }}</span>
                             </a>
                         </li>
-                    @endif
-                    @if (Gate::check('manage contact'))
-                        <li class="pc-item {{ in_array($routeName, ['contact.index']) ? 'active' : '' }}">
-                            <a href="{{ route('contact.index') }}" class="pc-link">
-                                <span class="pc-micon"><i class="ti ti-phone-call"></i></span>
-                                <span class="pc-mtext">{{ __('Contact Diary') }}</span>
+                        <li class="pc-item {{ $routeName == 'document.versions' ? 'active' : '' }}">
+                            <a href="" class="pc-link">
+                                <span class="pc-mtext">{{ __('Version Control') }}</span>
                             </a>
                         </li>
-                    @endif
-                    @if (Gate::check('manage note'))
-                        <li class="pc-item {{ in_array($routeName, ['note.index']) ? 'active' : '' }} ">
-                            <a href="{{ route('note.index') }}" class="pc-link">
-                                <span class="pc-micon"><i class="ti ti-notebook"></i></span>
-                                <span class="pc-mtext">{{ __('Notice Board') }}</span>
+                        <li class="pc-item {{ $routeName == 'document.history' ? 'active' : '' }}">
+                            <a href="" class="pc-link">
+                                <span class="pc-mtext">{{ __('Change History') }}</span>
                             </a>
                         </li>
-                    @endif
-                    @if (Gate::check('manage request'))
-                        <li class="pc-item {{ Request::route()->getName() == 'request.index' ? 'active' : '' }}">
-                            <a href="{{ route('request.index') }}" class="pc-link">
-                                <span class="pc-micon"><i data-feather="cpu"></i></span>
-                                <span class="pc-mtext">{{ __('Manage Requests') }}</span>
+                        <li class="pc-item {{ $routeName == 'document.workflow' ? 'active' : '' }}">
+                            <a href="" class="pc-link">
+                                <span class="pc-mtext">{{ __('Approval Workflow') }}</span>
                             </a>
                         </li>
-                    @endif
-                    @if (Gate::check('manage my request'))
-                        <li class="pc-item {{ Request::route()->getName() == 'my-request' ? 'active' : '' }}">
-                            <a href="{{ route('my-request') }}" class="pc-link">
-                                <span class="pc-micon"><i data-feather="aperture"></i></span>
-                                <span class="pc-mtext">{{ __('My Requests') }}</span>
+                        <li class="pc-item {{ $routeName == 'document.notifications' ? 'active' : '' }}">
+                            <a href="" class="pc-link">
+                                <span class="pc-mtext">{{ __('Review Notifications') }}</span>
                             </a>
                         </li>
-                    @endif
-                @endif
+                        <li class="pc-item {{ $routeName == 'document.categories' ? 'active' : '' }}">
+                            <a href="" class="pc-link">
+                                <span class="pc-mtext">{{ __('Document Categories') }}</span>
+                            </a>
+                        </li>
+                        <li class="pc-item {{ $routeName == 'document.permissions' ? 'active' : '' }}">
+                            <a href="" class="pc-link">
+                                <span class="pc-mtext">{{ __('Access Permissions') }}</span>
+                            </a>
+                        </li>
+                        <li class="pc-item {{ $routeName == 'document.archive' ? 'active' : '' }}">
+                            <a href="" class="pc-link">
+                                <span class="pc-mtext">{{ __('Document Archive') }}</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
 
+                <!-- Audit Management -->
+                <li class="pc-item pc-hasmenu {{ in_array($routeName, ['audit.index', 'audit.show']) ? 'active' : '' }}">
+                    <a href="#!" class="pc-link">
+                        <span class="pc-micon"><i class="ti ti-clipboard-check"></i></span>
+                        <span class="pc-mtext">{{ __('Audit Management') }}</span>
+                        <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
+                    </a>
+                    <ul class="pc-submenu">
+                        <li class="pc-item {{ $routeName == 'audit.index' ? 'active' : '' }}">
+                            <a href="" class="pc-link">
+                                <span class="pc-mtext">{{ __('All Audits') }}</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
 
-                @if (Gate::check('manage category') ||
-                        Gate::check('manage sub category') ||
-                        Gate::check('manage tag') ||
-                        Gate::check('manage notification'))
-                    <li class="pc-item pc-caption">
-                        <label>{{ __('System Configuration') }}</label>
-                        <i class="ti ti-chart-arcs"></i>
-                    </li>
-                    @if (Gate::check('manage category'))
-                        <li class="pc-item {{ Request::route()->getName() == 'category.index' ? 'active' : '' }}">
-                            <a href="{{ route('category.index') }}" class="pc-link">
-                                <span class="pc-micon"><i data-feather="list"></i></span>
-                                <span class="pc-mtext">{{ __('Category') }}</span>
+                <!-- Corrective Actions -->
+                <li class="pc-item pc-hasmenu {{ in_array($routeName, ['corrective_action.index', 'corrective_action.show']) ? 'active' : '' }}">
+                    <a href="#!" class="pc-link">
+                        <span class="pc-micon"><i class="ti ti-tool"></i></span>
+                        <span class="pc-mtext">{{ __('Corrective Actions') }}</span>
+                        <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
+                    </a>
+                    <ul class="pc-submenu">
+                        <li class="pc-item {{ $routeName == 'corrective_action.index' ? 'active' : '' }}">
+                            <a href="" class="pc-link">
+                                <span class="pc-mtext">{{ __('All Corrective Actions') }}</span>
                             </a>
                         </li>
-                    @endif
-                    @if (Gate::check('manage sub category'))
-                        <li class="pc-item {{ Request::route()->getName() == 'sub-category.index' ? 'active' : '' }}">
-                            <a href="{{ route('sub-category.index') }}" class="pc-link">
-                                <span class="pc-micon"><i data-feather="sliders"></i></span>
-                                <span class="pc-mtext">{{ __('Sub Category') }}</span>
-                            </a>
-                        </li>
-                    @endif
-                    @if (Gate::check('manage tag'))
-                        <li class="pc-item {{ Request::route()->getName() == 'tag.index' ? 'active' : '' }}">
-                            <a href="{{ route('tag.index') }}" class="pc-link">
-                                <span class="pc-micon"><i data-feather="layers"></i></span>
-                                <span class="pc-mtext">{{ __('Tags') }}</span>
-                            </a>
-                        </li>
-                    @endif
-                    @if (Gate::check('manage notification'))
-                        <li class="pc-item {{ in_array($routeName, ['notification.index']) ? 'active' : '' }} ">
-                            <a href="{{ route('notification.index') }}" class="pc-link">
-                                <span class="pc-micon"><i class="ti ti-bell"></i></span>
-                                <span class="pc-mtext">{{ __('Email Notification') }}</span>
-                            </a>
-                        </li>
-                    @endif
-                @endif
+                    </ul>
+                </li>
 
-
-                @if (Gate::check('manage pricing packages') ||
-                        Gate::check('manage pricing transation') ||
-                        Gate::check('manage account settings') ||
-                        Gate::check('manage password settings') ||
-                        Gate::check('manage general settings') ||
-                        Gate::check('manage email settings') ||
-                        Gate::check('manage payment settings') ||
-                        Gate::check('manage company settings') ||
-                        Gate::check('manage seo settings') ||
-                        Gate::check('manage google recaptcha settings'))
-                    <li class="pc-item pc-caption">
-                        <label>{{ __('System Settings') }}</label>
-                        <i class="ti ti-chart-arcs"></i>
-                    </li>
-
-                    @if (Gate::check('manage FAQ') || Gate::check('manage Page'))
-                        <li
-                            class="pc-item pc-hasmenu {{ in_array($routeName, ['homepage.index', 'FAQ.index', 'pages.index', 'footerSetting']) ? 'active' : '' }}">
-                            <a href="#!" class="pc-link">
-                                <span class="pc-micon">
-                                    <i class="ti ti-layout-rows"></i>
-                                </span>
-                                <span class="pc-mtext">{{ __('CMS') }}</span>
-                                <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
+                <!-- Non-Conformance -->
+                <li class="pc-item pc-hasmenu {{ in_array($routeName, ['nonconformance.index', 'nonconformance.show']) ? 'active' : '' }}">
+                    <a href="#!" class="pc-link">
+                        <span class="pc-micon"><i class="ti ti-alert-triangle"></i></span>
+                        <span class="pc-mtext">{{ __('Non-Conformance Management') }}</span>
+                        <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
+                    </a>
+                    <ul class="pc-submenu">
+                        <li class="pc-item {{ $routeName == 'nonconformance.index' ? 'active' : '' }}">
+                            <a href="" class="pc-link">
+                                <span class="pc-mtext">{{ __('All Non-Conformances') }}</span>
                             </a>
-                            <ul class="pc-submenu"
-                                style="display: {{ in_array($routeName, ['homepage.index', 'FAQ.index', 'pages.index', 'footerSetting']) ? 'block' : 'none' }}">
-                                @if (Gate::check('manage home page'))
-                                    <li
-                                        class="pc-item {{ in_array($routeName, ['homepage.index']) ? 'active' : '' }} ">
-                                        <a href="{{ route('homepage.index') }}"
-                                            class="pc-link">{{ __('Home Page') }}</a>
-                                    </li>
-                                @endif
-                                @if (Gate::check('manage Page'))
-                                    <li class="pc-item {{ in_array($routeName, ['pages.index']) ? 'active' : '' }} ">
-                                        <a href="{{ route('pages.index') }}"
-                                            class="pc-link">{{ __('Custom Page') }}</a>
-                                    </li>
-                                @endif
-                                @if (Gate::check('manage FAQ'))
-                                    <li class="pc-item {{ in_array($routeName, ['FAQ.index']) ? 'active' : '' }} ">
-                                        <a href="{{ route('FAQ.index') }}" class="pc-link">{{ __('FAQ') }}</a>
-                                    </li>
-                                @endif
-                                @if (Gate::check('manage footer'))
-                                    <li
-                                        class="pc-item {{ in_array($routeName, ['footerSetting']) ? 'active' : '' }} ">
-                                        <a href="{{ route('footerSetting') }}"
-                                            class="pc-link">{{ __('Footer') }}</a>
-                                    </li>
-                                @endif
-                                @if (Gate::check('manage footer'))
-                                    <li
-                                        class="pc-item {{ in_array($routeName, ['authPage.index']) ? 'active' : '' }} ">
-                                        <a href="{{ route('authPage.index') }}"
-                                            class="pc-link">{{ __('Auth Page') }}</a>
-                                    </li>
-                                @endif
-                            </ul>
                         </li>
-                    @endif
-                    @if (Auth::user()->type == 'super admin' || $pricing_feature_settings == 'on')
-                        @if (Gate::check('manage pricing packages') || Gate::check('manage pricing transation'))
-                            <li
-                                class="pc-item pc-hasmenu {{ in_array($routeName, ['subscriptions.index', 'subscriptions.show', 'subscription.transaction']) ? 'active' : '' }}">
-                                <a href="#!" class="pc-link">
-                                    <span class="pc-micon">
-                                        <i class="ti ti-package"></i>
-                                    </span>
-                                    <span class="pc-mtext">{{ __('Pricing') }}</span>
-                                    <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
-                                </a>
-                                <ul class="pc-submenu"
-                                    style="display: {{ in_array($routeName, ['subscriptions.index', 'subscriptions.show', 'subscription.transaction']) ? 'block' : 'none' }}">
-                                    @if (Gate::check('manage pricing packages'))
-                                        <li
-                                            class="pc-item {{ in_array($routeName, ['subscriptions.index', 'subscriptions.show']) ? 'active' : '' }}">
-                                            <a class="pc-link"
-                                                href="{{ route('subscriptions.index') }}">{{ __('Packages') }}</a>
-                                        </li>
-                                    @endif
-                                    @if (Gate::check('manage pricing transation'))
-                                        <li
-                                            class="pc-item {{ in_array($routeName, ['subscription.transaction']) ? 'active' : '' }}">
-                                            <a class="pc-link"
-                                                href="{{ route('subscription.transaction') }}">{{ __('Transactions') }}</a>
-                                        </li>
-                                    @endif
-                                </ul>
-                            </li>
-                        @endif
-                    @endif
-                    @if (Gate::check('manage coupon') || Gate::check('manage coupon history'))
-                        <li
-                            class="pc-item pc-hasmenu {{ in_array($routeName, ['coupons.index', 'coupons.history']) ? 'active' : '' }}">
-                            <a href="#!" class="pc-link">
-                                <span class="pc-micon">
-                                    <i class="ti ti-shopping-cart-discount"></i>
-                                </span>
-                                <span class="pc-mtext">{{ __('Coupons') }}</span>
-                                <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
+                    </ul>
+                </li>
+
+                <!-- Training Management -->
+                <li class="pc-item pc-hasmenu {{ in_array($routeName, ['training.index', 'training.show']) ? 'active' : '' }}">
+                    <a href="#!" class="pc-link">
+                        <span class="pc-micon"><i class="ti ti-certificate"></i></span>
+                        <span class="pc-mtext">{{ __('Training Management') }}</span>
+                        <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
+                    </a>
+                    <ul class="pc-submenu">
+                        <li class="pc-item {{ $routeName == 'training.index' ? 'active' : '' }}">
+                            <a href="" class="pc-link">
+                                <span class="pc-mtext">{{ __('All Training') }}</span>
                             </a>
-                            <ul class="pc-submenu"
-                                style="display: {{ in_array($routeName, ['coupons.index', 'coupons.history']) ? 'block' : 'none' }}">
-                                @if (Gate::check('manage coupon'))
-                                    <li
-                                        class="pc-item {{ in_array($routeName, ['coupons.index']) ? 'active' : '' }}">
-                                        <a class="pc-link"
-                                            href="{{ route('coupons.index') }}">{{ __('All Coupon') }}</a>
-                                    </li>
-                                @endif
-                                @if (Gate::check('manage coupon history'))
-                                    <li
-                                        class="pc-item {{ in_array($routeName, ['coupons.history']) ? 'active' : '' }}">
-                                        <a class="pc-link"
-                                            href="{{ route('coupons.history') }}">{{ __('Coupon History') }}</a>
-                                    </li>
-                                @endif
-                            </ul>
                         </li>
-                    @endif
-                    @if (Gate::check('manage account settings') ||
-                            Gate::check('manage password settings') ||
-                            Gate::check('manage general settings') ||
-                            Gate::check('manage email settings') ||
-                            Gate::check('manage payment settings') ||
-                            Gate::check('manage company settings') ||
-                            Gate::check('manage seo settings') ||
-                            Gate::check('manage google recaptcha settings'))
-                        <li class="pc-item {{ in_array($routeName, ['setting.index']) ? 'active' : '' }} ">
-                            <a href="{{ route('setting.index') }}" class="pc-link">
-                                <span class="pc-micon"><i class="ti ti-settings"></i></span>
+                    </ul>
+                </li>
+
+                <!-- Risk Management -->
+                <li class="pc-item pc-hasmenu {{ in_array($routeName, ['risk.index', 'risk.show']) ? 'active' : '' }}">
+                    <a href="#!" class="pc-link">
+                        <span class="pc-micon"><i class="ti ti-alert-circle"></i></span>
+                        <span class="pc-mtext">{{ __('Risk Management') }}</span>
+                        <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
+                    </a>
+                    <ul class="pc-submenu">
+                        <li class="pc-item {{ $routeName == 'risk.index' ? 'active' : '' }}">
+                            <a href="" class="pc-link">
+                                <span class="pc-mtext">{{ __('All Risks') }}</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <!-- Management Review -->
+                <li class="pc-item pc-hasmenu {{ in_array($routeName, ['management_review.index', 'management_review.show']) ? 'active' : '' }}">
+                    <a href="#!" class="pc-link">
+                        <span class="pc-micon"><i class="ti ti-calendar-stats"></i></span>
+                        <span class="pc-mtext">{{ __('Management Review') }}</span>
+                        <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
+                    </a>
+                    <ul class="pc-submenu">
+                        <li class="pc-item {{ $routeName == 'management_review.index' ? 'active' : '' }}">
+                            <a href="" class="pc-link">
+                                <span class="pc-mtext">{{ __('All Reviews') }}</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <!-- KPIs & Dashboards -->
+                <li class="pc-item pc-hasmenu {{ in_array($routeName, ['kpi.index', 'kpi.show']) ? 'active' : '' }}">
+                    <a href="#!" class="pc-link">
+                        <span class="pc-micon"><i class="ti ti-chart-bar"></i></span>
+                        <span class="pc-mtext">{{ __('KPIs & Dashboards') }}</span>
+                        <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
+                    </a>
+                    <ul class="pc-submenu">
+                        <li class="pc-item {{ $routeName == 'kpi.index' ? 'active' : '' }}">
+                            <a href="" class="pc-link">
+                                <span class="pc-mtext">{{ __('All KPIs') }}</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <!-- Roles & Permissions -->
+                <li class="pc-item pc-hasmenu {{ in_array($routeName, ['roles.index', 'roles.show']) ? 'active' : '' }}">
+                    <a href="#!" class="pc-link">
+                        <span class="pc-micon"><i class="ti ti-lock"></i></span>
+                        <span class="pc-mtext">{{ __('Roles & Permissions') }}</span>
+                        <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
+                    </a>
+                    <ul class="pc-submenu">
+                        <li class="pc-item {{ $routeName == 'roles.index' ? 'active' : '' }}">
+                            <a href="" class="pc-link">
+                                <span class="pc-mtext">{{ __('All Roles') }}</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <!-- Complaints Management -->
+                <li class="pc-item pc-hasmenu {{ in_array($routeName, ['complaints.index', 'complaints.show']) ? 'active' : '' }}">
+                    <a href="#!" class="pc-link">
+                        <span class="pc-micon"><i class="ti ti-message-report"></i></span>
+                        <span class="pc-mtext">{{ __('Complaints Management') }}</span>
+                        <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
+                    </a>
+                    <ul class="pc-submenu">
+                        <li class="pc-item {{ $routeName == 'complaints.index' ? 'active' : '' }}">
+                            <a href="" class="pc-link">
+                                <span class="pc-mtext">{{ __('All Complaints') }}</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <!-- Compliance Management -->
+                <li class="pc-item pc-hasmenu {{ in_array($routeName, ['compliance.index', 'compliance.show']) ? 'active' : '' }}">
+                    <a href="#!" class="pc-link">
+                        <span class="pc-micon"><i class="ti ti-shield-check"></i></span>
+                        <span class="pc-mtext">{{ __('Compliance Management') }}</span>
+                        <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
+                    </a>
+                    <ul class="pc-submenu">
+                        <li class="pc-item {{ $routeName == 'compliance.index' ? 'active' : '' }}">
+                            <a href="" class="pc-link">
+                                <span class="pc-mtext">{{ __('All Compliance') }}</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <!-- General Settings -->
+                <li class="pc-item pc-hasmenu {{ in_array($routeName, ['settings.index']) ? 'active' : '' }}">
+                    <a href="#!" class="pc-link">
+                        <span class="pc-micon"><i class="ti ti-settings"></i></span>
+                        <span class="pc-mtext">{{ __('General Settings') }}</span>
+                        <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
+                    </a>
+                    <ul class="pc-submenu">
+                        <li class="pc-item {{ $routeName == 'settings.index' ? 'active' : '' }}">
+                            <a href="" class="pc-link">
                                 <span class="pc-mtext">{{ __('Settings') }}</span>
                             </a>
                         </li>
-                    @endif
-
-                @endif --}}
+                    </ul>
+                </li>
             </ul>
-            <div class="w-100 text-center">
-                <div class="badge theme-version badge rounded-pill bg-light text-dark f-12"></div>
-            </div>
         </div>
     </div>
 </nav>

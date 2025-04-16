@@ -2,45 +2,42 @@
 
 namespace Modules\Tenant\Models;
 
+use Modules\Tenant\Models\TenantModel;
+
 class Document extends TenantModel
 {
-    protected $fillable = [
-        'title',
+    public $fillable=[
+        'name',
+        'category_id',
+        'sub_category_id',
         'description',
-        'content',
-        'status', // draft, pending_review, approved, archived
+        'reference_id',
+        'iso_system_id',
+        'remark',
+        'tages',
+        'parent_id',
+        'assign_user',
         'created_by',
-        'updated_by',
-        'google_doc_id'
     ];
 
-    public function versions()
-    {
-        return $this->hasMany(DocumentVersion::class);
+    public function category(){
+        return $this->hasOne('App\Models\Category','id','category_id');
     }
 
-    public function approvals()
-    {
-        return $this->hasMany(DocumentApproval::class);
+    public function subCategory(){
+        return $this->hasOne('App\Models\SubCategory','id','sub_category_id');
     }
 
-    public function archive()
-    {
-        return $this->hasOne(DocumentArchive::class);
+    public function createdBy(){
+        return $this->hasOne('App\Models\User','id','created_by');
     }
 
-    public function googleDocMapping()
-    {
-        return $this->hasOne(GoogleDocMapping::class);
-    }
-
-    public function createdBy()
-    {
-        return $this->belongsTo(User::class, 'created_by');
-    }
-
-    public function updatedBy()
-    {
-        return $this->belongsTo(User::class, 'updated_by');
+    public function tags(){
+       $docTag=!empty($this->tages)?explode(',',$this->tages):[];
+        $tags=[];
+        foreach ($docTag as $tag){
+            $tags[]=Tag::find($tag);
+        }
+        return $tags;
     }
 }

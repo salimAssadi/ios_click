@@ -1,8 +1,7 @@
 @extends('tenant::layouts.auth')
 
 @section('content')
-    <!-- Section: Design Block -->
-    <section class="" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
+    <section class="" dir="{{ app()->getLocale() === 'arabic' ? 'rtl' : 'ltr' }}">
         <!-- Jumbotron -->
         <div class="px-4 py-5 px-md-5 " >
             <div class="container">
@@ -32,7 +31,7 @@
 
                                     <div class="form-floating mb-3">
                                         <input type="text" class="form-control" id="company_name" name="company_name"
-                                            placeholder="{{ __('Company Name') }}" />
+                                            placeholder="{{ __('Company Name') }}" value="{{ old('company_name') }}" />
                                         <label for="company_name">{{ __('Company Name') }}</label>
                                         @error('company_name')
                                             <span class="invalid-email text-danger" role="alert">
@@ -43,7 +42,7 @@
 
                                     <div class="form-floating mb-3">
                                         <input type="email" class="form-control" id="email" name="email"
-                                            placeholder="{{ __('Email address') }}" />
+                                            placeholder="{{ __('Email address') }}" value="{{ old('email') }}" />
                                         <label for="email">{{ __('Email address') }}</label>
                                         @error('email')
                                             <span class="invalid-email text-danger" role="alert">
@@ -86,7 +85,6 @@
         </div>
         <!-- Jumbotron -->
     </section>
-    <!-- Section: Design Block -->
 @endsection
 
 @push('css-page')

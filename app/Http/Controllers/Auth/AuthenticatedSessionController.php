@@ -30,6 +30,10 @@ class AuthenticatedSessionController extends Controller
         return view('auth.login');
     }
 
+    protected function guard()
+    {
+        return Auth::guard('web');
+    }
     /**
      * Handle an incoming authentication request.
      *

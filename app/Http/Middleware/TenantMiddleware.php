@@ -22,33 +22,33 @@ class TenantMiddleware
      * @param  \Closure  $next
      * @return mixed
      */
-    public function handle(Request $request, Closure $next)
-    {
-        // Skip if not authenticated
-        if (!auth()->check()) {
-            return $next($request);
-        }
+//     public function handle(Request $request, Closure $next)
+//     {
+//         // Skip if not authenticated
+//         if (!auth()->check()) {
+//             return $next($request);
+//         }
 
-        // Get company details from session
-        $companyName = session('company_name');
-        $companyEmail = session('company_email');
+//         // Get company details from session
+//         $companyName = session('company_name');
+//         $companyEmail = session('company_email');
 
-        if (!$companyName || !$companyEmail) {
-            return redirect()->route('login');
-        }
+//         if (!$companyName || !$companyEmail) {
+//             return redirect()->route('login');
+//         }
 
-        // Try to set up tenant connection
-        $connection = $this->tenantService->setUpTenantConnection($companyName, $companyEmail);
+//         // Try to set up tenant connection
+//         $connection = $this->tenantService->setUpTenantConnection($companyName, $companyEmail);
         
-        if (!$connection) {
-            auth()->logout();
-            session()->flush();
-            return redirect()->route('login')->with('error', 'Company not found');
-        }
+//         if (!$connection) {
+//             auth()->logout();
+//             session()->flush();
+//             return redirect()->route('login')->with('error', 'Company not found');
+//         }
 
-        // Store tenant info in the request for later use
-        $request->merge(['tenant' => $connection]);
+//         // Store tenant info in the request for later use
+//         $request->merge(['tenant' => $connection]);
 
-        return $next($request);
-    }
+//         return $next($request);
+//     }
 }

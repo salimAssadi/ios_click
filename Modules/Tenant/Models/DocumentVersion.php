@@ -1,15 +1,20 @@
 <?php
 
-namespace Modules\Tenant\Models;
+namespace App\Models;
 
-class DocumentVersion extends TenantModel
+use Illuminate\Database\Eloquent\Model;
+
+class DocumentVersion extends Model
 {
+    protected $connection = 'iso_dic';
     protected $fillable = [
         'document_id',
         'version_number',
-        'content',
-        'changes',
-        'created_by'
+        'changes_description',
+        'file_path',
+        'google_doc_id',
+        'created_by',
+        'status'
     ];
 
     public function document()
@@ -17,7 +22,17 @@ class DocumentVersion extends TenantModel
         return $this->belongsTo(Document::class);
     }
 
-    public function createdBy()
+    public function approvals()
+    {
+        return $this->hasMany(DocumentApproval::class);
+    }
+
+    public function googleDocMapping()
+    {
+        return $this->hasOne(GoogleDocMapping::class);
+    }
+
+    public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');
     }
