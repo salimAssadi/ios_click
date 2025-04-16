@@ -1,0 +1,13 @@
+{
+    "name": "ComplaintsManagement",
+    "alias": "complaintsmanagement",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\ComplaintsManagement\\Providers\\ComplaintsManagementServiceProvider"
+    ],
+    "aliases": {},
+    "files": [],
+    "requires": []
+}

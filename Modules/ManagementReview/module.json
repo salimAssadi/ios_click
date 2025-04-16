@@ -1,0 +1,13 @@
+{
+    "name": "ManagementReview",
+    "alias": "managementreview",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\ManagementReview\\Providers\\ManagementReviewServiceProvider"
+    ],
+    "aliases": {},
+    "files": [],
+    "requires": []
+}

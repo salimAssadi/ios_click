@@ -1,0 +1,13 @@
+{
+    "name": "NonConformance",
+    "alias": "nonconformance",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\NonConformance\\Providers\\NonConformanceServiceProvider"
+    ],
+    "aliases": {},
+    "files": [],
+    "requires": []
+}

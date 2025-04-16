@@ -1,0 +1,13 @@
+{
+    "name": "KpiDashboard",
+    "alias": "kpidashboard",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\KpiDashboard\\Providers\\KpiDashboardServiceProvider"
+    ],
+    "aliases": {},
+    "files": [],
+    "requires": []
+}

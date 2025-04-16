@@ -1,0 +1,13 @@
+{
+    "name": "TrainingManagement",
+    "alias": "trainingmanagement",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\TrainingManagement\\Providers\\TrainingManagementServiceProvider"
+    ],
+    "aliases": {},
+    "files": [],
+    "requires": []
+}

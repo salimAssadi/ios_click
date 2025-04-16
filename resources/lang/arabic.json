@@ -876,5 +876,7 @@
   "Review Notifications": "الإشعارات للمراجعة أو التحديث",
   "Document Categories": "التصنيف حسب القسم/النوع/الاعتمادية",
   "Access Permissions": "صلاحيات عرض أو تحرير حسب الدور",
-  "Document Archive": "أرشفة الوثائق القديمة"
+  "Document Archive": "أرشفة الوثائق القديمة",
+  "Reports & Analytics": "التقارير والتحليلات",
+  "Settings": "الإعدادات"
 }

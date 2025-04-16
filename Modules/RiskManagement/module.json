@@ -1,0 +1,13 @@
+{
+    "name": "RiskManagement",
+    "alias": "riskmanagement",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\RiskManagement\\Providers\\RiskManagementServiceProvider"
+    ],
+    "aliases": {},
+    "files": [],
+    "requires": []
+}

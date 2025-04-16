@@ -1,0 +1,13 @@
+{
+    "name": "AuditManagement",
+    "alias": "auditmanagement",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\AuditManagement\\Providers\\AuditManagementServiceProvider"
+    ],
+    "aliases": {},
+    "files": [],
+    "requires": []
+}

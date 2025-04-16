@@ -1,0 +1,13 @@
+{
+    "name": "DocumentControl",
+    "alias": "documentcontrol",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\DocumentControl\\Providers\\DocumentControlServiceProvider"
+    ],
+    "aliases": {},
+    "files": [],
+    "requires": []
+}

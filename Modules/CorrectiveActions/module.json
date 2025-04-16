@@ -1,0 +1,13 @@
+{
+    "name": "CorrectiveActions",
+    "alias": "correctiveactions",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\CorrectiveActions\\Providers\\CorrectiveActionsServiceProvider"
+    ],
+    "aliases": {},
+    "files": [],
+    "requires": []
+}
