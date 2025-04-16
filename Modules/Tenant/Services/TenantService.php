@@ -4,9 +4,12 @@ namespace Modules\Tenant\Services;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Config;
+use App\Traits\TenantFileManager;
 
 class TenantService
 {
+    use TenantFileManager;
+
     /**
      * Set up a new database connection for a tenant
      *
@@ -81,6 +84,29 @@ class TenantService
             return true;
         } catch (\Exception $e) {
             return false;
+        }
+    }
+
+    public function create($data)
+    {
+        try {
+            DB::beginTransaction();
+            
+            // Create tenant record
+            $tenant = \Modules\Tenant\Models\Tenant::create([
+                'name' => $data['name'],
+                'domain' => $data['domain'],
+                'database' => $data['database']
+            ]);
+
+            // Create tenant storage directories
+            $this->createTenantStorage($tenant->id);
+
+            DB::commit();
+            return $tenant;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
         }
     }
 }

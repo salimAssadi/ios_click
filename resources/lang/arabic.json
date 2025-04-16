@@ -860,7 +860,7 @@
   "we guide you through preparing your required documentation, quality manual, and documented processes.": "نحن نرشدك خلال تجهيز المستندات المطلوبة، المطابقة، و المستندات الموثقة.",
   "Document Control": "إدارة الوثائق",
   "Audit Management": "إدارة التدقيقات",
-  "Corrective Actions": "الإجراءات التصحيحية والوقائية",
+  "Corrective Actions": "الإجراءات التصحيحية",
   "Non-Conformance Management": "إدارة عدم المطابقة",
   "Training Management": "إدارة التدريب والكفاءات",
   "Risk Management": "إدارة المخاطر والفرص",
@@ -868,7 +868,7 @@
   "KPIs & Dashboards": "التقارير",
   "Roles & Permissions": "إدارة الصلاحيات والمستخدمين",
   "Complaints Management": "إدارة الشكاوى",
-  "Compliance Management": "إدارة المطابقة",
+  "Compliance Management": "إدارة الامتثال",
   "Create New Document": "إنشاء وثيقة جديدة",
   "Version Control": "التحكم في الإصدارات",
   "Change History": "تتبع تاريخ التعديلات",
@@ -877,6 +877,5 @@
   "Document Categories": "التصنيف حسب القسم/النوع/الاعتمادية",
   "Access Permissions": "صلاحيات عرض أو تحرير حسب الدور",
   "Document Archive": "أرشفة الوثائق القديمة",
-  "Reports & Analytics": "التقارير والتحليلات",
-  "Settings": "الإعدادات"
+  "Reports & Analytics": "التقارير والتحليلات"
 }

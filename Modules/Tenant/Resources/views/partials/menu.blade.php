@@ -110,18 +110,17 @@
                     </ul>
                 </li>
 
-            
-                <!-- Compliance Management -->
-                <li class="pc-item pc-hasmenu {{ in_array($routeName, ['compliance.index', 'compliance.show']) ? 'active' : '' }}">
+                <!-- Non-Conformance -->
+                <li class="pc-item pc-hasmenu {{ in_array($routeName, ['nonconformance.index', 'nonconformance.show']) ? 'active' : '' }}">
                     <a href="#!" class="pc-link">
-                        <span class="pc-micon"><i class="ti ti-shield-check"></i></span>
-                        <span class="pc-mtext">{{ __('Compliance Management') }}</span>
+                        <span class="pc-micon"><i class="ti ti-alert-triangle"></i></span>
+                        <span class="pc-mtext">{{ __('Non-Conformance Management') }}</span>
                         <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
                     </a>
                     <ul class="pc-submenu">
-                        <li class="pc-item {{ $routeName == 'compliance.index' ? 'active' : '' }}">
+                        <li class="pc-item {{ $routeName == 'nonconformance.index' ? 'active' : '' }}">
                             <a href="" class="pc-link">
-                                <span class="pc-mtext">{{ __('All Compliance') }}</span>
+                                <span class="pc-mtext">{{ __('All Non-Conformances') }}</span>
                             </a>
                         </li>
                     </ul>
@@ -174,13 +173,51 @@
                         </li>
                     </ul>
                 </li>
+                <!-- Compliance Management -->
+                <li class="pc-item pc-hasmenu {{ in_array($routeName, ['compliance.index', 'compliance.show']) ? 'active' : '' }}">
+                    <a href="#!" class="pc-link">
+                        <span class="pc-micon"><i class="ti ti-shield-check"></i></span>
+                        <span class="pc-mtext">{{ __('Compliance Management') }}</span>
+                        <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
+                    </a>
+                    <ul class="pc-submenu">
+                        <li class="pc-item {{ $routeName == 'compliance.index' ? 'active' : '' }}">
+                            <a href="" class="pc-link">
+                                <span class="pc-mtext">{{ __('All Compliance') }}</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
 
+                  <!-- Complaints Management -->
+                  <li class="pc-item pc-hasmenu {{ in_array($routeName, ['complaints.index', 'complaints.show']) ? 'active' : '' }}">
+                    <a href="#!" class="pc-link">
+                        <span class="pc-micon"><i class="ti ti-message-report"></i></span>
+                        <span class="pc-mtext">{{ __('Complaints Management') }}</span>
+                        <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
+                    </a>
+                    <ul class="pc-submenu">
+                        <li class="pc-item {{ $routeName == 'complaints.index' ? 'active' : '' }}">
+                            <a href="" class="pc-link">
+                                <span class="pc-mtext">{{ __('All Complaints') }}</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
                 <!-- Reports -->
-                <li class="pc-item">
+                <li class="pc-item pc-hasmenu {{ in_array($routeName, ['reports.index', 'reports.show']) ? 'active' : '' }}">
                     <a href="" class="pc-link">
                         <span class="pc-micon"><i class="ti ti-chart-line"></i></span>
                         <span class="pc-mtext">{{ __('Reports & Analytics') }}</span>
+                        <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
                     </a>
+                    <ul class="pc-submenu">
+                        <li class="pc-item {{ $routeName == 'reports.index' ? 'active' : '' }}">
+                            <a href="" class="pc-link">
+                                <span class="pc-mtext">{{ __('All Reports') }}</span>
+                            </a>
+                        </li>
+                    </ul>
                 </li>
 
                 <!-- Roles & Permissions -->
@@ -199,29 +236,23 @@
                     </ul>
                 </li>
 
-                <!-- Complaints Management -->
-                <li class="pc-item pc-hasmenu {{ in_array($routeName, ['complaints.index', 'complaints.show']) ? 'active' : '' }}">
-                    <a href="#!" class="pc-link">
-                        <span class="pc-micon"><i class="ti ti-message-report"></i></span>
-                        <span class="pc-mtext">{{ __('Complaints Management') }}</span>
-                        <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
-                    </a>
-                    <ul class="pc-submenu">
-                        <li class="pc-item {{ $routeName == 'complaints.index' ? 'active' : '' }}">
-                            <a href="" class="pc-link">
-                                <span class="pc-mtext">{{ __('All Complaints') }}</span>
-                            </a>
-                        </li>
-                    </ul>
-                </li>
+              
 
 
                 <!-- Settings -->
-                <li class="pc-item">
+                <li class="pc-item pc-hasmenu {{ in_array($routeName, ['settings.index', 'settings.show']) ? 'active' : '' }}">
                     <a href="" class="pc-link">
-                        <span class="pc-micon"><i class="ti ti-cogs"></i></span>
+                        <span class="pc-micon"><i class="ti ti-settings"></i></span>
                         <span class="pc-mtext">{{ __('Settings') }}</span>
+                        <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
                     </a>
+                    <ul class="pc-submenu">
+                        <li class="pc-item {{ $routeName == 'settings.index' ? 'active' : '' }}">
+                            <a href="" class="pc-link">
+                                <span class="pc-mtext">{{ __('All Settings') }}</span>
+                            </a>
+                        </li>
+                    </ul>
                 </li>
             </ul>
         </div>

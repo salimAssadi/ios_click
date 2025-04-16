@@ -123,5 +123,11 @@ Route::prefix('tenant')->name('tenant.')->middleware(['XSS'])->group(function() 
         // Countries and Cities
         Route::resource('countries', CountryController::class);
         Route::get('countries/{country}/cities', [CountryController::class, 'cities'])->name('countries.cities');
+
+        // File Manager
+        Route::get('file-manager', [FileManagerController::class, 'index'])->name('file-manager.index');
+        Route::get('file-manager/config', [FileManagerController::class, 'getConfig'])->name('file-manager.config');
+        Route::post('file-manager/upload', [FileManagerController::class, 'upload'])->name('file-manager.upload');
     });
+
 });
