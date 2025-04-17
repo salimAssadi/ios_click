@@ -410,11 +410,7 @@ class SampleController extends Controller
         if (!$sample) {
             return redirect()->back()->with('error', __('Sample not found.'));
         }
-
-       
-
-        // Fetch and group procedure templates
-       
+        // Fetch and group procedure templates       
         $pageTitle = $sample->sample_name;
         return [
             'pageTitle' => $pageTitle,

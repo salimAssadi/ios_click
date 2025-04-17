@@ -1,7 +1,41 @@
 @extends('tenant::layouts.app')
 
 @section('page-title', __('Create New Document'))
-
+@push('script-page')
+    <script src="{{ asset('assets/js/plugins/tinymce/tinymce.min.js') }}"></script>
+    <script>
+        // Define routes for JavaScript
+        const routes = {
+            getTemplates: '{{ route("tenant.document.templates") }}',
+            getTemplateData: '{{ route("tenant.document.template.data", ":id") }}'
+        };
+        
+        // Define Lang object for translations
+        const Lang = {
+            get: function(key) {
+                return {
+                    'Please select an ISO system': '{{ __("Please select an ISO system") }}',
+                    'Please select a document type': '{{ __("Please select a document type") }}',
+                    'Please select a template': '{{ __("Please select a template") }}',
+                    'Step 1: ISO System': '{{ __("Step 1: ISO System") }}',
+                    'Step 2: Document Type': '{{ __("Step 2: Document Type") }}',
+                    'Step 3: Template': '{{ __("Step 3: Template") }}',
+                    'Step 4: Document Details': '{{ __("Step 4: Document Details") }}',
+                    'Loading...': '{{ __("Loading...") }}',
+                    'Next': '{{ __("Next") }}',
+                    'Error loading templates': '{{ __("Error loading templates") }}',
+                    'Template not found': '{{ __("Template not found") }}',
+                    'Failed to load template data': '{{ __("Failed to load template data") }}',
+                    'Creating...': '{{ __("Creating...") }}',
+                    'Create Document': '{{ __("Create Document") }}',
+                    'Document created successfully': '{{ __("Document created successfully") }}',
+                    'An error occurred while creating the document': '{{ __("An error occurred while creating the document") }}'
+                }[key];
+            }
+        };
+    </script>
+    <script src="{{ Module::asset('document:js/document-create.js') }}"></script>
+@endpush
 @section('breadcrumb')
     <li class="breadcrumb-item"><a href="{{ route('tenant.dashboard') }}">{{ __('Dashboard') }}</a></li>
     <li class="breadcrumb-item"><a href="{{ route('tenant.document.index') }}">{{ __('Documents') }}</a></li>
@@ -60,8 +94,8 @@
             <div class="col-md-12">
                 <!-- Progress Bar -->
                 <div class="progress my-3" style="height: 25px;">
-                    <div class="progress-bar bg-gray-300 text-black" role="progressbar" style="width: 25%;" aria-valuenow="25"
-                        aria-valuemin="0" aria-valuemax="100">
+                    <div class="progress-bar bg-gray-300 text-black" role="progressbar" style="width: 25%;"
+                        aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
                         <span class="progress-text">{{ __('Step 1: ISO System') }}</span>
                     </div>
                 </div>
@@ -90,7 +124,7 @@
                                                     <label class="form-check-label w-100" for="iso_{{ $system->id }}">
                                                         <div class="d-flex align-items-center">
                                                             @if ($system->image)
-                                                                <img src="{{ getISOImage(getFilePath('isoIcon').'/'. $system->image)}}"
+                                                                <img src="{{ getISOImage(getFilePath('isoIcon') . '/' . $system->image) }}"
                                                                     alt="{{ $system->name }}" class="me-3"
                                                                     style="width: 40px; height: 40px; object-fit: contain;">
                                                             @endif
@@ -120,11 +154,11 @@
                         </div>
                         <div class="card-body">
                             <div class="row">
-                                @foreach (['procedure' => 'Procedure', 'policy' => 'Policies', 'work_instruction' => 'Work Instruction', 'sample' => 'Samples', 'manual' => 'Manual'] as $type => $label)
+                                @foreach (['procedure' => 'Procedure', 'policy' => 'Policies', 'instruction' => 'Instruction', 'sample' => 'Samples', 'custom' => 'Custom'] as $type => $label)
                                     <div class="col-md-4 mb-3">
                                         <div class="card h-100 cursor-pointer document-type-card @error('document_type') is-invalid @enderror"
                                             data-type="{{ $type }}">
-                                            <div class="card-body">
+                                            <div class="card-body shadow-sm rounded ">
                                                 <div class="form-check">
                                                     <input type="radio" name="document_type"
                                                         id="type_{{ $type }}" value="{{ $type }}"
@@ -176,7 +210,7 @@
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">{{ __('Document Title') }} <span
                                             class="text-danger">*</span></label>
-                                    <input type="text" name="title"
+                                    <input type="text" name="title" id="title"
                                         class="form-control @error('title') is-invalid @enderror"
                                         value="{{ old('title') }}" required>
                                     @error('title')
@@ -188,7 +222,7 @@
                                             class="text-danger">*</span></label>
                                     <div class="input-group">
                                         <span class="input-group-text document-prefix">DOC-</span>
-                                        <input type="text" name="document_number"
+                                        <input type="text" name="document_number" id="document_number"
                                             class="form-control @error('document_number') is-invalid @enderror"
                                             value="{{ old('document_number') }}" required>
                                     </div>
@@ -215,16 +249,17 @@
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">{{ __('Version') }}</label>
-                                    <input type="text" name="version"
+                                    <input type="text" name="version" id="version"
                                         class="form-control @error('version') is-invalid @enderror"
                                         value="{{ old('version', '1.0') }}">
                                     @error('version')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
+
                                 <div class="col-12 mb-3">
                                     <label class="form-label">{{ __('Description') }}</label>
-                                    <textarea name="description" class="form-control @error('description') is-invalid @enderror" rows="3">{{ old('description') }}</textarea>
+                                    <textarea name="conent" id="document_content" class="form-control summernote @error('description') is-invalid @enderror" rows="3">{{ old('description') }}</textarea>
                                     @error('description')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -235,11 +270,11 @@
 
                     <!-- Navigation Buttons -->
                     <div class="d-flex justify-content-between bg-white p-2 mb-2 rounded-2">
-                        <button type="button" class="btn btn-primary" id="prevBtn" style="display: none;">
-                            {{ __('Previous') }}<i class="ti ti-arrow-right me-1"></i> 
+                        <button type="button" class="btn btn-primary" id="prevBtn" disabled>
+                            {{ __('Previous') }}<i class="ti ti-arrow-right me-1"></i>
                         </button>
                         <button type="button" class="btn btn-secondary float-end" id="nextBtn">
-                            <i class="ti ti-arrow-left ms-1"></i> {{ __('Next') }} 
+                            <i class="ti ti-arrow-left ms-1"></i> {{ __('Next') }}
                         </button>
                         <button type="submit" class="btn btn-success d-none" id="submitBtn">
                             <i class="ti ti-device-floppy me-1"></i> {{ __('Create Document') }}
@@ -250,188 +285,3 @@
         </div>
     </div>
 @endsection
-
-
-@push('script-page')
-    <script type="text/javascript">
-        document.addEventListener('DOMContentLoaded', function() {
-            // Wait for jQuery to be ready
-            if (typeof jQuery === 'undefined') {
-                console.error('jQuery is not loaded');
-                return;
-            }
-
-            let currentStep = 1;
-            const totalSteps = 4;
-
-            function updateProgressBar(step) {
-                const percent = (step / totalSteps) * 100;
-                const $progressBar = $('.progress-bar');
-                $progressBar.css('width', `${percent}%`);
-                $progressBar.attr('aria-valuenow', percent);
-
-                // Update progress text
-                const stepTitles = [
-                    '{{ __('Step 1: ISO System') }}',
-                    '{{ __('Step 2: Document Type') }}',
-                    '{{ __('Step 3: Template') }}',
-                    '{{ __('Step 4: Details') }}'
-                ];
-                $('.progress-text').text(stepTitles[step - 1]);
-            }
-
-            function showStep(step) {
-                // Hide all steps first
-                $('#step1, #step2, #step3, #step4').addClass('d-none');
-                // Show the current step
-                $(`#step${step}`).removeClass('d-none');
-
-                // Update buttons
-                $('#prevBtn').toggle(step > 1);
-                $('#nextBtn').toggle(step < totalSteps);
-                $('#submitBtn').toggleClass('d-none', step !== totalSteps);
-
-                updateProgressBar(step);
-            }
-
-            function validateStep(step) {
-                let isValid = true;
-                const $step = $(`#step${step}`);
-
-                if (step === 1) {
-                    if (!$('input[name="iso_system_id"]:checked').length) {
-                        isValid = false;
-                        toastr.error('{{ __('Please select an ISO system') }}');
-                    }
-                } else if (step === 2) {
-                    if (!$('input[name="document_type"]:checked').length) {
-                        isValid = false;
-                        toastr.error('{{ __('Please select a document type') }}');
-                    }
-                } else if (step === 3) {
-                    if (!$('input[name="template_id"]:checked').length) {
-                        isValid = false;
-                        toastr.error('{{ __('Please select a template') }}');
-                    }
-                }
-
-                return isValid;
-            }
-
-            function loadTemplates() {
-                const isoSystemId = $('input[name="iso_system_id"]:checked').val();
-                const documentType = $('input[name="document_type"]:checked').val();
-                
-                if (isoSystemId && documentType) {
-                    $.ajax({
-                        url: '{{ route('tenant.document.templates') }}',
-                        type: 'GET',
-                        headers: {
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                        },
-                        data: {
-                            iso_system_id: isoSystemId,
-                            document_type: documentType
-                        },
-                        beforeSend: function() {
-                            $('#templatesContainer').html('<div class="text-center"><div class="spinner-border text-primary" role="status"></div></div>');
-                        },
-                        success: function(response) {
-                            $('#templatesContainer').html(response.html);
-                            
-                            // Add click handler for template cards
-                            $('.template-card').click(function() {
-                                const radio = $(this).find('input[type="radio"]');
-                                radio.prop('checked', true);
-                                $('.template-card').removeClass('selected');
-                                $(this).addClass('selected');
-                            });
-                        },
-                        error: function() {
-                            $('#templatesContainer').html('<div class="alert alert-danger">Error loading templates</div>');
-                        }
-                    });
-                }
-            }
-
-            // Event Handlers
-            $('#nextBtn').click(function() {
-                if (validateStep(currentStep)) {
-                    currentStep++;
-                    showStep(currentStep);
-                    if (currentStep === 3) {
-                        loadTemplates();
-                    }
-                }
-            });
-
-            $('#prevBtn').click(function() {
-                currentStep--;
-                showStep(currentStep);
-            });
-
-            // Card selection handlers
-            $('.iso-system-card, .document-type-card').click(function() {
-                const $card = $(this);
-                const $radio = $card.find('input[type="radio"]');
-                
-                // Update visual selection
-                if ($card.hasClass('iso-system-card')) {
-                    $('.iso-system-card').removeClass('selected');
-                } else if ($card.hasClass('document-type-card')) {
-                    $('.document-type-card').removeClass('selected');
-                }
-                $card.addClass('selected');
-
-                // Update radio button
-                $radio.prop('checked', true);
-            });
-
-            // Initialize wizard - moved to the end
-            setTimeout(function() {
-                showStep(1);
-            }, 100);
-
-            // Form submission handler
-            $('#documentWizard').on('submit', function(e) {
-                e.preventDefault();
-                if (validateStep(currentStep)) {
-                    const $form = $(this);
-                    const $submitBtn = $('#submitBtn');
-                    
-                    $.ajax({
-                        url: $form.attr('action'),
-                        method: 'POST',
-                        data: new FormData(this),
-                        processData: false,
-                        contentType: false,
-                        beforeSend: function() {
-                            $submitBtn.prop('disabled', true)
-                             .html('<span class="spinner-border spinner-border-sm me-2"></span>{{ __("Creating...") }}');
-                        },
-                        success: function(response) {
-                            notifier.show('Success!', '{{ __("Document created successfully") }}', 'success',
-            successImg, 4000);
-                            window.location.href = response.redirect;
-                        },
-                        error: function(xhr) {
-                            $submitBtn.prop('disabled', false)
-                             .html('<i class="ti ti-device-floppy me-1"></i>{{ __("Create Document") }}');
-                    
-                            if (xhr.status === 422) {
-                                const errors = xhr.responseJSON.errors;
-                                Object.keys(errors).forEach(field => {
-                                    notifier.show('Error!', errors[field][0], 'error',
-                                    errorImg, 4000);
-                                });
-                            } else {
-                                notifier.show('Error!', '{{ __("An error occurred while creating the document") }}', 'error',
-                                errorImg, 4000);
-                            }
-                        }
-                    });
-                }
-            });
-        });
-    </script>
-@endpush

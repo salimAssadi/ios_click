@@ -1,15 +1,15 @@
 <?php
 
-namespace Modules\Document\Models;
+namespace Modules\Document\Entities;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\BaseModel;
 use App\Models\User;
-use Modules\Document\Models\IsoSystem;
-use Modules\Document\Models\Procedure;
-use Modules\Document\Models\Category;
-use Modules\Document\Models\IsoSystemForm;
+use Modules\Document\Entities\IsoSystem;
+use Modules\Document\Entities\Procedure;
+use Modules\Document\Entities\Category;
+use Modules\Document\Entities\IsoSystemForm;
 
 class IsoSystemProcedure extends BaseModel
 {

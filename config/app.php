@@ -161,6 +161,7 @@ return [
          */
 
         Nwidart\Modules\LaravelModulesServiceProvider::class,
+        Yajra\DataTables\DataTablesServiceProvider::class,
 
         /*
          * Application Service Providers...
@@ -194,6 +195,7 @@ return [
         // 'Example' => App\Facades\Example::class,
         'PDF' => Meneses\LaravelMpdf\Facades\LaravelMpdf::class,
         'Image' => Intervention\Image\Laravel\Facades\Image::class,
+        'DataTables' => Yajra\DataTables\Facades\DataTables::class,
 
     ])->toArray(),
 

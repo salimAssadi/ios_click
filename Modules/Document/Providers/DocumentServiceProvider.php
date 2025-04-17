@@ -27,6 +27,7 @@ class DocumentServiceProvider extends ServiceProvider
         $this->registerTranslations();
         $this->registerConfig();
         $this->registerViews();
+        $this->registerAssets();
         $this->loadMigrationsFrom(module_path($this->moduleName, 'Database/Migrations'));
     }
 
@@ -87,6 +88,18 @@ class DocumentServiceProvider extends ServiceProvider
         } else {
             $this->loadTranslationsFrom(module_path($this->moduleName, 'Resources/lang'), $this->moduleNameLower);
         }
+    }
+
+    /**
+     * Register assets.
+     *
+     * @return void
+     */
+    protected function registerAssets()
+    {
+        $this->publishes([
+            module_path($this->moduleName, 'Resources/assets') => public_path('modules/' . $this->moduleNameLower),
+        ], ['assets', $this->moduleNameLower . '-module-assets']);
     }
 
     /**

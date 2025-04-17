@@ -2,93 +2,122 @@
 
 namespace App\Services;
 
-use Meneses\LaravelMpdf\Facades\LaravelMpdf;
-use App\Models\DocumentVersion;
+use Mpdf\Mpdf;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Storage;
 
 class PdfGenerationService
 {
-    public function generatePdf($data, $template = 'template.procedures.procedure_template', $watermark = null)
+    /**
+     * Generate PDF from HTML content
+     *
+     * @param string $content HTML content
+     * @param array $options PDF generation options
+     * @return string Generated PDF content
+     */
+    public function generateFromHtml(string $content, array $options = []): string
     {
-        $mpdf = LaravelMpdf::loadView($template, $data);
-        
-        // Add watermark for old versions
-        if ($watermark) {
-            $mpdf->SetWatermarkText($watermark);
-            $mpdf->showWatermarkText = true;
-            $mpdf->watermarkTextAlpha = 0.1;
-        }
-
-        // Add electronic signature if available
-        if (isset($data['approval']) && $data['approval']->status === 'approved') {
-            $this->addSignature($mpdf, $data['approval']);
-        }
-
-        return $mpdf;
-    }
-
-    protected function addSignature($mpdf, $approval)
-    {
-        $approver = $approval->approver;
-        
-        // Create signature block
-        $signatureHtml = '
-            <div style="position: absolute; bottom: 50px; right: 30px; width: 200px; text-align: center;">
-                <div style="border-bottom: 1px solid #000; margin-bottom: 5px;">
-                    <img src="' . ($approver->signature_path ?? '') . '" style="max-width: 150px; max-height: 60px;">
-                </div>
-                <p style="margin: 5px 0; font-size: 12px;">Approved By: ' . $approver->name . '</p>
-                <p style="margin: 5px 0; font-size: 12px;">Date: ' . $approval->approved_at->format('Y-m-d H:i') . '</p>
-                <p style="margin: 5px 0; font-size: 10px;">Document ID: ' . $approval->document_version_id . '</p>
-            </div>
-        ';
-
-        // Add signature block to the last page
-        $mpdf->WriteHTML($signatureHtml);
-    }
-
-    public function generateVersionedPdf($data, DocumentVersion $version, $basePath)
-    {
-        $watermark = null;
-        
-        // Add watermark for non-current versions
-        if (!$version->is_current) {
-            $watermark = 'SUPERSEDED VERSION ' . $version->version_number;
-        }
-
-        // Add version information to the data
-        $data['version'] = $version;
-        $data['watermark'] = $watermark;
-
-        // Get the appropriate template based on document type
-        $template = $this->getTemplateForDocumentType($version->document);
-
-        $mpdf = $this->generatePdf($data, $template, $watermark);
-
-        // Generate filename
-        $filename = sprintf(
-            '%s_v%s_%s.pdf',
-            \Str::slug($version->document->name),
-            str_replace('.', '-', $version->version_number),
-            time()
-        );
-
-        // Save to storage
-        $relativePath = $basePath . '/' . $filename;
-        Storage::put($relativePath, $mpdf->output());
-
-        return $relativePath;
-    }
-
-    private function getTemplateForDocumentType($document)
-    {
-        // You can customize this based on your document types
-        $templates = [
-            'procedures' => 'template.procedures.procedure_template',
-            'samples' => 'template.procedures.sample_template',
-            // Add more templates as needed
+        $defaultConfig = [
+            'mode' => 'utf-8',
+            'format' => 'A4',
+            'margin_header' => 10,
+            'margin_footer' => 10,
+            'margin_left' => 15,
+            'margin_right' => 15,
+            'margin_top' => 40,
+            'margin_bottom' => 25,
+            'orientation' => 'P'
         ];
 
-        return $templates[$document->type] ?? 'template.procedures.procedure_template';
+        $config = array_merge($defaultConfig, $options);
+        $mpdf = new Mpdf($config);
+
+        // Set document properties
+        $mpdf->SetTitle($options['title'] ?? 'Document');
+        $mpdf->SetAuthor($options['author'] ?? config('app.name'));
+        $mpdf->SetCreator(config('app.name'));
+
+        // Add watermark for draft documents
+        if (isset($options['status']) && $options['status'] === 'draft') {
+            $mpdf->SetWatermarkText('DRAFT');
+            $mpdf->showWatermarkText = true;
+        }
+
+        // Set RTL if needed
+        if (isset($options['rtl']) && $options['rtl']) {
+            $mpdf->SetDirectionality('rtl');
+        }
+
+        // Add header
+        if (isset($options['header'])) {
+            $mpdf->SetHTMLHeader($options['header']);
+        }
+
+        // Add footer with page numbers
+        $mpdf->SetHTMLFooter('
+            <div style="text-align: center; font-size: 10px; color: #666;">
+                ' . config('app.name') . ' - Page {PAGENO} of {nbpg}
+            </div>
+        ');
+
+        // Write content
+        $mpdf->WriteHTML($content);
+
+        return $mpdf->Output('', 'S');
+    }
+
+    /**
+     * Generate PDF from a blade view
+     *
+     * @param string $view View name
+     * @param array $data View data
+     * @param array $options PDF generation options
+     * @return string Generated PDF content
+     */
+    public function generateFromView(string $view, array $data = [], array $options = []): string
+    {
+        $html = View::make($view, $data)->render();
+        return $this->generateFromHtml($html, $options);
+    }
+
+    /**
+     * Save PDF to storage
+     *
+     * @param string $content PDF content
+     * @param string $path Storage path
+     * @return bool
+     */
+    public function saveToStorage(string $content, string $path): bool
+    {
+        return Storage::put($path, $content);
+    }
+
+    /**
+     * Generate document PDF
+     *
+     * @param string $content Document content
+     * @param array $metadata Document metadata
+     * @return string Generated PDF content
+     */
+    public function generateDocument(string $content, array $metadata): string
+    {
+        $options = [
+            'title' => $metadata['title'] ?? 'Document',
+            'author' => $metadata['author'] ?? null,
+            'status' => $metadata['status'] ?? 'active',
+            'rtl' => $metadata['rtl'] ?? false,
+            'header' => '
+                <div style="text-align: center; border-bottom: 1px solid #ddd; padding-bottom: 5px;">
+                    <h2 style="margin: 0;">' . ($metadata['title'] ?? 'Document') . '</h2>
+                    <div style="font-size: 12px; color: #666;">
+                        Document #: ' . ($metadata['document_number'] ?? '') . ' | 
+                        Version: ' . ($metadata['version'] ?? '1.0') . ' | 
+                        Department: ' . ($metadata['department'] ?? '') . '
+                    </div>
+                </div>
+            '
+        ];
+
+        return $this->generateFromHtml($content, $options);
     }
 }

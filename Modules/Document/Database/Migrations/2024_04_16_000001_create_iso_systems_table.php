@@ -13,12 +13,13 @@ class CreateIsoSystemsTable extends Migration
      */
     public function up()
     {
-        Schema::create('iso_systems', function (Blueprint $table) {
-            $table->id();
-            $table->string('name_ar');
-            $table->string('name_en');
-            $table->string('symbole')->nullable();
-            $table->string('code')->nullable();
+        if (!Schema::hasTable('iso_systems')) {
+            Schema::create('iso_systems', function (Blueprint $table) {
+                $table->id();
+                $table->string('name_ar');
+                $table->string('name_en');
+                $table->string('symbole')->nullable();
+                $table->string('code')->nullable();
             $table->text('specification')->nullable();
             $table->string('version')->nullable();
             $table->string('image')->nullable();
@@ -27,6 +28,7 @@ class CreateIsoSystemsTable extends Migration
             $table->unsignedBigInteger('updated_by')->nullable();
             $table->timestamps();
         });
+        }
     }
 
     /**

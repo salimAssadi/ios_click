@@ -13,16 +13,21 @@ class CreateDocumentVersionsTable extends Migration
      */
     public function up()
     {
-        Schema::connection('tenant')->create('document_versions', function (Blueprint $table) {
+        if (!Schema::hasTable('document_versions')) {
+        Schema::create('document_versions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('document_id')->constrained('documents')->onDelete('cascade');
             $table->string('version');
+            $table->boolean('current_version')->default(false);
             $table->string('file_path');
+            $table->string('storage_path');
             $table->text('change_summary')->nullable();
             $table->foreignId('created_by')->constrained('users');
+            $table->foreignId('updated_by')->nullable()->constrained('users');
             $table->timestamps();
             $table->softDeletes();
         });
+        }
     }
 
     /**
@@ -32,6 +37,6 @@ class CreateDocumentVersionsTable extends Migration
      */
     public function down()
     {
-        Schema::connection('tenant')->dropIfExists('document_versions');
+        Schema::dropIfExists('document_versions');
     }
 }

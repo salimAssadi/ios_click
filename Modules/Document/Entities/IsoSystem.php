@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Document\Models;
+namespace Modules\Document\Entities;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Traits\Localizable;

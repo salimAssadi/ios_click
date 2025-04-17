@@ -13,7 +13,8 @@ class CreateDocumentApprovalsTable extends Migration
      */
     public function up()
     {
-        Schema::connection('tenant')->create('document_approvals', function (Blueprint $table) {
+        if (!Schema::hasTable('document_approvals')) {
+        Schema::create('document_approvals', function (Blueprint $table) {
             $table->id();
             $table->foreignId('document_id')->constrained('documents')->onDelete('cascade');
             $table->foreignId('approver_id')->constrained('users');
@@ -24,6 +25,7 @@ class CreateDocumentApprovalsTable extends Migration
             $table->timestamps();
             $table->softDeletes();
         });
+        }
     }
 
     /**

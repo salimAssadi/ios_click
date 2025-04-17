@@ -13,15 +13,16 @@ class CreateDocumentsTable extends Migration
      */
     public function up()
     {
-        Schema::connection('tenant')->create('documents', function (Blueprint $table) {
+        if (!Schema::hasTable('documents')) {
+        Schema::create('documents', function (Blueprint $table) {
             $table->id();
             $table->string('title');
             $table->string('document_number')->unique();
-            $table->string('category'); // policy, procedure, work_instruction, form, manual
-            $table->string('department'); // quality, operations, hr, finance, it
+            $table->string('document_type'); // policy, procedure, work_instruction, form, manual
+            $table->unsignedBigInteger('department_id')->nullable(); // quality, operations, hr, finance, it
             $table->text('description')->nullable();
             $table->string('file_path');
-            $table->string('version');
+            $table->string('storage_path');
             $table->string('status'); // draft, pending_approval, approved, rejected, archived
             $table->foreignId('created_by')->constrained('users');
             $table->foreignId('updated_by')->nullable()->constrained('users');
@@ -29,6 +30,7 @@ class CreateDocumentsTable extends Migration
             $table->timestamp('approved_at')->nullable();
             $table->timestamps();
         });
+        }
     }
 
     /**
@@ -38,6 +40,6 @@ class CreateDocumentsTable extends Migration
      */
     public function down()
     {
-        Schema::connection('tenant')->dropIfExists('documents');
+        Schema::dropIfExists('documents');
     }
 }
