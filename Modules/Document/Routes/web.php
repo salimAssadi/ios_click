@@ -31,8 +31,9 @@ Route::prefix('document')->name('tenant.document.')->middleware(['auth:tenant','
     Route::delete('/{document}', [DocumentController::class, 'destroy'])->name('destroy');
     Route::get('/{document}/versions', [DocumentController::class, 'versions'])->name('versions');
     Route::get('/{document}/versions/{version}', [DocumentController::class, 'version'])->name('version');
-    Route::get('/{document}/preview', [DocumentController::class, 'preview'])->name('preview');
-    Route::get('/{document}/download', [DocumentController::class, 'download'])->name('download');
+    
+    // File serving routes
+    Route::get('/serve/{id}', [DocumentController::class, 'serveFile'])->name('serve');
                 
     // File Manager Routes
     Route::get('/file-manager', [FileManagerController::class, 'index'])->name('file-manager.index');

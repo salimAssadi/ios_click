@@ -335,9 +335,9 @@ $(document).ready(function() {
             }
         ],
         initComplete: function(settings, json) {
-            if (json.recordsTotal > 0) {
-                $('#importDictionary').hide();
-            }
+            // if (json.recordsTotal > 0) {
+            //     $('#importDictionary').hide();
+            // }
         }
     });
 

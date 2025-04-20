@@ -18,6 +18,7 @@ use Modules\Document\Entities\IsoSystemProcedure;
 use Modules\Document\Entities\Procedure;
 use Modules\Document\Entities\Sample;
 use Yajra\DataTables\Facades\Datatables;
+use Modules\Tenant\Models\Setting;
 
 class DocumentController extends Controller
 {
@@ -230,6 +231,7 @@ class DocumentController extends Controller
         }
     }
 
+
     /**
      * Import documents from dictionary
      *
@@ -239,7 +241,7 @@ class DocumentController extends Controller
     public function importFromDictionary(Request $request)
     {
         // Check if documents already exist
-        if (Document::count() > 0) {
+        if (getSettingsValByName('import_dictionary') == 1) {
             return response()->json([
                 'success' => false,
                 'message' => __('Documents have already been imported')
@@ -299,6 +301,7 @@ class DocumentController extends Controller
                 }
             }
             DB::commit();
+            Setting::updateOrCreate(['name' => 'import_dictionary'], ['value' => 1] , ['parent_id' => '1']);
             return response()->json([
                 'success' => true,
                 'message' => __('Documents imported successfully'),
@@ -314,22 +317,71 @@ class DocumentController extends Controller
 
     public function preview($id)
     {
-        // $document = Document::findOrFail($id);
-        // $content = Storage::disk('public')->get($document->storage_path);
-
-        // return response($content)->header('Content-Type', 'text/html');
         $document = Document::with(['creator', 'lastVersion'])->findOrFail($id);
         return view('document::document.show', compact('document'));
+    }
 
+    public function serveFile($id, Request $request)
+    {
+        $document = Document::with(['lastVersion'])->findOrFail($id);
+        
+        // Get the specific version if requested, otherwise use the latest
+        if ($request->has('version')) {
+            $version = $document->versions()->findOrFail($request->version);
+        } else {
+            $version = $document->lastVersion;
+        }
+
+        if (!$version) {
+            return response()->json(['error' => 'No version found'], 404);
+        }
+
+        // Check if user has permission to access this document
+        if (!auth('tenant')->check()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        try {
+            $filePath = $version->file_path;
+          
+            // Check if file exists
+            if (!Storage::disk('tenants')->exists($filePath)) {
+                return response()->json([
+                    'error' => 'File not found',
+                    'path' => $filePath
+                ], 404);
+            }
+
+            // For preview (inline display)
+            if ($request->get('preview', false)) {
+                return response()->file(
+                    Storage::disk('tenants')->path($filePath),
+                    [
+                        'Content-Type' => Storage::disk('tenants')->mimeType($filePath),
+                        'Content-Disposition' => 'inline; filename="' . basename($filePath) . '"'
+                    ]
+                );
+            }
+
+            // For download
+            return Storage::disk('tenants')->download($filePath);
+            
+        } catch (\Exception $e) {
+            \Log::error('File Access Error', [
+                'error' => $e->getMessage(),
+                'file_path' => $filePath ?? null
+            ]);
+            
+            return response()->json([
+                'error' => 'Error accessing file',
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function download($id)
     {
-        $document = Document::findOrFail($id);
-        return Storage::disk('public')->download(
-            $document->storage_path,
-            $document->document_number . ' - ' . $document->title . '.html'
-        );
+        return $this->serveFile($id, request());
     }
 
     /**
@@ -345,7 +397,9 @@ class DocumentController extends Controller
 
     public function show($id)
     {
-        $document = Document::with(['creator', 'lastVersion'])->findOrFail($id);
+        $document = Document::with(['creator', 'lastVersion', 'versions' => function($query) {
+            $query->orderBy('created_at', 'desc');
+        }])->findOrFail($id);
         return view('document::document.show', compact('document'));
     }
 

@@ -11,7 +11,7 @@ return [
     | by the framework. The "local" disk, as well as a variety of cloud
     | based disks are available to your application. Just store away!
     |
-    */
+     */
 
     'default' => env('FILESYSTEM_DISK', 'local'),
 
@@ -26,39 +26,32 @@ return [
     |
     | Supported Drivers: "local", "ftp", "sftp", "s3"
     |
-    */
+     */
 
     'disks' => [
 
-       'local' => [
+        'local' => [
             'driver' => 'local',
-            'root' => storage_path('/'),
-            'url' => env('APP_URL').'/storage',
+            'root' => storage_path('app'),
+            'throw' => false,
+        ],
+
+        'public' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public'),
+            'url' => env('APP_URL') . '/storage',
             'visibility' => 'public',
             'throw' => false,
         ],
-        'private' => [
-    'driver' => 'local',
-    'root' => storage_path('app/private'),
-    'visibility' => 'private',
-],
-        'public' => [
+
+        'tenants' => [
             'driver' => 'local',
-            'root' => storage_path('app/public/ISO_DIC'),
-            'url' => env('APP_URL').'/storage',
+            'root' => storage_path('app/public/tenants'),
+            'url' => env('APP_URL') . '/storage/tenants',
             'visibility' => 'public',
+            'throw' => false,
         ],
 
-      
-
-        // 'public' => [
-        //     'driver' => 'local',
-        //     'root' => storage_path('app/public'),
-        //     'url' => env('APP_URL').'/storage',
-        //     'visibility' => 'public',
-        //     'throw' => false,
-        // ],
-        
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),
@@ -82,10 +75,11 @@ return [
     | `storage:link` Artisan command is executed. The array keys should be
     | the locations of the links and the values should be their targets.
     |
-    */
+     */
 
     'links' => [
         public_path('storage') => storage_path('app/public'),
+        
     ],
 
 ];

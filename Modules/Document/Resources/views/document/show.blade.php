@@ -36,6 +36,9 @@
                             <label class="form-label">{{ __('Current Version') }}</label>
                             <p class="form-control-static">
                                 <span class="badge bg-info">v{{ number_format($document->lastVersion->version, 1) }}</span>
+                                <a href="{{ route('tenant.document.serve', $document->id) }}" class="btn btn-sm btn-primary ms-2" target="_blank">
+                                    <i class="fas fa-external-link-alt"></i> {{ __('Open Document') }}
+                                </a>
                             </p>
                         </div>
                     @endif
@@ -54,17 +57,41 @@
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-bordered table-striped" id="versions-table">
+                        <table class="table table-bordered table-striped">
                             <thead>
                                 <tr>
                                     <th>{{ __('Version') }}</th>
-                                    <th>{{ __('Status') }}</th>
-                                    <th>{{ __('Change Notes') }}</th>
+                                    <th>{{ __('Created At') }}</th>
                                     <th>{{ __('Created By') }}</th>
-                                    <th>{{ __('Dates') }}</th>
                                     <th>{{ __('Actions') }}</th>
                                 </tr>
                             </thead>
+                            <tbody>
+                                @forelse($document->versions as $version)
+                                    <tr>
+                                        <td>{{ $version->version }}</td>
+                                        <td>{{ $version->created_at->format('Y-m-d') }}</td>
+                                        <td>{{ $version->created_by }}</td>
+                                        <td class="text-right">
+                                            <a href="{{ route('tenant.document.serve', ['id' => $document->id, 'version' => $version->id, 'preview' => true]) }}"
+                                               class="btn btn-sm btn-info" 
+                                               target="_blank"
+                                               title="{{ __('Preview Document') }}">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{{ route('tenant.document.serve', ['id' => $document->id, 'version' => $version->id]) }}"
+                                               class="btn btn-sm btn-primary" 
+                                               title="{{ __('Download Document') }}">
+                                                <i class="fas fa-download"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="4" class="text-center">{{ __('No versions available.') }}</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
                         </table>
                     </div>
                 </div>
@@ -72,110 +99,39 @@
         </div>
     </div>
 
-    <!-- Document Preview Card -->
-    <div class="col-md-12 mt-4">
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">{{ __('Document Preview') }}</h3>
-            </div>
-            <div class="card-body">
-                @if($document->lastVersion)
-                    @php
-                        $fileUrl = Storage::url($document->lastVersion->storage_path);
-                        $fullUrl = url($fileUrl);
-                        $encodedUrl = urlencode($fullUrl);
-                        $viewerUrl = "https://view.officeapps.live.com/op/embed.aspx?src=" . $encodedUrl;
-                    @endphp
-                    <div class="document-viewer">
-                        <iframe src="{{ $viewerUrl }}" 
-                                width="100%" 
-                                height="800px" 
-                                frameborder="0">
-                        </iframe>
+    <!-- New Version Modal -->
+    <div class="modal fade" id="newVersionModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="newVersionForm" enctype="multipart/form-data">
+                    <div class="modal-header">
+                        <h5 class="modal-title">{{ __('Create New Version') }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
-                @else
-                    <div class="alert alert-info">
-                        {{ __('No document version available for preview.') }}
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label required">{{ __('Change Notes') }}</label>
+                            <textarea class="form-control" name="change_notes" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label required">{{ __('Document File') }}</label>
+                            <input type="file" class="form-control" name="file" required>
+                            <small class="text-muted">{{ __('Upload the new version of the document') }}</small>
+                        </div>
                     </div>
-                @endif
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('Cancel') }}</button>
+                        <button type="submit" class="btn btn-primary">{{ __('Create Version') }}</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
-
-<!-- New Version Modal -->
-<div class="modal fade" id="newVersionModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form id="newVersionForm" enctype="multipart/form-data">
-                <div class="modal-header">
-                    <h5 class="modal-title">{{ __('Create New Version') }}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label required">{{ __('Change Notes') }}</label>
-                        <textarea class="form-control" name="change_notes" rows="3" required></textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label required">{{ __('Document File') }}</label>
-                        <input type="file" class="form-control" name="file" required>
-                        <small class="text-muted">{{ __('Upload the new version of the document') }}</small>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('Cancel') }}</button>
-                    <button type="submit" class="btn btn-primary">{{ __('Create Version') }}</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
 @endsection
 
-@push('styles')
-<link rel="stylesheet" href="{{ asset('plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
-@endpush
-
 @push('scripts')
-<script src="{{ asset('plugins/datatables/jquery.dataTables.min.js') }}"></script>
-<script src="{{ asset('plugins/datatables-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
 <script>
 $(function() {
-    let table = $('#versions-table').DataTable({
-        processing: true,
-        serverSide: true,
-        ajax: '{{ route("tenant.document.versions.data", ["document_id" => $document->id]) }}',
-        columns: [
-            { 
-                data: 'version_info',
-                name: 'version'
-            },
-            {
-                data: 'status_badge',
-                name: 'status'
-            },
-            {
-                data: 'change_notes',
-                name: 'change_notes'
-            },
-            {
-                data: 'creator.name',
-                name: 'creator.name'
-            },
-            {
-                data: 'dates',
-                name: 'created_at'
-            },
-            {
-                data: 'actions',
-                name: 'actions',
-                orderable: false,
-                searchable: false
-            }
-        ],
-        order: [[0, 'desc']]
-    });
-
     $('#newVersionForm').on('submit', function(e) {
         e.preventDefault();
         
@@ -188,7 +144,7 @@ $(function() {
             success: function(response) {
                 if (response.success) {
                     $('#newVersionModal').modal('hide');
-                    table.draw();
+                    window.location.reload();
                     toastr.success(response.message);
                 }
             },
