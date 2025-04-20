@@ -37,7 +37,7 @@
                             <table cellspacing="0" cellpadding="0" style="margin: auto;">
                                 <tr>
                                     <td align="center" style="background-color: #345C72; padding: 10px 20px; border-radius: 5px;">
-                                        <a href="{{ route('home') }}" target="_blank" style="color: #ffffff; text-decoration: none; font-weight: bold;">{{ __('Go Back') }}</a>
+                                        <a href="" target="_blank" style="color: #ffffff; text-decoration: none; font-weight: bold;">{{ __('Go Back') }}</a>
                                     </td>
                                 </tr>
                             </table>

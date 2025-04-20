@@ -13,18 +13,20 @@ class CreateSettingsTable extends Migration
      */
     public function up()
     {
-        Schema::connection('tenant')->create('settings', function (Blueprint $table) {
-            $table->id();
-            $table->string('key')->unique();
-            $table->json('value');
-            $table->string('group')->default('general');
-            $table->string('type')->default('string');
-            $table->string('description')->nullable();
-            $table->foreignId('created_by')->nullable()->constrained('users');
-            $table->foreignId('updated_by')->nullable()->constrained('users');
-            $table->timestamps();
-            $table->softDeletes();
-        });
+        if (!Schema::hasTable('settings')) {
+            Schema::create('settings', function (Blueprint $table) {
+                $table->id();
+                $table->string('key')->unique();
+                $table->json('value');
+                $table->string('group')->default('general');
+                $table->string('type')->default('string');
+                $table->string('description')->nullable();
+                $table->foreignId('created_by')->nullable()->constrained('users');
+                $table->foreignId('updated_by')->nullable()->constrained('users');
+                $table->timestamps();
+                $table->softDeletes();
+            });
+        }
     }
 
     /**
@@ -34,6 +36,6 @@ class CreateSettingsTable extends Migration
      */
     public function down()
     {
-        Schema::connection('tenant')->dropIfExists('settings');
+        Schema::dropIfExists('settings');
     }
 }

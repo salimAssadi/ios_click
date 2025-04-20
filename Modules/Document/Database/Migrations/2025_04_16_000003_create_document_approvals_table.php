@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class CreateDocumentApprovalsTable extends Migration
 {
@@ -14,18 +14,20 @@ class CreateDocumentApprovalsTable extends Migration
     public function up()
     {
         if (!Schema::hasTable('document_approvals')) {
-        Schema::create('document_approvals', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('document_id')->constrained('documents')->onDelete('cascade');
-            $table->foreignId('approver_id')->constrained('users');
-            $table->string('status'); // pending, approved, rejected
-            $table->text('comments')->nullable();
-            $table->timestamp('approved_at')->nullable();
-            $table->timestamp('rejected_at')->nullable();
-            $table->timestamps();
-            $table->softDeletes();
-        });
+            Schema::create('document_approvals', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('document_version_id')->constrained()->onDelete('cascade');
+                $table->foreignId('approver_id')->constrained('users');
+                $table->enum('action', ['approved', 'rejected']);
+                $table->text('comment')->nullable();
+                $table->timestamp('approved_at')->nullable();
+                $table->string('signature_path')->nullable();
+                $table->string('stamp_path')->nullable();
+                $table->timestamps();
+                $table->softDeletes();
+            });
         }
+
     }
 
     /**

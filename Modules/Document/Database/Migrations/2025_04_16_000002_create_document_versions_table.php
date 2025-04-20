@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class CreateDocumentVersionsTable extends Migration
 {
@@ -14,19 +14,23 @@ class CreateDocumentVersionsTable extends Migration
     public function up()
     {
         if (!Schema::hasTable('document_versions')) {
-        Schema::create('document_versions', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('document_id')->constrained('documents')->onDelete('cascade');
-            $table->string('version');
-            $table->boolean('current_version')->default(false);
-            $table->string('file_path');
-            $table->string('storage_path');
-            $table->text('change_summary')->nullable();
-            $table->foreignId('created_by')->constrained('users');
-            $table->foreignId('updated_by')->nullable()->constrained('users');
-            $table->timestamps();
-            $table->softDeletes();
-        });
+            Schema::create('document_versions', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('document_id')->constrained()->onDelete('cascade');
+                $table->integer('version');
+                $table->date('issue_date');
+                $table->date('expiry_date');
+                $table->date('review_due_date')->nullable();
+                $table->enum('status', ['draft', 'under_review', 'approved', 'modified', 'obsolete']);
+                $table->date('approval_date')->nullable();
+                $table->foreignId('approved_by')->nullable()->constrained('users');
+                $table->string('storage_path'); 
+                $table->string('file_path'); 
+                $table->text('change_notes')->nullable();
+                $table->boolean('is_active')->default(false); 
+                $table->timestamps();
+                $table->softDeletes();
+            });
         }
     }
 

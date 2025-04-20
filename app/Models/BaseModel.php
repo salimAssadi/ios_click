@@ -14,17 +14,17 @@ abstract class BaseModel extends Model
     {
         parent::boot();
 
-        static::creating(function ($model) {
-            if (auth('tenant')->check()) {
-                $model->created_by = auth('tenant')->user()->id;
-            }
-        });
+        // static::creating(function ($model) {
+        //     if (auth('tenant')->check()) {
+        //         $model->created_by = auth('tenant')->user()->id;
+        //     }
+        // });
 
-        static::updating(function ($model) {
-            if (auth('tenant')->check()) {
-                $model->updated_by = auth('tenant')->user()->id;
-            }
-        });
+        // static::updating(function ($model) {
+        //     if (auth('tenant')->check()) {
+        //         $model->updated_by = auth('tenant')->user()->id;
+        //     }
+        // });
     }
 
     public function creator()
@@ -37,3 +37,8 @@ abstract class BaseModel extends Model
         return $this->belongsTo(User::class, 'updated_by');
     }
 }
+
+
+
+
+

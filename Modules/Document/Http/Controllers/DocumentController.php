@@ -2,19 +2,22 @@
 
 namespace Modules\Document\Http\Controllers;
 
+use App\Traits\TenantFileManager;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use App\Traits\TenantFileManager;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Modules\Document\Entities\Document;
+use Modules\Document\Entities\DocumentVersion;
 use Modules\Document\Entities\IsoInstruction;
 use Modules\Document\Entities\IsoPolicy;
 use Modules\Document\Entities\IsoSystem;
 use Modules\Document\Entities\IsoSystemProcedure;
 use Modules\Document\Entities\Procedure;
 use Modules\Document\Entities\Sample;
-use Modules\Document\Entities\Document;
-use Illuminate\Support\Facades\Storage;
 use Yajra\DataTables\Facades\Datatables;
-use Illuminate\Support\Facades\DB;
 
 class DocumentController extends Controller
 {
@@ -22,26 +25,30 @@ class DocumentController extends Controller
 
     public function index()
     {
-        return view('document::index');
+        return view('document::document.index');
     }
 
     public function create()
     {
         $isoSystems = IsoSystem::where('status', true)->get();
-        return view('document::create', compact('isoSystems'));
+        return view('document::document.create-document', compact('isoSystems'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
             'title' => 'required|string|max:255',
-            'document_number' => 'required|string|max:50',
+            'document_number' => 'nullable|string|max:50',
             'department' => 'required|string',
             'version' => 'required|string',
             'content' => 'nullable|string',
             'file' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx|max:10240', // 10MB max
             'document_type' => 'required|in:procedure,policy,instruction,sample,custom',
-            'iso_system_id' => 'required|exists:iso_systems,id'
+
+        ]);
+
+        $request->merge([
+            'document_number' => Str::uuid()->toString(),
         ]);
 
         try {
@@ -50,14 +57,15 @@ class DocumentController extends Controller
             // Create document record
             $document = Document::create([
                 'title' => $request->title,
-                'document_number' => $request->document_number,
-                'department_id' => 1,
-                'status' => 'draft',
                 'document_type' => $request->document_type,
-                'created_by' => auth('tenant')->id()
+                'document_number' => $request->document_number,
+                'related_process' => $request->related_process,
+                'department' => $request->department,
+                'created_by' => auth('tenant')->id(),
+                'creation_date' => now(),
             ]);
+            $document->save();
 
-            // Save the document file
             $fileName = $this->generateFileName($request->document_number, $request->title);
             $content = $request->hasFile('file') ? $request->file('file') : $request->content;
 
@@ -68,46 +76,47 @@ class DocumentController extends Controller
                 $content,
                 'draft'
             );
+            $request->issue_date = now();
+            $validYears = 3;
+            $expiryDate = Carbon::parse($request->issue_date)->addYears($validYears);
+            $reviewDate = Carbon::parse($request->issue_date)->addYears($validYears - 1);
 
-            // Update document with file path
-            $document->file_path = $fileName;
-            $document->storage_path = $filePath;
-            $document->save();
-
-            // // Create initial version
-            // $document->versions()->create([
-            //     'version' => $request->version,
-            //     'file_path' => $fileName,
-            //     'storage_path' => $filePath,
-            //     'created_by' => auth('tenant')->id()
-            // ]);
+            $documentVersion = DocumentVersion::create([
+                'document_id' => $document->id,
+                'version' => 1.0,
+                'issue_date' => now(),
+                'expiry_date' => $expiryDate,
+                'review_due_date' => $reviewDate,
+                'status' => 'draft',
+                'storage_path' => $filePath,
+                'file_path' => $filePath,
+                'is_active' => true,
+            ]);
 
             DB::commit();
 
             return response()->json([
                 'success' => true,
                 'message' => __('Document created successfully'),
-                'data' => $document
+                'data' => $document,
+                'redirect' => route('tenant.document.index'),
             ]);
 
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json([
                 'success' => false,
-                'message' => __('Error creating document: ') . $e->getMessage()
+                'message' => __('Error creating document: ') . $e->getMessage(),
             ], 500);
         }
     }
 
     public function getTemplates(Request $request)
     {
-        $isoSystemId = $request->input('iso_system_id');
         $documentType = $request->input('document_type');
 
         if ($documentType == 'procedure') {
-            $templates = IsoSystemProcedure::with(['procedure'])
-                ->where('iso_system_id', $isoSystemId)
-                ->get();
+            $templates = Procedure::get();
             $html = view('document::partials.procedure', compact('templates'))->render();
         } elseif ($documentType == 'policy') {
             $templates = IsoPolicy::get();
@@ -183,27 +192,28 @@ class DocumentController extends Controller
     {
         try {
             $query = Document::query()
-                ->with(['creator', 'documentVersion'])
-                ->when($request->document_type, function($q) use ($request) {
+                ->with(['creator', 'lastVersion'])
+                ->when($request->document_type, function ($q) use ($request) {
                     return $q->byType($request->document_type);
                 })
-                ->when($request->status, function($q) use ($request) {
+                ->when($request->status, function ($q) use ($request) {
                     return $q->byStatus($request->status);
                 });
 
             return Datatables::of($query)
                 ->addColumn('version_badge', function ($document) {
-                    $version = $document->documentVersion?->version ?? '1.0';
+                    $version = $document->lastVersion->version ?? '1.0';
                     return '<span class="badge bg-info">v' . $version . '</span>';
                 })
                 ->addColumn('status_badge', function ($document) {
+                    $status = $document->lastVersion->status ?? 'draft';
                     $colors = [
                         'draft' => 'bg-warning',
                         'active' => 'bg-success',
-                        'archived' => 'bg-secondary'
+                        'archived' => 'bg-secondary',
                     ];
-                    $color = $colors[$document->status] ?? 'bg-info';
-                    return '<span class="badge ' . $color . '">' . ucfirst($document->status) . '</span>';
+                    $color = $colors[$status] ?? 'bg-info';
+                    return '<span class="badge ' . $color . '">' . ucfirst($status) . '</span>';
                 })
                 ->addColumn('preview_url', function ($document) {
                     return route('tenant.document.preview', $document);
@@ -215,17 +225,102 @@ class DocumentController extends Controller
                 ->make(true);
         } catch (\Exception $e) {
             return response()->json([
-                'error' => 'Error loading documents: ' . $e->getMessage()
+                'error' => 'Error loading documents: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Import documents from dictionary
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function importFromDictionary(Request $request)
+    {
+        // Check if documents already exist
+        if (Document::count() > 0) {
+            return response()->json([
+                'success' => false,
+                'message' => __('Documents have already been imported')
+            ], 400);
+        }
+
+        Document::truncate();
+        DocumentVersion::truncate();
+        $procedures = Procedure::all();
+        DB::beginTransaction();
+        try {
+            foreach ($procedures as $procedure) {
+                $document = Document::create([
+                    'title' => $procedure->procedure_name_ar,
+                    'document_type' => 'procedure',
+                    'document_number' => str()->uuid(),
+                    'related_process' => null,
+                    'department' => null,
+                    'created_by' => auth('tenant')->id(),
+                    'creation_date' => now(),
+                ]);
+                DocumentVersion::create([
+                    'document_id' => $document->id,
+                    'version' => 1.0,
+                    'issue_date' => now(),
+                    'expiry_date' => now()->addYears(3),
+                    'review_due_date' => now()->addYears(3)->subYear(),
+                    'status' => 'draft',
+                    'storage_path' => $procedure->template_path,
+                    'file_path' => $procedure->template_path,
+                    'is_active' => true,
+                ]);
+                $samples = Sample::where('procedure_id', $procedure->id)->get();
+
+                foreach ($samples as $sample) {
+                    $sampleDocument = Document::create([
+                        'title' => $sample->sample_name_ar,
+                        'document_type' => 'form',
+                        'document_number' => str()->uuid(),
+                        'related_process' => $procedure->procedure_name_ar,
+                        'department' => null,
+                        'created_by' => auth('tenant')->id(),
+                        'creation_date' => now(),
+                    ]);
+        
+                    DocumentVersion::create([
+                        'document_id' => $sampleDocument->id,
+                        'version' => 1.0,
+                        'issue_date' => now(),
+                        'expiry_date' => now()->addYears(3),
+                        'review_due_date' => now()->addYears(3)->subYear(),
+                        'status' => 'draft',
+                        'storage_path' => $sample->sample_file_path,
+                        'file_path' => $sample->sample_file_path,
+                        'is_active' => true,
+                    ]);
+                }
+            }
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'message' => __('Documents imported successfully'),
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => __('Error importing documents: ') . $e->getMessage(),
             ], 500);
         }
     }
 
     public function preview($id)
     {
-        $document = Document::findOrFail($id);
-        $content = Storage::disk('public')->get($document->storage_path);
-        
-        return response($content)->header('Content-Type', 'text/html');
+        // $document = Document::findOrFail($id);
+        // $content = Storage::disk('public')->get($document->storage_path);
+
+        // return response($content)->header('Content-Type', 'text/html');
+        $document = Document::with(['creator', 'lastVersion'])->findOrFail($id);
+        return view('document::document.show', compact('document'));
+
     }
 
     public function download($id)
@@ -245,12 +340,13 @@ class DocumentController extends Controller
         // Clean and combine document number and title
         $cleanTitle = preg_replace('/[^a-z0-9]+/i', '_', $title);
         $cleanNumber = preg_replace('/[^a-z0-9]+/i', '_', $documentNumber);
-        return strtolower("{$cleanNumber}_{$cleanTitle}.html");
+        return strtolower("{$cleanNumber}_{$cleanTitle}.pdf");
     }
 
     public function show($id)
     {
-        // TODO: Show document implementation
+        $document = Document::with(['creator', 'lastVersion'])->findOrFail($id);
+        return view('document::document.show', compact('document'));
     }
 
     public function edit($id)

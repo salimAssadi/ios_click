@@ -5,6 +5,7 @@ namespace App\Services;
 use Mpdf\Mpdf;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Storage;
+use Meneses\LaravelMpdf\Facades\LaravelMpdf;
 
 class PdfGenerationService
 {
@@ -99,25 +100,40 @@ class PdfGenerationService
      * @param array $metadata Document metadata
      * @return string Generated PDF content
      */
-    public function generateDocument(string $content, array $metadata): string
-    {
-        $options = [
-            'title' => $metadata['title'] ?? 'Document',
-            'author' => $metadata['author'] ?? null,
-            'status' => $metadata['status'] ?? 'active',
-            'rtl' => $metadata['rtl'] ?? false,
-            'header' => '
-                <div style="text-align: center; border-bottom: 1px solid #ddd; padding-bottom: 5px;">
-                    <h2 style="margin: 0;">' . ($metadata['title'] ?? 'Document') . '</h2>
-                    <div style="font-size: 12px; color: #666;">
-                        Document #: ' . ($metadata['document_number'] ?? '') . ' | 
-                        Version: ' . ($metadata['version'] ?? '1.0') . ' | 
-                        Department: ' . ($metadata['department'] ?? '') . '
-                    </div>
-                </div>
-            '
-        ];
+    // public function generateDocument(string $content, array $metadata): string
+    // {
+        
+    //     $options = [
+    //         'title' => $metadata['title'] ?? 'Document',
+    //         'author' => $metadata['author'] ?? null,
+    //         'status' => $metadata['status'] ?? 'active',
+    //         'rtl' => $metadata['rtl'] ?? false,
+    //         'header' => '
+    //             <div style="text-align: center; border-bottom: 1px solid #ddd; padding-bottom: 5px;">
+    //                 <h2 style="margin: 0;">' . ($metadata['title'] ?? 'Document') . '</h2>
+    //                 <div style="font-size: 12px; color: #666;">
+    //                     Document #: ' . ($metadata['document_number'] ?? '') . ' | 
+    //                     Version: ' . ($metadata['version'] ?? '1.0') . ' | 
+    //                     Department: ' . ($metadata['department'] ?? '') . '
+    //                 </div>
+    //             </div>
+    //         '
+    //     ];
 
-        return $this->generateFromHtml($content, $options);
+    //     return $this->generateFromHtml($content, $options);
+    // }
+
+    public function generateDocument(string $content, array $metadata , string $view): string
+    {
+        
+        $pdf = LaravelMpdf::loadView($view, [
+            'content' => $content,
+            'title' => $metadata['title'] ?? 'Document',
+            'created_at' => now(),
+            'author' => $metadata['author'] ?? null
+        ]);
+        return $pdf->output();
     }
+
+
 }

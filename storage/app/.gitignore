@@ -1,3 +1,4 @@
 *
-!public/ISO_DIC
+!public/
+!private/
 !.gitignore

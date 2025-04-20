@@ -24,7 +24,7 @@
 @section('breadcrumb')
     <ul class="breadcrumb mb-0">
         <li class="breadcrumb-item">
-            <a href="{{ route('home') }}">{{ __('Dashboard') }}</a>
+            <a href="">{{ __('Dashboard') }}</a>
         </li>
         <li class="breadcrumb-item">
             <a href="">{{ __('ISO Systems') }}</a>

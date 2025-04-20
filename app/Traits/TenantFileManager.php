@@ -129,13 +129,11 @@ trait TenantFileManager
     {   
         $path = "tenants/{$tenantId}/documents/{$documentType}/{$status}/{$fileName}";
 
-        // Handle file upload
         if ($content instanceof UploadedFile) {
             Storage::putFileAs(dirname($path), $content, basename($path));
             return $path;
         }
 
-        // Handle content as string (generate PDF)
         if (is_string($content) && !empty($content)) {
             $metadata = [
                 'title' => pathinfo($fileName, PATHINFO_FILENAME),
@@ -143,7 +141,7 @@ trait TenantFileManager
                 'document_type' => $documentType
             ];
 
-            $pdf = $this->pdfService->generateDocument($content, $metadata);
+            $pdf = $this->pdfService->generateDocument($content, $metadata, 'template.forms.template');
             Storage::put($path, $pdf);
             return $path;
         }

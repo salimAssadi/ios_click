@@ -19,15 +19,14 @@ class CreateDocumentsTable extends Migration
             $table->string('title');
             $table->string('document_number')->unique();
             $table->string('document_type'); // policy, procedure, work_instruction, form, manual
-            $table->unsignedBigInteger('department_id')->nullable(); // quality, operations, hr, finance, it
+            $table->string('department')->nullable(); // quality, operations, hr, finance, it
             $table->text('description')->nullable();
-            $table->string('file_path');
-            $table->string('storage_path');
-            $table->string('status'); // draft, pending_approval, approved, rejected, archived
+            $table->string('related_process')->nullable();
             $table->foreignId('created_by')->constrained('users');
-            $table->foreignId('updated_by')->nullable()->constrained('users');
-            $table->foreignId('approved_by')->nullable()->constrained('users');
-            $table->timestamp('approved_at')->nullable();
+            $table->date('creation_date');
+            $table->boolean('is_obsolete')->default(false);
+            $table->date('obsoleted_date')->nullable();
+            $table->text('notes')->nullable();
             $table->timestamps();
         });
         }

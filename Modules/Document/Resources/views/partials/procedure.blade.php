@@ -5,7 +5,7 @@
                 <div class="form-check">
                     <input class="form-check-input" type="radio" name="template_id" value="{{ $template->id }}" id="template_{{ $template->id }}">
                     <label class="form-check-label w-100" for="template_{{ $template->id }}">
-                        <h5 class="mb-2">{{ $template->procedure->procedure_name_ar }}</h5>
+                        <h5 class="mb-2">{{ $template->procedure_name_ar }}</h5>
                     </label>
                 </div>
             </div>

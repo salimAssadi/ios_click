@@ -42,56 +42,56 @@
 // require __DIR__ . '/auth.php';
 
 Route::get('/',function(){
-    return redirect('/iso_dic/login');
+    return redirect('/tenant/login');
 });
 
-Route::get('/', [HomeController::class, 'index'])->middleware(
-    [
+// Route::get('/', [HomeController::class, 'index'])->middleware(
+//     [
 
-        'XSS',
-    ]
-);
-Route::get('home', [HomeController::class, 'index'])->name('home')->middleware(
-    [
+//         'XSS',
+//     ]
+// );
+// Route::get('home', [HomeController::class, 'index'])->name('home')->middleware(
+//     [
 
-        'XSS',
-    ]
-);
-
-
-//-------------------------------FAQ-------------------------------------------
-Route::resource('FAQ', FAQController::class)->middleware(
-    [
-        'auth',
-        'XSS',
-    ]
-);
-
-//-------------------------------Home Page-------------------------------------------
-Route::resource('homepage', HomePageController::class)->middleware(
-    [
-        'auth',
-        'XSS',
-    ]
-);
-//-------------------------------FAQ-------------------------------------------
-Route::resource('pages', PageController::class)->middleware(
-    [
-        'auth',
-        'XSS',
-    ]
-);
-
-//-------------------------------FAQ-------------------------------------------
-Route::resource('authPage', AuthPageController::class)->middleware(
-    [
-        'auth',
-        'XSS',
-    ]
-);
+//         'XSS',
+//     ]
+// );
 
 
-Route::get('page/{slug}', [PageController::class, 'page'])->name('page');
+// //-------------------------------FAQ-------------------------------------------
+// Route::resource('FAQ', FAQController::class)->middleware(
+//     [
+//         'auth',
+//         'XSS',
+//     ]
+// );
+
+// //-------------------------------Home Page-------------------------------------------
+// Route::resource('homepage', HomePageController::class)->middleware(
+//     [
+//         'auth',
+//         'XSS',
+//     ]
+// );
+// //-------------------------------FAQ-------------------------------------------
+// Route::resource('pages', PageController::class)->middleware(
+//     [
+//         'auth',
+//         'XSS',
+//     ]
+// );
+
+// //-------------------------------FAQ-------------------------------------------
+// Route::resource('authPage', AuthPageController::class)->middleware(
+//     [
+//         'auth',
+//         'XSS',
+//     ]
+// );
+
+
+// Route::get('page/{slug}', [PageController::class, 'page'])->name('page');
 //-------------------------------FAQ-------------------------------------------
 Route::impersonate();
 

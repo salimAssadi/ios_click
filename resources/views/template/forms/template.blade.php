@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 
 <head>
-    <title>{{$data['pageTitle']}}</title>
+    <title>{{$title}}</title>
     <meta charset='utf-8'>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     @include('template.partials.form.pdf-styles-advance')
@@ -18,7 +18,7 @@
 <body>
     @include('template.partials.form.header')
     <main>
-        {!! $data['sample']->content !!}
+        {!! $content !!}
     </main>
     @include('template.partials.form.footer')
    
@@ -26,3 +26,8 @@
 </body>
 
 </html>
+
+
+
+
+

@@ -90,7 +90,7 @@
     <!-- [ Main Content ] start -->
     <nav class="navbar navbar-expand-lg navbar-light card rounded-0 fixed-top">
         <div class="container">
-            <a class="navbar-brand landing-logo" href="{{ route('home') }}">
+            <a class="navbar-brand landing-logo" href="">
                 <img src="{{ asset(Storage::url('upload/logo/logo.png')) }}"  alt="logo" class="img-fluid " />
                 {{-- <img src="{{ asset(Storage::url('upload/logo/logo.png')) }}"  alt="image" class="img-fluid brand-logo" /> --}}
             </a>
@@ -101,13 +101,13 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto f-w-600">
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('home') }}">{{ __('Home') }}</a>
+                        <a class="nav-link" href="">{{ __('Home') }}</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('home') }}#pricing">{{ __('Pricing') }}</a>
+                        <a class="nav-link" href="#pricing">{{ __('Pricing') }}</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link me-2" href="{{ route('home') }}#features">{{ __('Features') }}</a>
+                        <a class="nav-link me-2" href="#features">{{ __('Features') }}</a>
                     </li>
                     @foreach ($menus as $menu)
                     <li class="nav-item">

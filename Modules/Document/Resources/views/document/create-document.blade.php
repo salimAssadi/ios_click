@@ -18,9 +18,9 @@
                     'Please select a document type': '{{ __("Please select a document type") }}',
                     'Please select a template': '{{ __("Please select a template") }}',
                     'Step 1: ISO System': '{{ __("Step 1: ISO System") }}',
-                    'Step 2: Document Type': '{{ __("Step 2: Document Type") }}',
-                    'Step 3: Template': '{{ __("Step 3: Template") }}',
-                    'Step 4: Document Details': '{{ __("Step 4: Document Details") }}',
+                    'Step 1: Document Type': '{{ __("Step 1: Document Type") }}',
+                    'Step 2: Template': '{{ __("Step 2: Template") }}',
+                    'Step 3: Document Details': '{{ __("Step 3: Document Details") }}',
                     'Loading...': '{{ __("Loading...") }}',
                     'Next': '{{ __("Next") }}',
                     'Error loading templates': '{{ __("Error loading templates") }}',
@@ -94,9 +94,9 @@
             <div class="col-md-12">
                 <!-- Progress Bar -->
                 <div class="progress my-3" style="height: 25px;">
-                    <div class="progress-bar bg-gray-300 text-black" role="progressbar" style="width: 25%;"
-                        aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
-                        <span class="progress-text">{{ __('Step 1: ISO System') }}</span>
+                    <div class="progress-bar bg-gray-300 text-black" role="progressbar" style="width: 0%;"
+                        aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                        <span class="progress-text">{{ __('Step 1: Document Type') }}</span>
                     </div>
                 </div>
 
@@ -104,53 +104,11 @@
                 <form id="documentWizard" action="{{ route('tenant.document.store') }}" method="POST"
                     enctype="multipart/form-data">
                     @csrf
-                    <!-- Step 1: ISO System Selection -->
+                    <!-- Step 1: Document Type Selection -->
                     <div id="step1" class="card mb-4">
                         <div class="card-header bg-gray-300 text-white d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">{{ __('Select ISO System') }}</h5>
-                            <span class="badge bg-light text-primary">{{ __('Step 1 of 4') }}</span>
-                        </div>
-                        <div class="card-body ">
-                            <div class="row">
-                                @foreach ($isoSystems as $system)
-                                    <div class="col-md-6 mb-3">
-                                        <div class="card h-100 cursor-pointer iso-system-card @error('iso_system_id') is-invalid @enderror"
-                                            data-system-id="{{ $system->id }}">
-                                            <div class="card-body shadow-sm rounded bg-gray-100">
-                                                <div class="form-check">
-                                                    <input type="radio" name="iso_system_id" id="iso_{{ $system->id }}"
-                                                        value="{{ $system->id }}" class="form-check-input"
-                                                        @if (old('iso_system_id') == $system->id) checked @endif>
-                                                    <label class="form-check-label w-100" for="iso_{{ $system->id }}">
-                                                        <div class="d-flex align-items-center">
-                                                            @if ($system->image)
-                                                                <img src="{{ getISOImage(getFilePath('isoIcon') . '/' . $system->image) }}"
-                                                                    alt="{{ $system->name }}" class="me-3"
-                                                                    style="width: 40px; height: 40px; object-fit: contain;">
-                                                            @endif
-                                                            <div>
-                                                                <h6 class="mb-1">{{ $system->name }}</h6>
-                                                                <small class="text-muted">{{ $system->code }}</small>
-                                                            </div>
-                                                        </div>
-                                                    </label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                @endforeach
-                            </div>
-                            @error('iso_system_id')
-                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div>
-
-                    <!-- Step 2: Document Type Selection -->
-                    <div id="step2" class="card mb-4 d-none">
-                        <div class="card-header bg-gray-300 text-white d-flex justify-content-between align-items-center">
                             <h5 class="mb-0">{{ __('Select Document Type') }}</h5>
-                            <span class="badge bg-light text-primary">{{ __('Step 2 of 4') }}</span>
+                            <span class="badge bg-light text-primary">{{ __('Step 1 of 3') }}</span>
                         </div>
                         <div class="card-body">
                             <div class="row">
@@ -180,11 +138,11 @@
                         </div>
                     </div>
 
-                    <!-- Step 3: Template Selection -->
-                    <div id="step3" class="card mb-4 d-none">
+                    <!-- Step 2: Template Selection -->
+                    <div id="step2" class="card mb-4 d-none">
                         <div class="card-header bg-gray-300 text-white d-flex justify-content-between align-items-center">
                             <h5 class="mb-0">{{ __('Select Template') }}</h5>
-                            <span class="badge bg-light text-primary">{{ __('Step 3 of 4') }}</span>
+                            <span class="badge bg-light text-primary">{{ __('Step 2 of 3') }}</span>
                         </div>
                         <div class="card-body">
                             <div id="templatesContainer" class="row">
@@ -199,11 +157,11 @@
                         </div>
                     </div>
 
-                    <!-- Step 4: Document Details -->
-                    <div id="step4" class="card mb-4 d-none">
+                    <!-- Step 3: Document Details -->
+                    <div id="step3" class="card mb-4 d-none">
                         <div class="card-header bg-gray-300 text-white d-flex justify-content-between align-items-center">
                             <h5 class="mb-0">{{ __('Document Details') }}</h5>
-                            <span class="badge bg-light text-primary">{{ __('Step 4 of 4') }}</span>
+                            <span class="badge bg-light text-primary">{{ __('Step 3 of 3') }}</span>
                         </div>
                         <div class="card-body">
                             <div class="row">
@@ -217,14 +175,14 @@
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
-                                <div class="col-md-6 mb-3">
+                                <div class="col-md-6 mb-3 d-none">
                                     <label class="form-label">{{ __('Document Number') }} <span
                                             class="text-danger">*</span></label>
                                     <div class="input-group">
                                         <span class="input-group-text document-prefix">DOC-</span>
                                         <input type="text" name="document_number" id="document_number"
                                             class="form-control @error('document_number') is-invalid @enderror"
-                                            value="{{ old('document_number') }}" required>
+                                            value="{{ old('document_number') }}" >
                                     </div>
                                     @error('document_number')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -259,7 +217,7 @@
 
                                 <div class="col-12 mb-3">
                                     <label class="form-label">{{ __('Description') }}</label>
-                                    <textarea name="conent" id="document_content" class="form-control summernote @error('description') is-invalid @enderror" rows="3">{{ old('description') }}</textarea>
+                                    <textarea name="content" id="document_content" class="form-control summernote @error('description') is-invalid @enderror" rows="3">{{ old('description') }}</textarea>
                                     @error('description')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror

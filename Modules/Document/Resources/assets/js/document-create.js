@@ -6,23 +6,17 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     let currentStep = 1;
-    const totalSteps = 4;
+    const totalSteps = 3;
 
     // Function to validate each step
     function validateStep(step) {
         if (step === 1) {
-            const isoSystemId = $('input[name="iso_system_id"]:checked').val();
-            if (!isoSystemId) {
-                notifier.show('Error!', Lang.get('Please select an ISO system'), 'error', errorImg, 4000);
-                return false;
-            }
-        } else if (step === 2) {
             const documentType = $('input[name="document_type"]:checked').val();
             if (!documentType) {
                 notifier.show('Error!', Lang.get('Please select a document type'), 'error', errorImg, 4000);
                 return false;
             }
-        } else if (step === 3) {
+        } else if (step === 2) {
             const templateId = $('input[name="template_id"]:checked').val();
             if (!templateId) {
                 notifier.show('Error!', Lang.get('Please select a template'), 'error', errorImg, 4000);
@@ -34,7 +28,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Function to show/hide steps and update progress bar
     function showStep(step) {
-        // Hide all steps
         for (let i = 1; i <= totalSteps; i++) {
             $(`#step${i}`).addClass('d-none');
         }
@@ -49,10 +42,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Update progress text based on current step
         const stepTexts = {
-            1: Lang.get('Step 1: ISO System'),
-            2: Lang.get('Step 2: Document Type'),
-            3: Lang.get('Step 3: Template'),
-            4: Lang.get('Step 4: Document Details')
+            1: Lang.get('Step 2: Document Type'),
+            2: Lang.get('Step 2: Template'),
+            3: Lang.get('Step 3: Document Details')
         };
         $('.progress-text').text(stepTexts[step]);
 
@@ -62,17 +54,15 @@ document.addEventListener('DOMContentLoaded', function() {
         $('#submitBtn').toggleClass('d-none', step !== totalSteps);
     }
 
-    // Function to load templates based on selected system and document type
+    // Function to load templates based on document type
     function loadTemplates() {
-        const isoSystemId = $('input[name="iso_system_id"]:checked').val();
         const documentType = $('input[name="document_type"]:checked').val();
 
-        if (isoSystemId && documentType) {
+        if (documentType) {
             $.ajax({
                 url: routes.getTemplates,
                 method: 'GET',
                 data: {
-                    iso_system_id: isoSystemId,
                     document_type: documentType
                 },
                 beforeSend: function() {
@@ -103,19 +93,19 @@ document.addEventListener('DOMContentLoaded', function() {
     $('#nextBtn').click(function() {
         if (validateStep(currentStep)) {
             var documentType = $('input[name="document_type"]:checked').val();
-            // Check if we're on step 2 (document type) and custom type is selected
-            if (currentStep === 2 && documentType === 'custom') {
-                currentStep = 4; // Skip to step 4
+            // Check if we're on step 1 (document type) and custom type is selected
+            if (currentStep === 1 && documentType === 'custom') {
+                currentStep = 3; // Skip to step 3
                 showStep(currentStep);
+               
             }
-            // If we're on step 3 (template selection)
-            else if (currentStep === 3) {
+            // If we're on step 2 (template selection)
+            else if (currentStep === 2) {
                 const templateId = $('input[name="template_id"]:checked').val();
                 
                 if (templateId === 'custom') {
-                    // For custom template, skip to step 4 and clear fields
-                    currentStep = 4;
-                    $('#title, #document_number').val('');
+                    // For custom template, skip to step 3 and clear fields
+                    currentStep = 3;
                     $('#version').val('1.0');
                     tinymce.get('document_content').setContent('');
                     showStep(currentStep);
@@ -164,7 +154,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // For other steps, just move to next step
                 currentStep++;
                 showStep(currentStep);
-                if (currentStep === 3) {
+                if (currentStep === 2) {
                     loadTemplates();
                 }
             }
@@ -172,9 +162,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     $('#prevBtn').click(function() {
-        // If we are going back from step 4 and it's a custom document, skip step 3
-        if (currentStep === 4 && $('input[name="document_type"]:checked').val() === 'custom') {
-            currentStep = 2; // Skip step 3 and go directly to step 2
+        if (currentStep === 3 && $('input[name="document_type"]:checked').val() === 'custom') {
+            currentStep = 1; // Skip step 3 and go directly to step 2
         } else {
             currentStep--;
         }
@@ -182,16 +171,12 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Card selection handlers
-    $('.iso-system-card, .document-type-card').click(function() {
+    $('.document-type-card').click(function() {
         const $card = $(this);
         const $radio = $card.find('input[type="radio"]');
 
         // Update visual selection
-        if ($card.hasClass('iso-system-card')) {
-            $('.iso-system-card').removeClass('selected');
-        } else if ($card.hasClass('document-type-card')) {
-            $('.document-type-card').removeClass('selected');
-        }
+        $('.document-type-card').removeClass('selected');
         $card.addClass('selected');
 
         // Update radio button

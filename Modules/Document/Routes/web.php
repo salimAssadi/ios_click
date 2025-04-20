@@ -13,11 +13,13 @@
 
 use Modules\Document\Http\Controllers\DocumentController;
 use Modules\Document\Http\Controllers\FileManagerController;
+use Modules\Document\Http\Controllers\DocumentVersionController;
 use Modules\Tenant\Http\Middleware\TenantMiddleware;
 use Modules\Tenant\Http\Middleware\XSSMiddleware;
 
 Route::prefix('document')->name('tenant.document.')->middleware(['auth:tenant','XSS', 'tenant'])->group(function() {
     Route::get('/', [DocumentController::class, 'index'])->name('index');
+    Route::post('/import-dictionary', [DocumentController::class, 'importFromDictionary'])->name('import-dictionary');
     Route::get('/create', [DocumentController::class, 'create'])->name('create');
     Route::get('/templates', [DocumentController::class, 'getTemplates'])->name('templates');
     Route::get('/list', [DocumentController::class, 'list'])->name('list');
@@ -32,9 +34,15 @@ Route::prefix('document')->name('tenant.document.')->middleware(['auth:tenant','
     Route::get('/{document}/preview', [DocumentController::class, 'preview'])->name('preview');
     Route::get('/{document}/download', [DocumentController::class, 'download'])->name('download');
                 
-            // File Manager Routes
+    // File Manager Routes
     Route::get('/file-manager', [FileManagerController::class, 'index'])->name('file-manager.index');
     Route::get('/file-manager/config', [FileManagerController::class, 'getConfig'])->name('file-manager.config');
     Route::post('/file-manager/upload', [FileManagerController::class, 'upload'])->name('file-manager.upload');
 
+    // Document Version Management Routes
+    Route::prefix('versions')->name('versions.')->group(function () {
+        Route::get('/data', [DocumentVersionController::class, 'data'])->name('data');
+        Route::post('/{document}', [DocumentVersionController::class, 'store'])->name('store');
+        Route::get('/{version}', [DocumentVersionController::class, 'show'])->name('show');
+    });
 });
