@@ -37,7 +37,7 @@ class Document extends BaseModel
     public function scopeByStatus($query, $status)
     {
         return $query->whereHas('lastVersion', function ($q) use ($status) {
-            $q->where('status', $status);
+            $q->where('status_id', $status);
         });
     }
 

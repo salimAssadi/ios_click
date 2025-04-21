@@ -250,10 +250,11 @@
                         <table class="table table-hover" id="documents-table">
                             <thead>
                                 <tr>
+                                    <th>{{ __('ID') }}</th>
                                     <th>{{ __('Title') }}</th>
-                                    <th>{{ __('Department') }}</th>
                                     <th>{{ __('Version') }}</th>
                                     <th>{{ __('Status') }}</th>
+                                    <th>{{ __('Created At') }}</th>
                                     <th>{{ __('Actions') }}</th>
                                 </tr>
                             </thead>
@@ -304,34 +305,17 @@ $(document).ready(function() {
             }
         },
         columns: [
+            { data: 'id', name: 'id' },
             { data: 'title', name: 'title' },
-            { data: 'department', name: 'department' },
-            { data: 'version_badge', name: 'documentVersion.version' },
-            { data: 'status_badge', name: 'status' },
-            {
-                data: null,
+            { data: 'version_badge', name: 'version_badge' },
+            { data: 'status_badge', name: 'status_badge' },
+            { data: 'created_at', name: 'created_at' },
+            { 
+                data: 'actions',
+                name: 'actions',
                 orderable: false,
-                render: function(data) {
-                    return `
-                        <div class="btn-group">
-                            <a href="${data.preview_url}" class="btn btn-sm btn-info" title="{{ __('Preview') }}">
-                                <i class="fas fa-eye"></i>
-                            </a>
-                            <a href="${data.download_url}" class="btn btn-sm btn-success" title="{{ __('Download') }}">
-                                <i class="fas fa-download"></i>
-                            </a>
-                            <button type="button" class="btn btn-sm btn-primary dropdown-toggle" data-bs-toggle="dropdown">
-                                <i class="fas fa-ellipsis-v"></i>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" href="#"><i class="fas fa-edit me-2"></i>{{ __('Edit') }}</a></li>
-                                <li><a class="dropdown-item" href="#"><i class="fas fa-history me-2"></i>{{ __('Versions') }}</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-trash me-2"></i>{{ __('Delete') }}</a></li>
-                            </ul>
-                        </div>
-                    `;
-                }
+                searchable: false,
+                className: 'text-center'
             }
         ],
         initComplete: function(settings, json) {

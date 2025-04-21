@@ -26,7 +26,7 @@
 
                 <!-- Document Control -->
                 <li
-                    class="pc-item pc-hasmenu {{ in_array($routeName, ['document.index', 'document.show']) ? 'active' : '' }}">
+                    class="pc-item pc-hasmenu {{ in_array($routeName, ['document.index', 'document.show', 'document.requests.index', 'document.requests.create', 'document.requests.my']) ? 'active' : '' }}">
                     <a href="#!" class="pc-link">
                         <span class="pc-micon"><i class="ti ti-file-text"></i></span>
                         <span class="pc-mtext">{{ __('Document Control') }}</span>
@@ -43,11 +43,11 @@
                                 <span class="pc-mtext">{{ __('Create New Document') }}</span>
                             </a>
                         </li>
-                        <li class="pc-item {{ $routeName == 'document.versions' ? 'active' : '' }}">
+                        {{-- <li class="pc-item {{ $routeName == 'document.versions' ? 'active' : '' }}">
                             <a href="" class="pc-link">
                                 <span class="pc-mtext">{{ __('Version Control') }}</span>
                             </a>
-                        </li>
+                        </li> --}}
                         <li class="pc-item {{ $routeName == 'document.history' ? 'active' : '' }}">
                             <a href="" class="pc-link">
                                 <span class="pc-mtext">{{ __('Change History') }}</span>
@@ -58,10 +58,11 @@
                                 <span class="pc-mtext">{{ __('Approval Workflow') }}</span>
                             </a>
                         </li>
-                        <li class="pc-item {{ $routeName == 'document.notifications' ? 'active' : '' }}">
-                            <a href="" class="pc-link">
+                       
+                        <li class="pc-item {{ in_array($routeName, ['tenant.document.requests.index', 'document.requests.create']) ? 'active' : '' }}">
+                            <a href="{{ route('tenant.document.requests.index') }}" class="pc-link">
                                 <span class="pc-mtext">{{ __('Review Notifications') }}</span>
-                            </a>
+                            </a>    
                         </li>
                         <li class="pc-item {{ $routeName == 'document.categories' ? 'active' : '' }}">
                             <a href="" class="pc-link">
@@ -78,6 +79,8 @@
                                 <span class="pc-mtext">{{ __('Document Archive') }}</span>
                             </a>
                         </li>
+                       
+                       
                     </ul>
                 </li>
 

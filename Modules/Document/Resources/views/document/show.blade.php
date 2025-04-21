@@ -8,7 +8,23 @@
         <div class="col-md-4">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">{{ __('Document Information') }}</h3>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5>{{ __('Document Details') }}</h5>
+                        <div>
+                            <a href="{{ route('tenant.document.requests.create', $document->id) }}" 
+                               class="btn btn-primary btn-sm">
+                                <i class="ti ti-plus"></i>
+                                {{ __('New Request') }}
+                            </a>
+                            @can('edit_documents')
+                            <a href="{{ route('tenant.document.edit', $document->id) }}" 
+                               class="btn btn-warning btn-sm">
+                                <i class="ti ti-pencil"></i>
+                                {{ __('Edit') }}
+                            </a>
+                            @endcan
+                        </div>
+                    </div>
                 </div>
                 <div class="card-body">
                     <div class="mb-3">
@@ -62,6 +78,7 @@
                                 <tr>
                                     <th>{{ __('Version') }}</th>
                                     <th>{{ __('Created At') }}</th>
+                                    <th>{{ __('Status') }}</th>
                                     <th>{{ __('Created By') }}</th>
                                     <th>{{ __('Actions') }}</th>
                                 </tr>
@@ -71,6 +88,7 @@
                                     <tr>
                                         <td>{{ $version->version }}</td>
                                         <td>{{ $version->created_at->format('Y-m-d') }}</td>
+                                        <td>{!! $version->status_badge !!}</td>
                                         <td>{{ $version->created_by }}</td>
                                         <td class="text-right">
                                             <a href="{{ route('tenant.document.serve', ['id' => $document->id, 'version' => $version->id, 'preview' => true]) }}"

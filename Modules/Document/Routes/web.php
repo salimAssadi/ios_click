@@ -14,6 +14,7 @@
 use Modules\Document\Http\Controllers\DocumentController;
 use Modules\Document\Http\Controllers\FileManagerController;
 use Modules\Document\Http\Controllers\DocumentVersionController;
+use Modules\Document\Http\Controllers\DocumentRequestController;
 use Modules\Tenant\Http\Middleware\TenantMiddleware;
 use Modules\Tenant\Http\Middleware\XSSMiddleware;
 
@@ -40,7 +41,17 @@ Route::prefix('document')->name('tenant.document.')->middleware(['auth:tenant','
     Route::get('/file-manager/config', [FileManagerController::class, 'getConfig'])->name('file-manager.config');
     Route::post('/file-manager/upload', [FileManagerController::class, 'upload'])->name('file-manager.upload');
 
-    // Document Version Management Routes
+    // Document Requests Routes
+    Route::prefix('requests')->name('requests.')->group(function () {
+        Route::get('/data', [DocumentRequestController::class, 'index'])->name('index');
+        Route::get('/my', [DocumentRequestController::class, 'myRequests'])->name('my');
+        Route::get('/create/{document}', [DocumentRequestController::class, 'create'])->name('create');
+        Route::post('/', [DocumentRequestController::class, 'store'])->name('store');
+        Route::get('/{request}', [DocumentRequestController::class, 'show'])->name('show');
+        Route::put('/{request}/status', [DocumentRequestController::class, 'updateStatus'])->name('update-status');
+    });
+
+    // Document Versions Routes
     Route::prefix('versions')->name('versions.')->group(function () {
         Route::get('/data', [DocumentVersionController::class, 'data'])->name('data');
         Route::post('/{document}', [DocumentVersionController::class, 'store'])->name('store');

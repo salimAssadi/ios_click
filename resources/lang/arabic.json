@@ -902,5 +902,11 @@
   "Select Template":"اختر القالب",
   "Please select a document type":"الرجاء اختيار نوع الوثيقة",
   "Loading...":"جاري التحميل...",
-  "Document Structure":"هيكل الملفات"
+  "Document Structure":"هيكل الملفات",
+  "Request Type":"نوع الطلب",
+  "Document Requests":"طلبات الوثائق",
+  "Create Document Request":"إنشاء طلب على وثيقة",
+  "Select Request Type":"تحديد نوع الطلب",
+  "Request Details":"تفاصيل الطلب",
+  "Submit Request":"تاكيد الطلب"
 }

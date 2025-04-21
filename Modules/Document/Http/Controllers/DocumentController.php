@@ -19,6 +19,8 @@ use Modules\Document\Entities\Procedure;
 use Modules\Document\Entities\Sample;
 use Yajra\DataTables\Facades\Datatables;
 use Modules\Tenant\Models\Setting;
+use Illuminate\Support\Facades\RateLimiter;
+use Modules\Document\Entities\Status;
 
 class DocumentController extends Controller
 {
@@ -88,7 +90,7 @@ class DocumentController extends Controller
                 'issue_date' => now(),
                 'expiry_date' => $expiryDate,
                 'review_due_date' => $reviewDate,
-                'status' => 'draft',
+                'status_id' => 1,
                 'storage_path' => $filePath,
                 'file_path' => $filePath,
                 'is_active' => true,
@@ -193,7 +195,7 @@ class DocumentController extends Controller
     {
         try {
             $query = Document::query()
-                ->with(['creator', 'lastVersion'])
+                ->with(['creator', 'lastVersion.status'])
                 ->when($request->document_type, function ($q) use ($request) {
                     return $q->byType($request->document_type);
                 })
@@ -207,22 +209,56 @@ class DocumentController extends Controller
                     return '<span class="badge bg-info">v' . $version . '</span>';
                 })
                 ->addColumn('status_badge', function ($document) {
-                    $status = $document->lastVersion->status ?? 'draft';
+                    if (!$document->lastVersion) {
+                        return '<span class="badge bg-secondary">N/A</span>';
+                    }
+                    
+                    if (!$document->lastVersion->status_id) {
+                        return '<span class="badge bg-secondary">Draft</span>';
+                    }
+
+                    $status = Status::find($document->lastVersion->status_id);
+                    if (!$status) {
+                        return '<span class="badge bg-secondary">N/A</span>';
+                    }
+
                     $colors = [
-                        'draft' => 'bg-warning',
-                        'active' => 'bg-success',
-                        'archived' => 'bg-secondary',
+                        1 => 'bg-warning',    // draft
+                        2 => 'bg-info',       // in review
+                        3 => 'bg-success',    // approved
+                        4 => 'bg-primary',    // published
+                        5 => 'bg-secondary'   // archived
                     ];
-                    $color = $colors[$status] ?? 'bg-info';
-                    return '<span class="badge ' . $color . '">' . ucfirst($status) . '</span>';
+                    
+                    $color = $colors[$status->id] ?? 'bg-info';
+                    return '<span class="badge ' . $color . '">' . $status->name . '</span>';
                 })
-                ->addColumn('preview_url', function ($document) {
-                    return route('tenant.document.preview', $document);
+                ->addColumn('actions', function ($document) {
+                    return '<div class="btn-group" role="group">
+                        <a href="' . route('tenant.document.edit', $document->id) . '" 
+                           class="btn btn-sm btn-warning" 
+                           title="' . __('Edit Document') . '">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <a href="' . route('tenant.document.show', $document->id) . '" 
+                           class="btn btn-sm btn-info" 
+                           title="' . __('View Details') . '">
+                            <i class="fas fa-info-circle"></i>
+                        </a>
+                        <a href="' . route('tenant.document.serve', ['id' => $document->id, 'preview' => true]) . '" 
+                           class="btn btn-sm btn-primary"
+                           target="_blank" 
+                           title="' . __('Preview') . '">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        <a href="' . route('tenant.document.serve', ['id' => $document->id]) . '" 
+                           class="btn btn-sm btn-success"
+                           title="' . __('Download') . '">
+                            <i class="fas fa-download"></i>
+                        </a>
+                    </div>';
                 })
-                ->addColumn('download_url', function ($document) {
-                    return route('tenant.document.download', $document);
-                })
-                ->rawColumns(['version_badge', 'status_badge'])
+                ->rawColumns(['version_badge', 'status_badge', 'actions'])
                 ->make(true);
         } catch (\Exception $e) {
             return response()->json([
@@ -315,36 +351,128 @@ class DocumentController extends Controller
         }
     }
 
-    public function preview($id)
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit($id)
     {
-        $document = Document::with(['creator', 'lastVersion'])->findOrFail($id);
-        return view('document::document.show', compact('document'));
+        $document = Document::with(['lastVersion.status'])->findOrFail($id);
+        $statuses = Status::all();
+        return view('document::document.edit', compact('document', 'statuses'));
     }
 
-    public function serveFile($id, Request $request)
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, $id)
     {
-        $document = Document::with(['lastVersion'])->findOrFail($id);
+        $document = Document::findOrFail($id);
         
-        // Get the specific version if requested, otherwise use the latest
-        if ($request->has('version')) {
-            $version = $document->versions()->findOrFail($request->version);
-        } else {
-            $version = $document->lastVersion;
-        }
-
-        if (!$version) {
-            return response()->json(['error' => 'No version found'], 404);
-        }
-
-        // Check if user has permission to access this document
-        if (!auth('tenant')->check()) {
-            return response()->json(['error' => 'Unauthorized'], 403);
-        }
+        // Validate request
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'file' => 'nullable|file|max:10240', // 10MB max
+            'status' => 'required|numeric',
+            'version_notes' => 'nullable|string'
+        ]);
 
         try {
+            \DB::beginTransaction();
+
+            // Update document
+            $document->update([
+                'title' => $request->title,
+                'description' => $request->description
+            ]);
+
+            // Handle file upload if provided
+            if ($request->hasFile('file')) {
+                $file = $request->file('file');
+                $filePath = $file->store('documents/' . $document->id, 'tenants');
+
+                // Create new version
+                $document->versions()->create([
+                    'version' => $document->lastVersion->version + 0.1,
+                    'file_path' => $filePath,
+                    'status_id' => $request->status,
+                    'change_notes' => $request->version_notes,
+                    'created_by' => auth('tenant')->id()
+                ]);
+            } else {
+                // Update existing version status if no new file
+                $document->lastVersion->update([
+                    'status_id' => $request->status,
+                    'change_notes' => $request->version_notes
+                ]);
+            }
+
+            \DB::commit();
+
+            return redirect()
+                ->route('tenant.document.show', $document)
+                ->with('success', __('Document updated successfully'));
+
+        } catch (\Exception $e) {
+            \DB::rollBack();
+            \Log::error('Document update failed', [
+                'error' => $e->getMessage(),
+                'document_id' => $id,
+                'user_id' => auth('tenant')->id()
+            ]);
+
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', $e->getMessage());
+        }
+    }
+
+    /**
+     * Securely serve document files with access control
+     */
+    public function serveFile($id, Request $request)
+    {
+        try {
+            // 1. Get document and version
+            $document = Document::with(['lastVersion'])->findOrFail($id);
+            
+            // 2. Get specific version if requested
+            if ($request->has('version')) {
+                $version = $document->versions()->findOrFail($request->version);
+            } else {
+                $version = $document->lastVersion;
+            }
+
+            if (!$version) {
+                return response()->json(['error' => 'No version found'], 404);
+            }
+
+            // 3. Security checks
+            if (!auth('tenant')->check()) {
+                return response()->json(['error' => 'Unauthorized'], 403);
+            }
+
+            // 4. Check tenant access
+            $user = auth('tenant')->user();
+            if ($user->tenant_id !== $document->tenant_id) {
+                \Log::warning('Unauthorized tenant access attempt', [
+                    'user_id' => $user->id,
+                    'tenant_id' => $user->tenant_id,
+                    'document_id' => $document->id,
+                    'document_tenant' => $document->tenant_id
+                ]);
+                return response()->json(['error' => 'Access denied'], 403);
+            }
+
+            // 5. Rate limiting
+            if (!RateLimiter::remaining('file-downloads:'.$user->id, 60)) {
+                return response()->json(['error' => 'Too many download attempts. Please try again later.'], 429);
+            }
+            RateLimiter::hit('file-downloads:'.$user->id);
+
+            // 6. Get file path and validate
             $filePath = $version->file_path;
-          
-            // Check if file exists
             if (!Storage::disk('tenants')->exists($filePath)) {
                 return response()->json([
                     'error' => 'File not found',
@@ -352,29 +480,49 @@ class DocumentController extends Controller
                 ], 404);
             }
 
-            // For preview (inline display)
+            // 7. Log access
+            \Log::info('Document access', [
+                'user_id' => $user->id,
+                'tenant_id' => $user->tenant_id,
+                'document_id' => $document->id,
+                'version_id' => $version->id,
+                'ip' => $request->ip(),
+                'user_agent' => $request->userAgent()
+            ]);
+
+            // 8. Generate temporary URL or serve file
             if ($request->get('preview', false)) {
+                // For preview, serve directly with strict headers
                 return response()->file(
                     Storage::disk('tenants')->path($filePath),
                     [
                         'Content-Type' => Storage::disk('tenants')->mimeType($filePath),
-                        'Content-Disposition' => 'inline; filename="' . basename($filePath) . '"'
+                        'Content-Disposition' => 'inline; filename="' . basename($filePath) . '"',
+                        'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
+                        'Pragma' => 'no-cache',
+                        'Expires' => '0'
                     ]
                 );
             }
 
-            // For download
-            return Storage::disk('tenants')->download($filePath);
+            // For download, stream the file
+            return Storage::disk('tenants')->download($filePath, basename($filePath), [
+                'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
+                'Pragma' => 'no-cache',
+                'Expires' => '0'
+            ]);
             
         } catch (\Exception $e) {
             \Log::error('File Access Error', [
                 'error' => $e->getMessage(),
-                'file_path' => $filePath ?? null
+                'user_id' => auth('tenant')->id(),
+                'document_id' => $id,
+                'trace' => $e->getTraceAsString()
             ]);
             
             return response()->json([
                 'error' => 'Error accessing file',
-                'message' => $e->getMessage()
+                'message' => app()->environment('local') ? $e->getMessage() : 'An error occurred'
             ], 500);
         }
     }
@@ -401,16 +549,6 @@ class DocumentController extends Controller
             $query->orderBy('created_at', 'desc');
         }])->findOrFail($id);
         return view('document::document.show', compact('document'));
-    }
-
-    public function edit($id)
-    {
-        // TODO: Edit document implementation
-    }
-
-    public function update(Request $request, $id)
-    {
-        // TODO: Update document implementation
     }
 
     public function destroy($id)
