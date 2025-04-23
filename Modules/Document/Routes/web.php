@@ -15,8 +15,11 @@ use Modules\Document\Http\Controllers\DocumentController;
 use Modules\Document\Http\Controllers\FileManagerController;
 use Modules\Document\Http\Controllers\DocumentVersionController;
 use Modules\Document\Http\Controllers\DocumentRequestController;
+use Modules\Document\Http\Controllers\WorkflowController;
+use Modules\Document\Http\Controllers\HistoryLogController;
 use Modules\Tenant\Http\Middleware\TenantMiddleware;
 use Modules\Tenant\Http\Middleware\XSSMiddleware;
+use Modules\Document\Http\Controllers\CategoryController;
 
 Route::prefix('document')->name('tenant.document.')->middleware(['auth:tenant','XSS', 'tenant'])->group(function() {
     Route::get('/', [DocumentController::class, 'index'])->name('index');
@@ -27,6 +30,7 @@ Route::prefix('document')->name('tenant.document.')->middleware(['auth:tenant','
     Route::get('/template/data/{templateId}', [DocumentController::class, 'getTemplateData'])->name('template.data');
     Route::post('/', [DocumentController::class, 'store'])->name('store');
     Route::get('/{document}', [DocumentController::class, 'show'])->name('show');
+    Route::get('/{document}/history', [DocumentController::class, 'history'])->name('history');
     Route::get('/{document}/edit', [DocumentController::class, 'edit'])->name('edit');
     Route::put('/{document}', [DocumentController::class, 'update'])->name('update');
     Route::delete('/{document}', [DocumentController::class, 'destroy'])->name('destroy');
@@ -51,6 +55,15 @@ Route::prefix('document')->name('tenant.document.')->middleware(['auth:tenant','
         Route::put('/{request}/status', [DocumentRequestController::class, 'updateStatus'])->name('update-status');
     });
 
+    // Document History Routes
+    Route::get('/history/show', [HistoryLogController::class, 'index'])->name('history.index');
+    Route::get('/history/data', [HistoryLogController::class, 'data'])->name('history.data');
+
+    // Document Workflow Routes
+    Route::get('/workflow/all', [WorkflowController::class, 'index'])->name('workflow.index');
+    Route::get('/workflow/data', [WorkflowController::class, 'data'])->name('workflow.data');
+    Route::put('/workflow/{document}/status', [WorkflowController::class, 'updateStatus'])->name('workflow.status');
+    Route::resource('category', CategoryController::class);
     // Document Versions Routes
     Route::prefix('versions')->name('versions.')->group(function () {
         Route::get('/data', [DocumentVersionController::class, 'data'])->name('data');

@@ -1,4 +1,4 @@
-@extends('setting::layouts.master')
+@extends('tenant::layouts.app')
 
 @section('content')
     <h1>Hello World</h1>

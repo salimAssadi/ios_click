@@ -186,6 +186,7 @@
                 </div>
             </div>
         </div>
+        
         <div class="col-lg-3 col-md-6">
             <div class="card">
                 <div class="card-body">
@@ -244,7 +245,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-lg-3 col-md-6">
+        {{-- <div class="col-lg-3 col-md-6">
             <div class="card">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
@@ -342,8 +343,87 @@
                     </div>
                 </div>
             </div>
-        </div>                              
+        </div> --}}
 
+        <div class="col-lg-3 col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="avtar bg-light-warning">
+                                <i class="ti ti-file-text f-24"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <p class="mb-1">{{ __('Under Review') }}</p>
+                            <div class="d-flex align-items-center justify-content-between">
+                                <h4 class="mb-0">{{ $result['underReviewDocs'] ?? 0 }}</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="avtar bg-light-info">
+                                <i class="ti ti-file-check f-24"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <p class="mb-1">{{ __('Pending Approval') }}</p>
+                            <div class="d-flex align-items-center justify-content-between">
+                                <h4 class="mb-0">{{ $result['pendingApprovalDocs'] ?? 0 }}</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="avtar bg-light-success">
+                                <i class="ti ti-file-check f-24"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <p class="mb-1">{{ __('Approved') }}</p>
+                            <div class="d-flex align-items-center justify-content-between">
+                                <h4 class="mb-0">{{ $result['approvedDocs'] ?? 0 }}</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="avtar bg-light-secondary">
+                                <i class="ti ti-archive f-24"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <p class="mb-1">{{ __('Archived') }}</p>
+                            <div class="d-flex align-items-center justify-content-between">
+                                <h4 class="mb-0">{{ $result['archivedDocs'] ?? 0 }}</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         {{-- <div class="col-lg-3 col-md-6">
             <div class="card">

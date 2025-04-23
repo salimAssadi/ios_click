@@ -51,7 +51,7 @@
                                         </td>
                                         <td>{{ $request->requestType->name }}</td>
                                         <td>{{ $request->creator->name }}</td>
-                                        <td>{!! $request->status_badge !!}</td>
+                                        <td>{!! $request->requestStatusBadge !!}</td>
                                         <td>{{ $request->created_at->format('Y-m-d') }}</td>
                                         <td class="text-right">
                                             <a href="{{ route('tenant.document.requests.show', $request->id) }}" 

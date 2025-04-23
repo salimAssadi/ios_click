@@ -13,8 +13,8 @@ class CreateDocumentHistoryLogTable extends Migration
      */
     public function up()
     {
-        if (!Schema::hasTable('document_history_log')) {
-        Schema::create('document_history_log', function (Blueprint $table) {
+        if (!Schema::hasTable('document_history_logs')) {
+        Schema::create('document_history_logs', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('document_id'); 
             $table->unsignedBigInteger('version_id'); 
@@ -36,8 +36,8 @@ class CreateDocumentHistoryLogTable extends Migration
      */
     public function down()
     {
-        if (Schema::hasTable('document_history_log')) {
-            Schema::dropIfExists('document_history_log');
+        if (Schema::hasTable('document_history_logs')) {
+            Schema::dropIfExists('document_history_logs');
         }
     }
 }

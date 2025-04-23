@@ -16,7 +16,7 @@ abstract class BaseModuleController extends Controller
 
     public function __construct()
     {
-        $this->middleware('tenant.auth');
+        $this->middleware('auth:tenant');
     }
 
     protected function view($view, $data = [])

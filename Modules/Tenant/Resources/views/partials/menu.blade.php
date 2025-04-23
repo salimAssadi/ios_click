@@ -16,7 +16,7 @@
         </div>
         <div class="navbar-content">
             <ul class="pc-navbar">
-                
+
                 <li class="pc-item {{ in_array($routeName, ['tenant.dashboard', 'home', '']) ? 'active' : '' }}">
                     <a href="{{ route('tenant.dashboard') }}" class="pc-link">
                         <span class="pc-micon"><i class="ti ti-dashboard"></i></span>
@@ -49,23 +49,23 @@
                             </a>
                         </li> --}}
                         <li class="pc-item {{ $routeName == 'document.history' ? 'active' : '' }}">
-                            <a href="" class="pc-link">
+                            <a href="{{ route('tenant.document.history.index') }}" class="pc-link">
                                 <span class="pc-mtext">{{ __('Change History') }}</span>
                             </a>
                         </li>
                         <li class="pc-item {{ $routeName == 'document.workflow' ? 'active' : '' }}">
-                            <a href="" class="pc-link">
+                            <a href="{{ route('tenant.document.workflow.index') }}" class="pc-link">
                                 <span class="pc-mtext">{{ __('Approval Workflow') }}</span>
                             </a>
                         </li>
-                       
-                        <li class="pc-item {{ in_array($routeName, ['tenant.document.requests.index', 'document.requests.create']) ? 'active' : '' }}">
+                        <li
+                            class="pc-item {{ in_array($routeName, ['tenant.document.requests.index', 'document.requests.create']) ? 'active' : '' }}">
                             <a href="{{ route('tenant.document.requests.index') }}" class="pc-link">
                                 <span class="pc-mtext">{{ __('Review Notifications') }}</span>
-                            </a>    
+                            </a>
                         </li>
-                        <li class="pc-item {{ $routeName == 'document.categories' ? 'active' : '' }}">
-                            <a href="" class="pc-link">
+                        <li class="pc-item {{ $routeName == 'document.category' ? 'active' : '' }}">
+                            <a href="{{ route('tenant.document.category.index') }}" class="pc-link">
                                 <span class="pc-mtext">{{ __('Document Categories') }}</span>
                             </a>
                         </li>
@@ -79,8 +79,8 @@
                                 <span class="pc-mtext">{{ __('Document Archive') }}</span>
                             </a>
                         </li>
-                       
-                       
+
+
                     </ul>
                 </li>
 
@@ -258,45 +258,32 @@
 
                 <!-- Settings -->
                 <li
-                    class="pc-item pc-hasmenu {{ in_array($routeName, ['settings.index', 'settings.organization', 'settings.general', 'settings.other', 'settings.consultants', 'settings.users', 'settings.backup']) ? 'active' : '' }}">
+                    class="pc-item pc-hasmenu {{ in_array($routeName, ['setting.index', 'setting.organization', 'setting.general', 'setting.other', 'setting.consultants', 'setting.users', 'setting.backup']) ? 'active' : '' }}">
                     <a href="#!" class="pc-link">
                         <span class="pc-micon"><i class="ti ti-settings"></i></span>
                         <span class="pc-mtext">{{ __('Settings') }}</span>
                         <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
                     </a>
                     <ul class="pc-submenu">
-                        <li class="pc-item {{ $routeName == 'settings.index' ? 'active' : '' }}">
-                            <a href="#" class="pc-link">
+                        <li class="pc-item {{ $routeName == 'tenant.setting.index' ? 'active' : '' }}">
+                            <a href="{{ route('tenant.setting.index') }}" class="pc-link">
                                 <span class="pc-mtext">{{ __('Company Profile') }}</span>
                             </a>
                         </li>
-                        <li class="pc-item {{ $routeName == 'settings.organization' ? 'active' : '' }}">
-                            <a href="#" class="pc-link">
+                        <li
+                            class="pc-item {{ Str::startsWith($routeName, 'tenant.setting.organization.') ? 'active' : '' }}">
+                            <a href="{{ route('tenant.setting.organization.index') }}" class="pc-link">
                                 <span class="pc-mtext">{{ __('Organization Structure') }}</span>
                             </a>
+
                         </li>
-                        <li class="pc-item {{ $routeName == 'settings.general' ? 'active' : '' }}">
-                            <a href="#" class="pc-link">
-                                <span class="pc-mtext">{{ __('General Setting') }}</span>
-                            </a>
-                        </li>
-                        <li class="pc-item {{ $routeName == 'settings.other' ? 'active' : '' }}">
-                            <a href="#" class="pc-link">
-                                <span class="pc-mtext">{{ __('Other Setting') }}</span>
-                            </a>
-                        </li>
-                        <li class="pc-item {{ $routeName == 'settings.consultants' ? 'active' : '' }}">
-                            <a href="#" class="pc-link">
+                        <li class="pc-item {{ $routeName == 'tenant.setting.consultants' ? 'active' : '' }}">
+                            <a href="{{ route('tenant.setting.consultants') }}" class="pc-link">
                                 <span class="pc-mtext">{{ __('Consultants') }}</span>
                             </a>
                         </li>
-                        <li class="pc-item {{ $routeName == 'settings.users' ? 'active' : '' }}">
-                            <a href="#" class="pc-link">
-                                <span class="pc-mtext">{{ __('Users') }}</span>
-                            </a>
-                        </li>
-                        <li class="pc-item {{ $routeName == 'settings.backup' ? 'active' : '' }}">
-                            <a href="#" class="pc-link">
+                        <li class="pc-item {{ $routeName == 'tenant.setting.backup' ? 'active' : '' }}">
+                            <a href="{{ route('tenant.setting.backup') }}" class="pc-link">
                                 <span class="pc-mtext">{{ __('Backup') }}</span>
                             </a>
                         </li>
@@ -305,7 +292,7 @@
 
 
 
-                
+
             </ul>
         </div>
     </div>

@@ -16,7 +16,7 @@ class DocumentVersion extends BaseModel
     protected $fillable = [
         'document_id', 'version', 'issue_date', 'expiry_date', 'review_due_date',
         'status_id', 'approval_date', 'approved_by', 'storage_path', 'file_path', 
-        'change_notes', 'is_active', 'created_by'
+        'change_notes', 'is_active', 'created_by', 'updated_by'
     ];
 
     /**
@@ -39,7 +39,7 @@ class DocumentVersion extends BaseModel
      */
    public function status()
    {
-       return $this->belongsTo(Status::class,'status_id','id')->where('type','document');
+       return $this->belongsTo(Status::class,'status_id','id')->where('type','revision');
    }
 
     public function document()

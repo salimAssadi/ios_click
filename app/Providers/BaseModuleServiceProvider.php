@@ -44,6 +44,6 @@ abstract class BaseModuleServiceProvider extends ServiceProvider
         }
 
         // Register module middleware
-        $this->app['router']->aliasMiddleware('tenant.auth', \App\Http\Middleware\TenantMiddleware::class);
+        $this->app['router']->aliasMiddleware('auth:tenant', \App\Http\Middleware\TenantMiddleware::class);
     }
 }

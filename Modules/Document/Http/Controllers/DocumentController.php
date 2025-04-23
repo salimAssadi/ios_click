@@ -21,6 +21,7 @@ use Yajra\DataTables\Facades\Datatables;
 use Modules\Tenant\Models\Setting;
 use Illuminate\Support\Facades\RateLimiter;
 use Modules\Document\Entities\Status;
+use Modules\Document\Entities\DocumentHistoryLog;
 
 class DocumentController extends Controller
 {
@@ -195,7 +196,7 @@ class DocumentController extends Controller
     {
         try {
             $query = Document::query()
-                ->with(['creator', 'lastVersion.status'])
+                ->with(['creator', 'lastVersion','status'])
                 ->when($request->document_type, function ($q) use ($request) {
                     return $q->byType($request->document_type);
                 })
@@ -209,29 +210,7 @@ class DocumentController extends Controller
                     return '<span class="badge bg-info">v' . $version . '</span>';
                 })
                 ->addColumn('status_badge', function ($document) {
-                    if (!$document->lastVersion) {
-                        return '<span class="badge bg-secondary">N/A</span>';
-                    }
-                    
-                    if (!$document->lastVersion->status_id) {
-                        return '<span class="badge bg-secondary">Draft</span>';
-                    }
-
-                    $status = Status::find($document->lastVersion->status_id);
-                    if (!$status) {
-                        return '<span class="badge bg-secondary">N/A</span>';
-                    }
-
-                    $colors = [
-                        1 => 'bg-warning',    // draft
-                        2 => 'bg-info',       // in review
-                        3 => 'bg-success',    // approved
-                        4 => 'bg-primary',    // published
-                        5 => 'bg-secondary'   // archived
-                    ];
-                    
-                    $color = $colors[$status->id] ?? 'bg-info';
-                    return '<span class="badge ' . $color . '">' . $status->name . '</span>';
+                    return $document->getStatusBadgeAttribute();
                 })
                 ->addColumn('actions', function ($document) {
                     return '<div class="btn-group" role="group">
@@ -545,10 +524,20 @@ class DocumentController extends Controller
 
     public function show($id)
     {
-        $document = Document::with(['creator', 'lastVersion', 'versions' => function($query) {
-            $query->orderBy('created_at', 'desc');
+        $document = Document::with(['creator', 'lastVersion' , 'status', 'versions' => function($query) {
+            $query->orderBy('created_at', 'desc')->with('status');
         }])->findOrFail($id);
         return view('document::document.show', compact('document'));
+    }
+
+    public function history(Document $document)
+    {
+        $history = DocumentHistoryLog::with(['performer', 'version'])
+            ->where('document_id', $document->id)
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
+
+        return view('document::document.history', compact('document', 'history'));
     }
 
     public function destroy($id)

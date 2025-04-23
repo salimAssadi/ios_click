@@ -3,7 +3,8 @@
 namespace Modules\Tenant\Http\Controllers;
 
 use Illuminate\Routing\Controller;
-
+use Modules\Document\Entities\DocumentRequest;
+use Modules\Document\Entities\Status;
 //use Modules\Tenant\Models\Category;
 use Modules\Tenant\Models\Contact;
 use Modules\Tenant\Models\Custom;
@@ -46,6 +47,23 @@ class HomeController extends Controller
                 $result['totalPolicies'] = IsoPolicy::count();
 
                 // $result['totalContact'] = Contact::where('parent_id', \Auth::user()->id)->count();
+
+                // Document Statistics
+                $result['underReviewDocs'] = DocumentRequest::whereHas('approvalStatus', function($q) {
+                    $q->where('code', 'under_review');
+                })->count();
+
+                $result['pendingApprovalDocs'] = DocumentRequest::whereHas('approvalStatus', function($q) {
+                    $q->where('code', 'pending_approval');
+                })->count();
+
+                $result['approvedDocs'] = DocumentRequest::whereHas('approvalStatus', function($q) {
+                    $q->where('code', 'approved');
+                })->count();
+
+                $result['archivedDocs'] = DocumentRequest::whereHas('approvalStatus', function($q) {
+                    $q->where('code', 'archived');
+                })->count();
 
                 $result['documentByCategory'] = $this->documentByCategory();
                 $result['documentBySubCategory'] = $this->documentBySubCategory();

@@ -26,7 +26,7 @@ class DocumentRequest extends BaseModel
         'action_at',
         'action_by',
     ];
-    const STATUS_UNDER_REVIEW = 'under_review';
+    const DEFAULT_REQUEST_STATUS = 'pending';
 
     public function document()
     {
@@ -37,17 +37,35 @@ class DocumentRequest extends BaseModel
     {
         return $this->belongsTo(RequestType::class);
     }
-    
-    public function status()
+
+    public function Status()
+    {
+        return $this->belongsTo(Status::class,'status_id','id');
+    }
+
+    public function requestStatus()
     {
         return $this->belongsTo(Status::class,'status_id','id')->where('type','request');
     }
-    public function getStatusBadgeAttribute()
+
+    public function approvalStatus()
     {
-        if (!$this->status) {
+        return $this->belongsTo(Status::class,'status_id','id')->where('type','approval');
+    }
+
+    public function getRequestStatusBadgeAttribute()
+    {
+        if (!$this->requestStatus) {
             return null;
         }
-        return '<span class="badge ' . $this->status->badge . '">' . __($this->status->name) . '</span>';
+        return '<span class="badge ' . $this->requestStatus->badge . '">' . __($this->requestStatus->name) . '</span>';
+    }
+    public function getApprovalStatusBadgeAttribute()
+    {
+        if (!$this->approvalStatus) {
+            return null;
+        }
+        return '<span class="badge ' . $this->approvalStatus->badge . '">' . __($this->approvalStatus->name) . '</span>';
     }
     public function creator()
     {

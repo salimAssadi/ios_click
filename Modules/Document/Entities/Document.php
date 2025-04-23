@@ -11,7 +11,7 @@ class Document extends BaseModel
 {
     protected $fillable = [
         'title', 'document_number', 'document_type', 'related_process', 'department',
-        'owner', 'created_by', 'creation_date', 'is_obsolete', 'obsoleted_date', 'notes'
+        'owner', 'created_by', 'creation_date', 'status_id', 'obsoleted_date', 'notes'
     ];
 
     protected $casts = [
@@ -22,6 +22,11 @@ class Document extends BaseModel
     public function versions()
     {
         return $this->hasMany(DocumentVersion::class);
+    }
+
+    public function status()
+    {
+        return $this->belongsTo(Status::class, 'status_id')->where('type', 'document');
     }
 
     public function creator()
@@ -36,14 +41,22 @@ class Document extends BaseModel
 
     public function scopeByStatus($query, $status)
     {
-        return $query->whereHas('lastVersion', function ($q) use ($status) {
-            $q->where('status_id', $status);
-        });
+        return $this->status()->where('id', $status);
     }
 
     public function scopeByType($query, $documentType)
     {
         return $query->where('document_type', $documentType);
     }
+
+    public function getStatusBadgeAttribute()
+    {
+        if (!$this->status) {
+            return null;
+        }
+        return '<span class="badge ' . $this->status->badge . '">' . __($this->status->name) . '</span>';
+    }
+
+
 
 }

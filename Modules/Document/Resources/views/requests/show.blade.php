@@ -47,7 +47,7 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label fw-bold">{{ __('Status') }}</label>
-                                <p>{!! $documentRequest->status_badge !!}</p>
+                                <p>{!! $documentRequest->requestStatusBadge !!}</p>
                             </div>
                         </div>
                         
@@ -68,7 +68,7 @@
                         @endif
                     </div>
 
-                    @if(auth()->user()->can('manage_documents') && $documentRequest->status === 'pending')
+                    @if($documentRequest->requestStatus->code === 'pending')
                         <div class="mt-4">
                             <form action="{{ route('tenant.document.requests.update-status', $documentRequest->id) }}" method="POST">
                                 @csrf
@@ -80,9 +80,9 @@
                                             <label class="form-label">{{ __('Update Status') }} <span class="text-danger">*</span></label>
                                             <select name="status" class="form-control @error('status') is-invalid @enderror" required>
                                                 <option value="">{{ __('Select Status') }}</option>
-                                                <option value="in_progress">{{ __('In Progress') }}</option>
-                                                <option value="approved">{{ __('Approve') }}</option>
-                                                <option value="rejected">{{ __('Reject') }}</option>
+                                                @foreach($requestStatus as $status)
+                                                    <option value="{{ $status->id }}" {{ old('status', $documentRequest->status_id) === $status->id ? 'selected' : '' }}>{{ $status->name }}</option>
+                                                @endforeach
                                             </select>
                                             @error('status')
                                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -111,7 +111,7 @@
                             </form>
                         </div>
                     @endif
-
+                    
                     <div class="mt-4">
                         <a href="{{ url()->previous() }}" class="btn btn-secondary">
                             {{ __('Back') }}

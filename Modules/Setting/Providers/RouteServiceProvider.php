@@ -4,6 +4,9 @@ namespace Modules\Setting\Providers;
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
+use Modules\Tenant\Http\Middleware\TenantMiddleware;
+use Modules\Tenant\Http\Middleware\XSSMiddleware;
+use Illuminate\Support\Facades\Auth;
 
 class RouteServiceProvider extends ServiceProvider
 {
@@ -23,8 +26,12 @@ class RouteServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        $this->app['router']->aliasMiddleware('tenant', TenantMiddleware::class);
+        $this->app['router']->aliasMiddleware('xss', XSSMiddleware::class);
+
         parent::boot();
     }
+
 
     /**
      * Define the routes for the application.
@@ -47,7 +54,8 @@ class RouteServiceProvider extends ServiceProvider
      */
     protected function mapWebRoutes()
     {
-        Route::middleware('web')
+        Route::prefix('tenant')
+            ->middleware('web')
             ->namespace($this->moduleNamespace)
             ->group(module_path('Setting', '/Routes/web.php'));
     }

@@ -56,6 +56,7 @@ class Kernel extends HttpKernel
      */
     protected $middlewareAliases = [
         'auth' => \App\Http\Middleware\Authenticate::class,
+        'auth:tenant' => \App\Http\Middleware\Authenticate::class,
         'iso_dic_auth' => \App\Http\Middleware\Authenticated_iso_dic::class,
         'auth.basic' => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
         'auth.session' => \Illuminate\Session\Middleware\AuthenticateSession::class,
