@@ -2,10 +2,12 @@
 
 namespace Modules\Document\Http\Controllers;
 
-use Modules\Document\Models\Category;
-use Modules\Document\Models\SubCategory;
+use Modules\Document\Entities\Category;
+// use Modules\Document\Models\SubCategory;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Auth;
+
 
 
 
@@ -14,9 +16,9 @@ class CategoryController extends Controller
 
     public function index()
     {
-        if (\Auth::user()->can('manage category')) {
+        if ( !Auth::user()->can('manage category')) {
             $categories = Category::where('parent_id', '=', \Auth::user()->id)->get();
-            return view('category.index', compact('categories'));
+            return view('document::category.index', compact('categories'));
         } else {
             return redirect()->back()->with('error', __('Permission Denied!'));
         }
@@ -25,13 +27,13 @@ class CategoryController extends Controller
 
     public function create()
     {
-        return view('category.create');
+        return view('document::category.create');
     }
 
 
     public function store(Request $request)
     {
-        if (\Auth::user()->can('create category')) {
+        if (!Auth::user()->can('create category')) {
             $validator = \Validator::make(
                 $request->all(), [
                 'title' => 'required',
@@ -63,8 +65,8 @@ class CategoryController extends Controller
 
     public function edit(category $category)
     {
-        if (\Auth::user()->can('edit category') ) {
-            return view('category.edit', compact('category'));
+        if (!Auth::user()->can('edit category')) {
+            return view('document::category.edit', compact('category'));
         } else {
             return redirect()->back()->with('error', __('Permission Denied!'));
         }
@@ -73,7 +75,7 @@ class CategoryController extends Controller
 
     public function update(Request $request, category $category)
     {
-        if (\Auth::user()->can('edit category')) {
+        if (!Auth::user()->can('edit category')) {
             $validator = \Validator::make(
                 $request->all(), [
                 'title' => 'required',
@@ -97,7 +99,7 @@ class CategoryController extends Controller
 
     public function destroy(category $category)
     {
-        if (\Auth::user()->can('delete category')) {
+        if (!Auth::user()->can('delete category')) {
             $category->delete();
             return redirect()->back()->with('success', 'Category successfully deleted!');
         } else {

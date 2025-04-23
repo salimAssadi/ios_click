@@ -63,7 +63,16 @@ Route::prefix('document')->name('tenant.document.')->middleware(['auth:tenant','
     Route::get('/workflow/all', [WorkflowController::class, 'index'])->name('workflow.index');
     Route::get('/workflow/data', [WorkflowController::class, 'data'])->name('workflow.data');
     Route::put('/workflow/{document}/status', [WorkflowController::class, 'updateStatus'])->name('workflow.status');
-    Route::resource('category', CategoryController::class);
+
+    Route::group(['prefix' => 'category', 'as' => 'category.'], function () {
+        Route::get('/see', [CategoryController::class, 'index'])->name('index');
+        Route::get('/create', [CategoryController::class, 'create'])->name('create');
+        Route::post('/', [CategoryController::class, 'store'])->name('store');
+        Route::get('/{category}', [CategoryController::class, 'show'])->name('show');
+        Route::get('/{category}/edit', [CategoryController::class, 'edit'])->name('edit');
+        Route::put('/{category}', [CategoryController::class, 'update'])->name('update');
+        Route::delete('/{category}', [CategoryController::class, 'destroy'])->name('destroy');
+    });
     // Document Versions Routes
     Route::prefix('versions')->name('versions.')->group(function () {
         Route::get('/data', [DocumentVersionController::class, 'data'])->name('data');

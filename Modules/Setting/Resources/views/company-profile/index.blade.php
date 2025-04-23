@@ -1,11 +1,10 @@
 @extends('tenant::layouts.app')
 
-@section('title')
+@section('page-title')
     {{ __('Company Profile') }}
 @endsection
 
 @section('content')
-    <div class="pc-content">
         <div class="row">
             <div class="col-sm-12">
                 <div class="card">
@@ -103,5 +102,4 @@
                 </div>
             </div>
         </div>
-    </div>
 @endsection

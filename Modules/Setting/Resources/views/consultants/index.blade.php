@@ -1,11 +1,10 @@
 @extends('tenant::layouts.app')
 
-@section('title')
+@section('page-title')
     {{ __('Consultants') }}
 @endsection
 
 @section('content')
-    <div class="pc-content">
         <div class="row">
             <div class="col-sm-12">
                 <div class="card">
@@ -63,11 +62,10 @@
                 </div>
             </div>
         </div>
-    </div>
 
     <!-- Add/Edit Modal -->
     <div class="modal fade" id="consultantModal" tabindex="-1">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="modalTitle">{{ __('Add Consultant') }}</h5>
@@ -119,7 +117,7 @@
     </div>
 @endsection
 
-@section('javascript')
+@push('script-page')
 <script>
 $(document).ready(function() {
     // Initialize DataTable
@@ -153,7 +151,7 @@ $(document).ready(function() {
 function showAddModal() {
     resetForm();
     $('#modalTitle').text('{{ __("Add Consultant") }}');
-    $('#consultantForm').attr('action', '{{ route("settings.consultants.store") }}');
+    $('#consultantForm').attr('action', '{{ route("tenant.setting.consultants.store") }}');
     $('#formMethod').val('POST');
     $('#consultantModal').modal('show');
 }
@@ -161,11 +159,11 @@ function showAddModal() {
 function showEditModal(id) {
     resetForm();
     $('#modalTitle').text('{{ __("Edit Consultant") }}');
-    $('#consultantForm').attr('action', '{{ route("settings.consultants.update", "") }}/' + id);
+    $('#consultantForm').attr('action', '{{ route("tenant.setting.consultants.update", "") }}/' + id);
     $('#formMethod').val('PUT');
 
     // Fetch consultant data
-    $.get('{{ route("settings.consultants.show", "") }}/' + id, function(response) {
+    $.get('{{ route("tenant.setting.consultants.show", "") }}/' + id, function(response) {
         $('#name').val(response.name);
         $('#email').val(response.email);
         $('#phone').val(response.phone);
@@ -180,7 +178,7 @@ function showEditModal(id) {
 function deleteConsultant(id) {
     if (confirm('{{ __("Are you sure you want to delete this consultant?") }}')) {
         $.ajax({
-            url: '{{ route("settings.consultants.destroy", "") }}/' + id,
+            url: '{{ route("tenant.setting.consultants.destroy", "") }}/' + id,
             method: 'DELETE',
             data: {
                 _token: '{{ csrf_token() }}'
@@ -202,4 +200,4 @@ function resetForm() {
     $('#consultantForm')[0].reset();
 }
 </script>
-@endsection
+@endpush

@@ -4,18 +4,26 @@ namespace Modules\Setting\Entities;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use \App\Models\BaseModel;
+use App\Traits\Localizable;
 
-class Position extends Model
+class Position extends BaseModel
 {
     use HasFactory;
+    use Localizable;    
 
     protected $fillable = [
         'department_id',
-        'title',
+        'title_ar',
+        'title_en',
         'reports_to_id',
         'description'
     ];
 
+    public function getNameAttribute()
+    {
+        return $this->getLocalizedAttribute('title');
+    }
     public function department()
     {
         return $this->belongsTo(Department::class);

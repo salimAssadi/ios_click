@@ -3,10 +3,10 @@
 namespace Modules\Setting\Http\Controllers;
 
 use App\Http\Controllers\BaseModuleController;
-use Modules\Setting\Entities\Department;
-use Modules\Setting\Entities\Position;
-use Modules\Setting\Entities\Employee;
 use Illuminate\Http\Request;
+use Modules\Setting\Entities\Department;
+use Modules\Setting\Entities\Employee;
+use Modules\Setting\Entities\Position;
 
 class OrganizationController extends BaseModuleController
 {
@@ -14,7 +14,7 @@ class OrganizationController extends BaseModuleController
     {
         parent::__construct();
         $this->viewPath = 'setting::organization';
-        $this->routePrefix = 'tenant.settings.organization';
+        $this->routePrefix = 'tenant.setting.organization';
         $this->moduleName = 'Setting';
     }
 
@@ -36,13 +36,12 @@ class OrganizationController extends BaseModuleController
     public function storeDepartment(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'name_ar' => 'required|string|max:255',
+            'name_en' => 'required|string|max:255',
             'parent_id' => 'nullable|exists:departments,id',
             'description' => 'nullable|string',
         ]);
 
-        $validated['organization_id'] = tenantId();
-        
         if ($validated['parent_id']) {
             $parent = Department::find($validated['parent_id']);
             $validated['level'] = $parent->level + 1;
@@ -57,7 +56,8 @@ class OrganizationController extends BaseModuleController
     {
         $validated = $request->validate([
             'department_id' => 'required|exists:departments,id',
-            'title' => 'required|string|max:255',
+            'title_ar' => 'required|string|max:255',
+            'title_en' => 'required|string|max:255',
             'reports_to_id' => 'nullable|exists:positions,id',
             'description' => 'nullable|string',
         ]);
@@ -88,7 +88,8 @@ class OrganizationController extends BaseModuleController
         $department = Department::findOrFail($id);
 
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'name_ar' => 'required|string|max:255',
+            'name_en' => 'required|string|max:255',
             'description' => 'nullable|string',
         ]);
 
@@ -102,7 +103,8 @@ class OrganizationController extends BaseModuleController
         $position = Position::findOrFail($id);
 
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
+            'title_ar' => 'required|string|max:255',
+            'title_en' => 'required|string|max:255',
             'reports_to_id' => 'nullable|exists:positions,id',
             'description' => 'nullable|string',
         ]);
@@ -157,8 +159,9 @@ class OrganizationController extends BaseModuleController
     public function getOrganizationChart()
     {
         $departments = Department::with(['positions.employees', 'children'])
-            ->where('organization_id', tenantId())
             ->whereNull('parent_id')
+            ->orderBy('level', 'asc')
+            ->orderBy('id', 'asc')
             ->get();
 
         $chart = $this->buildOrganizationChart($departments);
@@ -171,47 +174,130 @@ class OrganizationController extends BaseModuleController
         $chart = [];
 
         foreach ($departments as $department) {
-            $node = [
+            $deptNode = [
                 'id' => 'dept_' . $department->id,
                 'text' => $department->name,
                 'type' => 'department',
-                'children' => []
+                'icon' => 'fas fa-building text-primary',
+                'state' => ['opened' => false],
+                'children' => [],
             ];
 
-            // Add positions in this department
+            // خريطة المناصب حسب ID لسهولة الربط بينهم
+            $positionMap = [];
+
             foreach ($department->positions as $position) {
                 $posNode = [
                     'id' => 'pos_' . $position->id,
-                    'text' => $position->title,
+                    'text' => $position->title_ar,
                     'type' => 'position',
-                    'data' => [
-                        'reports_to' => $position->reports_to_id ? 'pos_' . $position->reports_to_id : null
-                    ]
+                    'icon' => 'fas fa-briefcase text-primary',
+                    'state' => ['opened' => false],
+                    'children' => [],
                 ];
 
-                // Add employee if position is filled
+                // إضافة الموظف الحالي إن وجد
                 if ($position->currentEmployee) {
-                    $posNode['children'] = [[
+                    $posNode['children'][] = [
                         'id' => 'emp_' . $position->currentEmployee->id,
                         'text' => $position->currentEmployee->name,
-                        'type' => 'employee'
-                    ]];
+                        'type' => 'employee',
+                        'icon' => 'fas fa-user-tie text-success',
+                        'state' => ['opened' => false],
+                    ];
                 }
 
-                $node['children'][] = $posNode;
+                $positionMap[$position->id] = $posNode;
             }
 
-            // Add sub-departments
+            // ربط المناصب مع بعضها حسب reports_to
+            foreach ($department->positions as $position) {
+                $posNode = $positionMap[$position->id];
+
+                if ($position->reports_to_id && isset($positionMap[$position->reports_to_id])) {
+                    $positionMap[$position->reports_to_id]['children'][] = $posNode;
+                } else {
+                    $deptNode['children'][] = $posNode;
+                }
+            }
+
+            // معالجة الأقسام الفرعية بشكل تكراري
             if ($department->children->count() > 0) {
-                $node['children'] = array_merge(
-                    $node['children'],
+                $deptNode['children'] = array_merge(
+                    $deptNode['children'],
                     $this->buildOrganizationChart($department->children)
                 );
             }
 
-            $chart[] = $node;
+            $chart[] = $deptNode;
         }
 
         return $chart;
+    }
+
+    public function showDepartment($id)
+    {
+        $department = Department::findOrFail($id);
+        $departments = Department::whereNull('parent_id')->get();
+        
+        return response()->json([
+            'id' => $department->id,
+            'name_ar' => $department->name_ar,
+            'name_en' => $department->name_en,
+            'parent_id' => $department->parent_id,
+            'description' => $department->description,
+            'departments' => $departments
+        ]);
+    }
+
+    public function showPosition($id)
+    {
+        $position = Position::findOrFail($id);
+        $departments = Department::all();
+        $positions = Position::with('department')->get();
+
+        return response()->json([
+            'id' => $position->id,
+            'title_ar' => $position->title_ar,
+            'title_en' => $position->title_en,
+            'department_id' => $position->department_id,
+            'reports_to_id' => $position->reports_to_id,
+            'description' => $position->description,
+            'departments' => $departments,
+            'positions' => $positions
+        ]);
+    }
+
+    public function showEmployee($id)
+    {
+        $employee = Employee::findOrFail($id);
+        $positions = Position::with('department')->get();
+
+        return response()->json([
+            'id' => $employee->id,
+            'name' => $employee->name,
+            'email' => $employee->email,
+            'phone' => $employee->phone,
+            'status' => $employee->status,
+            'position_id' => $employee->position_id,
+            'user_id' => $employee->user_id,
+            'positions' => $positions
+        ]);
+    }
+
+    private function addToParentPosition(&$nodes, $parentId, $newNode)
+    {
+        foreach ($nodes as &$node) {
+            if ($node['id'] === $parentId) {
+                $node['children'][] = $newNode;
+                return true;
+            }
+            if (!empty($node['children'])) {
+                if ($this->addToParentPosition($node['children'], $parentId, $newNode)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

@@ -4,8 +4,10 @@ namespace Modules\Document\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Eloquent\Factory;
+use App\Providers\BaseModuleServiceProvider;
 
-class DocumentServiceProvider extends ServiceProvider
+
+class DocumentServiceProvider extends BaseModuleServiceProvider
 {
     /**
      * @var string $moduleName

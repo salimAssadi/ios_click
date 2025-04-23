@@ -932,5 +932,10 @@
   "No matching records found": "لم يتم العثور على نتائج مطابقة",
   "No data available in table": "لا توجد بيانات متاحة في الجدول",
   "First": "الأول",
-  "Last": "الأخير"
+  "Last": "الأخير",
+  "Organization Chart": "الهيكل التنظيمي",
+  "Add Department": "إضافة قسم",
+  "Add Position": "إضافة منصب",
+  "Add Employee": "إضافة موظف",
+  "Management": "إدارة"
 }

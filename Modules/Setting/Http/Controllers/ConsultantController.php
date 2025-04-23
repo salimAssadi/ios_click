@@ -18,7 +18,7 @@ class ConsultantController extends BaseModuleController
 
     public function index()
     {
-        $consultants = Consultant::where('tenant_id', tenantId())->get();
+        $consultants = Consultant::get();
         return $this->view('index', compact('consultants'));
     }
 
@@ -57,6 +57,11 @@ class ConsultantController extends BaseModuleController
         $consultant->update($validated);
 
         return $this->success('Consultant updated successfully.');
+    }
+    public function show($id)
+    {
+        $consultant = Consultant::findOrFail($id);
+        return $this->view('show', compact('consultant'));
     }
 
     public function destroy($id)

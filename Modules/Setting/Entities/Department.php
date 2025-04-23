@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use \App\Models\BaseModel;
 use Modules\Setting\Entities\Position;
+use App\Traits\Localizable;
 
 class Department extends BaseModel
 {
-    use HasFactory;
+    use HasFactory ,Localizable;
 
     protected $fillable = [
         'name_ar',
@@ -19,6 +20,10 @@ class Department extends BaseModel
         'level'
     ];
 
+    public function getNameAttribute()
+    {
+        return $this->getLocalizedAttribute('name');
+    }
     public function parent()
     {
         return $this->belongsTo(Department::class, 'parent_id');

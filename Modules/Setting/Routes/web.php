@@ -52,12 +52,15 @@ Route::prefix('setting')->name('tenant.setting.')->middleware(['auth:tenant', 'X
         Route::delete('/employees/{id}', [OrganizationController::class, 'destroyEmployee'])->name('employees.destroy');
         Route::get('/employees/{id}', [OrganizationController::class, 'showEmployee'])->name('employees.show');
     });
-
+    
     // Consultants
-    Route::get('/consultants/all', [ConsultantController::class, 'index'])->name('consultants');
+    Route::get('/consultants', [ConsultantController::class, 'index'])->name('consultants');
     Route::post('/consultants', [ConsultantController::class, 'store'])->name('consultants.store');
     Route::put('/consultants/{id}', [ConsultantController::class, 'update'])->name('consultants.update');
     Route::delete('/consultants/{id}', [ConsultantController::class, 'destroy'])->name('consultants.destroy');
+    Route::get('/consultants/{id}', [ConsultantController::class, 'show'])->name('consultants.show');
+
+    
 
     // Backup
     Route::get('/backup', [BackupController::class, 'index'])->name('backup');

@@ -13,9 +13,9 @@
     </ul>
 @endsection
 @section('card-action-btn')
-    @if (Gate::check('create category'))
+    @if (!Gate::check('create category'))
         <a class="btn btn-secondary btn-sm ml-20 customModal" href="#" data-size="md"
-            data-url="{{ route('category.create') }}" data-title="{{ __('Create Category') }}"> <i
+            data-url="{{ route('tenant.document.category.create') }}" data-title="{{ __('Create Category') }}"> <i
                 class="ti-plus mr-5"></i>{{ __('Create Category') }}</a>
     @endif
 @endsection
@@ -30,10 +30,10 @@
                                 {{ __('Category') }}
                             </h5>
                         </div>
-                        @if (Gate::check('create category'))
+                        @if (!Gate::check('create category'))
                             <div class="col-auto">
                                 <a href="#" class="btn btn-secondary customModal" data-size="md"
-                                    data-url="{{ route('category.create') }}" data-title="{{ __('Create Category') }} ">
+                                    data-url="{{ route('tenant.document.category.create') }}" data-title="{{ __('Create Category') }} ">
                                     <i class="ti ti-circle-plus align-text-bottom"></i>
                                     {{ __('Create Category') }}
                                 </a>
@@ -48,7 +48,7 @@
                                 <tr>
                                     <th>{{ __('Title') }}</th>
                                     <th>{{ __('Created At') }}</th>
-                                    @if (Gate::check('edit category') || Gate::check('delete category'))
+                                    @if (!Gate::check('edit category') || !Gate::check('delete category'))
                                         <th class="text-right">{{ __('Action') }}</th>
                                     @endif
                                 </tr>
@@ -63,19 +63,19 @@
                                             {{ $category->created_at }}
                                         </td>
 
-                                        @if (Gate::check('edit category') || Gate::check('delete category'))
+                                        @if (!Gate::check('edit category') || !Gate::check('delete category'))
                                             <td class="text-right">
                                                 <div class="cart-action">
-                                                    {!! Form::open(['method' => 'DELETE', 'route' => ['category.destroy', $category->id]]) !!}
+                                                    {!! Form::open(['method' => 'DELETE', 'route' => ['tenant.document.category.destroy', $category->id]]) !!}
 
-                                                    @if (Gate::check('edit category'))
+                                                    @if (!Gate::check('edit category'))
                                                         <a class="avtar avtar-xs btn-link-secondary text-secondary customModal" data-bs-toggle="tooltip"
                                                             data-bs-original-title="{{ __('Edit') }}" href="#"
-                                                            data-url="{{ route('category.edit', $category->id) }}"
+                                                            data-url="{{ route('tenant.document.category.edit', $category->id) }}"
                                                             data-title="{{ __('Edit Category') }}"> <i
                                                                 data-feather="edit"></i></a>
                                                     @endif
-                                                    @if (Gate::check('delete category'))
+                                                    @if (!Gate::check('delete category'))
                                                         <a class=" avtar avtar-xs btn-link-danger text-danger confirm_dialog" data-bs-toggle="tooltip"
                                                             data-bs-original-title="{{ __('Detete') }}" href="#"> <i
                                                                 data-feather="trash-2"></i></a>

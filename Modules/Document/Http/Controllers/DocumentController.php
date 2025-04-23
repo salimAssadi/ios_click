@@ -17,6 +17,7 @@ use Modules\Document\Entities\IsoSystem;
 use Modules\Document\Entities\IsoSystemProcedure;
 use Modules\Document\Entities\Procedure;
 use Modules\Document\Entities\Sample;
+use Modules\Setting\Entities\Department;
 use Yajra\DataTables\Facades\Datatables;
 use Modules\Tenant\Models\Setting;
 use Illuminate\Support\Facades\RateLimiter;
@@ -35,6 +36,7 @@ class DocumentController extends Controller
     public function create()
     {
         $isoSystems = IsoSystem::where('status', true)->get();
+        $department= Department::get();
         return view('document::document.create-document', compact('isoSystems'));
     }
 
