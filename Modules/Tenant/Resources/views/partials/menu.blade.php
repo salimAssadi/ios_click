@@ -245,13 +245,28 @@
                         <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
                     </a>
                     <ul class="pc-submenu">
-                        <li class="pc-item {{ $routeName == 'roles.index' ? 'active' : '' }}">
-                            <a href="" class="pc-link">
-                                <span class="pc-mtext">{{ __('All Roles') }}</span>
+                        <li class="pc-item {{ $routeName == 'tenant.role.users.index' ? 'active' : '' }}">
+                            <a href="{{ route('tenant.role.users.index') }}" class="pc-link">
+                                <span class="pc-mtext">{{ __('Users') }}</span>
+                            </a>
+                        </li>
+                        <li class="pc-item {{ $routeName == 'tenant.role.roles.index' ? 'active' : '' }}">
+                            <a href="{{ route('tenant.role.roles.index') }}" class="pc-link">
+                                <span class="pc-mtext">{{ __('Roles') }}</span>
+                            </a>
+                        </li>
+                        <li class="pc-item {{ $routeName == 'tenant.role.permissions.index' ? 'active' : '' }}">
+                            <a href="{{ route('tenant.role.permissions.index') }}" class="pc-link">
+                                <span class="pc-mtext">{{ __('Permissions') }}</span>
                             </a>
                         </li>
                     </ul>
                 </li>
+
+
+
+
+                <!-- Settings -->
 
 
 

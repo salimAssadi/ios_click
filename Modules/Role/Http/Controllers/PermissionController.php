@@ -5,10 +5,9 @@ namespace Modules\Role\Http\Controllers;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 
-class RoleController extends Controller
+class PermissionController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -16,8 +15,8 @@ class RoleController extends Controller
      */
     public function index()
     {
-        $roles = Role::all();
-        return view('role::roles.index', compact('roles'));
+        $permissions = Permission::all();
+        return view('role::permissions.index', compact('permissions'));
     }
 
     /**
@@ -26,8 +25,7 @@ class RoleController extends Controller
      */
     public function create()
     {
-        $permissions = Permission::all();
-        return view('role::roles.create', compact('permissions'));
+        return view('role::permissions.create');
     }
 
     /**
@@ -38,22 +36,17 @@ class RoleController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255|unique:roles',
+            'name' => 'required|string|max:255|unique:permissions',
             'guard_name' => 'nullable|string|max:255',
-            'permissions' => 'nullable|array',
         ]);
 
-        $role = Role::create([
+        Permission::create([
             'name' => $request->name,
             'guard_name' => $request->guard_name ?? 'web',
         ]);
 
-        if ($request->has('permissions')) {
-            $role->syncPermissions($request->permissions);
-        }
-
-        return redirect()->route('role.roles.index')
-            ->with('success', 'Role created successfully.');
+        return redirect()->route('role.permissions.index')
+            ->with('success', 'Permission created successfully.');
     }
 
     /**
@@ -63,8 +56,8 @@ class RoleController extends Controller
      */
     public function show($id)
     {
-        $role = Role::with('permissions')->findOrFail($id);
-        return view('role::roles.show', compact('role'));
+        $permission = Permission::findOrFail($id);
+        return view('role::permissions.show', compact('permission'));
     }
 
     /**
@@ -74,11 +67,8 @@ class RoleController extends Controller
      */
     public function edit($id)
     {
-        $role = Role::findOrFail($id);
-        $permissions = Permission::all();
-        $rolePermissions = $role->permissions->pluck('id')->toArray();
-        
-        return view('role::roles.edit', compact('role', 'permissions', 'rolePermissions'));
+        $permission = Permission::findOrFail($id);
+        return view('role::permissions.edit', compact('permission'));
     }
 
     /**
@@ -90,26 +80,18 @@ class RoleController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'name' => 'required|string|max:255|unique:roles,name,' . $id,
+            'name' => 'required|string|max:255|unique:permissions,name,' . $id,
             'guard_name' => 'nullable|string|max:255',
-            'permissions' => 'nullable|array',
         ]);
 
-        $role = Role::findOrFail($id);
-        $role->update([
+        $permission = Permission::findOrFail($id);
+        $permission->update([
             'name' => $request->name,
             'guard_name' => $request->guard_name ?? 'web',
         ]);
 
-        // Sync permissions
-        if ($request->has('permissions')) {
-            $role->syncPermissions($request->permissions);
-        } else {
-            $role->syncPermissions([]);
-        }
-
-        return redirect()->route('role.roles.index')
-            ->with('success', 'Role updated successfully.');
+        return redirect()->route('role.permissions.index')
+            ->with('success', 'Permission updated successfully.');
     }
 
     /**
@@ -119,10 +101,10 @@ class RoleController extends Controller
      */
     public function destroy($id)
     {
-        $role = Role::findOrFail($id);
-        $role->delete();
+        $permission = Permission::findOrFail($id);
+        $permission->delete();
 
-        return redirect()->route('role.roles.index')
-            ->with('success', 'Role deleted successfully.');
+        return redirect()->route('role.permissions.index')
+            ->with('success', 'Permission deleted successfully.');
     }
 }

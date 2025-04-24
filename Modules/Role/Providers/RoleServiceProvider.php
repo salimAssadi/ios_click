@@ -4,8 +4,9 @@ namespace Modules\Role\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Eloquent\Factory;
+use App\Providers\BaseModuleServiceProvider;
 
-class RoleServiceProvider extends ServiceProvider
+class RoleServiceProvider extends BaseModuleServiceProvider
 {
     /**
      * @var string $moduleName

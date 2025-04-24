@@ -48,6 +48,7 @@ class RouteServiceProvider extends ServiceProvider
     protected function mapWebRoutes()
     {
         Route::middleware('web')
+            ->prefix('tenant')
             ->namespace($this->moduleNamespace)
             ->group(module_path('Role', '/Routes/web.php'));
     }

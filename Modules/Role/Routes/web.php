@@ -1,5 +1,8 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
+
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -11,6 +14,16 @@
 |
 */
 
-Route::prefix('role')->group(function() {
-    Route::get('/', 'RoleController@index');
+Route::prefix('role')->name('tenant.role.')->middleware(['auth:tenant','tenant','XSS'])->group(function() {
+    // Roles Management
+    Route::resource('roles', 'RoleController');
+    
+    // Permissions Management
+    Route::resource('permissions', 'PermissionController');
+    
+    // User Management
+    Route::resource('users', 'UserController');
+    
+    // Dashboard
+    Route::get('/', 'RoleController@index')->name('dashboard');
 });
