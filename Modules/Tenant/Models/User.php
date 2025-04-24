@@ -10,16 +10,16 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Traits\HasRoles;
 use Lab404\Impersonate\Models\Impersonate;
+use Modules\Tenant\Traits\BelongsToTenant;
 
 
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    protected $connection = 'tenant';
     use HasRoles;
     use Notifiable;
     use Impersonate;
-
+    protected $guard_name = 'tenant';
     protected $table = 'users';
 
     protected $fillable = [

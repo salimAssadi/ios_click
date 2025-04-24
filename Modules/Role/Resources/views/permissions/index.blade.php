@@ -2,8 +2,8 @@
 @section('page-title')
     {{ __('Permissions Management') }}
 @endsection
+
 @section('content')
-<div class="container">
     <div class="row">
         <div class="col-md-12">
             <div class="card">
@@ -21,12 +21,13 @@
                     @endif
 
                     <div class="table-responsive">
-                        <table class="table table-striped">
+                        <table class="table table-striped basic-datatable">
                             <thead>
                                 <tr>
                                     <th>{{ __('ID') }}</th>
                                     <th>{{ __('Name') }}</th>
                                     <th>{{ __('Guard Name') }}</th>
+                                    <th>{{ __('Module') }}</th>
                                     <th>{{ __('Actions') }}</th>
                                 </tr>
                             </thead>
@@ -36,8 +37,9 @@
                                     <td>{{ $permission->id }}</td>
                                     <td>{{ $permission->name }}</td>
                                     <td>{{ $permission->guard_name }}</td>
+                                    <td>{{ $permission->module }}</td>
                                     <td>
-                                        <div class="btn-group">
+                                        <div class="btn-group gap-2">
                                             <a href="{{ route('tenant.role.permissions.show', $permission->id) }}" class="btn btn-info btn-sm">
                                                 <i class="fa fa-eye"></i>
                                             </a>
@@ -62,5 +64,5 @@
             </div>
         </div>
     </div>
-</div>
 @endsection
+

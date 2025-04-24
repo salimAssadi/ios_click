@@ -5,8 +5,8 @@ namespace Modules\Role\Http\Controllers;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
+use Modules\Role\Entities\Role;
+use Modules\Role\Entities\Permission;
 
 class RoleController extends Controller
 {
@@ -24,9 +24,10 @@ class RoleController extends Controller
      * Show the form for creating a new resource.
      * @return Renderable
      */
+   
     public function create()
     {
-        $permissions = Permission::all();
+        $permissions = Permission::all()->groupBy('module');
         return view('role::roles.create', compact('permissions'));
     }
 
@@ -40,19 +41,23 @@ class RoleController extends Controller
         $request->validate([
             'name' => 'required|string|max:255|unique:roles',
             'guard_name' => 'nullable|string|max:255',
-            'permissions' => 'nullable|array',
+            'permissions' => 'required|array',
         ]);
 
-        $role = Role::create([
-            'name' => $request->name,
-            'guard_name' => $request->guard_name ?? 'web',
-        ]);
+        $name             = $request['name'];
+        $role             = new Role();
+        $role->name       = $name;
+        $role->guard_name ="tenant";
+        $role->created_by = auth('tenant')->user()->id;
+        $permissions      = $request['permissions'];
+        $role->save();
 
-        if ($request->has('permissions')) {
-            $role->syncPermissions($request->permissions);
+        foreach($permissions as $permission)
+        {
+            $p    = Permission::where('id', '=', $permission)->firstOrFail();
+            $role->givePermissionTo($p);
         }
-
-        return redirect()->route('role.roles.index')
+        return redirect()->route('tenant.role.roles.index')
             ->with('success', 'Role created successfully.');
     }
 
@@ -75,11 +80,11 @@ class RoleController extends Controller
     public function edit($id)
     {
         $role = Role::findOrFail($id);
-        $permissions = Permission::all();
-        $rolePermissions = $role->permissions->pluck('id')->toArray();
-        
+        $permissions = Permission::all()->groupBy('module');
+        $rolePermissions = $role->permissions->pluck('name', 'id')->toArray();
+
         return view('role::roles.edit', compact('role', 'permissions', 'rolePermissions'));
-    }
+}
 
     /**
      * Update the specified resource in storage.
@@ -94,21 +99,25 @@ class RoleController extends Controller
             'guard_name' => 'nullable|string|max:255',
             'permissions' => 'nullable|array',
         ]);
-
+        $input       = $request->except(['permissions']);
+        $permissions = $request['permissions'];
         $role = Role::findOrFail($id);
-        $role->update([
-            'name' => $request->name,
-            'guard_name' => $request->guard_name ?? 'web',
-        ]);
+        $role->fill($input)->save();
 
-        // Sync permissions
-        if ($request->has('permissions')) {
-            $role->syncPermissions($request->permissions);
-        } else {
-            $role->syncPermissions([]);
+        $p_all = Permission::all();
+
+        foreach($p_all as $p)
+        {
+            $role->revokePermissionTo($p);
         }
 
-        return redirect()->route('role.roles.index')
+        foreach($permissions as $permission)
+        {
+            $p = Permission::where('id', '=', $permission)->firstOrFail();
+            $role->givePermissionTo($p);
+        }
+
+        return redirect()->route('tenant.role.roles.index')
             ->with('success', 'Role updated successfully.');
     }
 
@@ -122,7 +131,7 @@ class RoleController extends Controller
         $role = Role::findOrFail($id);
         $role->delete();
 
-        return redirect()->route('role.roles.index')
+        return redirect()->route('tenant.role.roles.index')
             ->with('success', 'Role deleted successfully.');
     }
 }

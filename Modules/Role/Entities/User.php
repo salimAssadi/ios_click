@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 
 
+
 class User extends Authenticatable implements MustVerifyEmail
 {
     use HasRoles;
@@ -22,6 +23,7 @@ class User extends Authenticatable implements MustVerifyEmail
     use Impersonate;
     use HasFactory, BelongsToTenant;
 
+    protected $guard_name = 'tenant';
 
     protected $table = 'users';
 

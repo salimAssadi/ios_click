@@ -10,16 +10,15 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Traits\HasRoles;
 use Lab404\Impersonate\Models\Impersonate;
+use Modules\Setting\Entities\Employee;
 
 
-
-class User extends Authenticatable implements MustVerifyEmail
-{
-    protected $connection = 'tenant';
+class User extends Authenticatable 
+{   
     use HasRoles;
     use Notifiable;
     use Impersonate;
-
+    protected $guard_name = 'tenant';
     protected $table = 'users';
 
     protected $fillable = [
@@ -43,6 +42,11 @@ class User extends Authenticatable implements MustVerifyEmail
     public function sendEmailVerificationNotification()
     {
         $this->notify(new VerifyEmail);
+    }
+
+    public function employee()
+    {
+        return $this->hasOne(Employee::class);
     }
 
     protected $hidden = [

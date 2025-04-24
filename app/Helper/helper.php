@@ -163,6 +163,44 @@ if (!function_exists('subscriptionPaymentSettings')) {
     }
 }
 
+if (!function_exists('tenant_can')) {
+    function tenant_can(string $permission): bool
+    {
+        try {
+            $user = auth()->guard('tenant')->user();
+
+            if (!$user) {
+                return false; // لا يوجد مستخدم مسجل دخول
+            }
+
+            return $user->hasPermissionTo($permission, 'tenant');
+        } catch (\Exception $e) {
+            // log($e->getMessage()); // خيار للتتبع
+            return false; // في حال حدوث خطأ في التحقق
+        }
+    }
+}
+
+function tenant_can_any(array $permissions): bool
+{
+    try {
+        $user = auth()->guard('tenant')->user();
+
+        if (!$user) return false;
+
+        foreach ($permissions as $permission) {
+            if ($user->hasPermissionTo($permission, 'tenant')) {
+                return true;
+            }
+        }
+
+        return false;
+    } catch (\Exception $e) {
+        return false;
+    }
+}
+
+
 if (!function_exists('invoicePaymentSettings')) {
     function invoicePaymentSettings($id)
     {

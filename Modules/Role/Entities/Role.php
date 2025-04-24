@@ -5,11 +5,13 @@ namespace Modules\Role\Entities;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Modules\Role\Entities\User;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role as SpatieRole;
 use App\Models\BaseModel;
+use App\Traits\BelongsToTenant;
 
-class Role extends BaseModel
+class Role extends SpatieRole
 {
-    use HasFactory;
+    use HasFactory, BelongsToTenant;
 
     protected $fillable = [
         'name',
@@ -20,21 +22,23 @@ class Role extends BaseModel
     /**
      * The users that belong to the role.
      */
-    public function users()
-    {
-        return $this->belongsToMany(User::class, 'role_user', 'role_id', 'user_id');
-    }
-    
+   
     /**
      * The permissions that belong to the role.
      */
-    public function permissions()
-    {
-        return $this->belongsToMany(Permission::class, 'role_permission', 'role_id', 'permission_id');
-    }
+    // public function permissions()
+    // {
+    //     return $this->belongsToMany(Permission::class, 'role_has_permissions', 'role_id', 'permission_id');
+    // }
     
     protected static function newFactory()
     {
         return \Modules\Role\Database\factories\RoleFactory::new();
     }
 }
+
+
+
+
+
+

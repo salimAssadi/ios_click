@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Modules\Tenant\Models\User;
+use Modules\Tenant\Entities\User;
 use Modules\Tenant\Services\TenantService;
 
 class LoginController extends Controller

@@ -10,7 +10,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Traits\HasRoles;
 use Lab404\Impersonate\Models\Impersonate;
-
+use Modules\Setting\Entities\Employee;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -95,6 +95,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return Document::where('parent_id', '=', parentId())->count();
     }
 
+   
     public function subscriptions()
     {
         return $this->hasOne('App\Models\Subscription', 'id', 'subscription');

@@ -3,6 +3,7 @@
     // $ids = parentId();
     // $authUser = \App\Models\User::find($ids);
     // $subscription = \App\Models\Subscription::find($authUser->subscription);
+    $authUser = Auth::guard('tenant')->user();
     $routeName = \Request::route()->getName();
     // $pricing_feature_settings = getSettingsValByIdName(1, 'pricing_feature');
 @endphp
@@ -23,8 +24,8 @@
                         <span class="pc-mtext">{{ __('Dashboard') }}</span>
                     </a>
                 </li>
-
                 <!-- Document Control -->
+                @if(tenant_can('Manage Documents'))
                 <li
                     class="pc-item pc-hasmenu {{ in_array($routeName, ['document.index', 'document.show', 'document.requests.index', 'document.requests.create', 'document.requests.my']) ? 'active' : '' }}">
                     <a href="#!" class="pc-link">
@@ -83,7 +84,7 @@
 
                     </ul>
                 </li>
-
+                @endif
                 <!-- Audit Management -->
                 <li
                     class="pc-item pc-hasmenu {{ in_array($routeName, ['audit.index', 'audit.show']) ? 'active' : '' }}">

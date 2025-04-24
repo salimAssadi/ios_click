@@ -5,7 +5,7 @@ namespace Modules\Role\Http\Controllers;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use Spatie\Permission\Models\Permission;
+use Modules\Role\Entities\Permission;
 
 class PermissionController extends Controller
 {
@@ -25,7 +25,9 @@ class PermissionController extends Controller
      */
     public function create()
     {
-        return view('role::permissions.create');
+       
+        $modules = Permission::select('module')->distinct()->pluck('module')->filter()->all();
+        return view('role::permissions.create', compact('modules'));
     }
 
     /**
@@ -38,16 +40,24 @@ class PermissionController extends Controller
         $request->validate([
             'name' => 'required|string|max:255|unique:permissions',
             'guard_name' => 'nullable|string|max:255',
+            'module' => 'required|string|max:255',
         ]);
-
+    
         Permission::create([
             'name' => $request->name,
             'guard_name' => $request->guard_name ?? 'web',
+            'module' => $request->module,
         ]);
-
-        return redirect()->route('role.permissions.index')
+    
+        if ($request->has('add_new')) {
+            return redirect()->route('tenant.role.permissions.create')
+                ->with('success', 'Permission created successfully. You can add another one.');
+        }
+    
+        return redirect()->route('tenant.role.permissions.index')
             ->with('success', 'Permission created successfully.');
     }
+    
 
     /**
      * Show the specified resource.
@@ -68,7 +78,8 @@ class PermissionController extends Controller
     public function edit($id)
     {
         $permission = Permission::findOrFail($id);
-        return view('role::permissions.edit', compact('permission'));
+        $modules = Permission::select('module')->distinct()->pluck('module')->filter()->all();
+        return view('role::permissions.edit', compact('permission', 'modules'));
     }
 
     /**
@@ -82,15 +93,19 @@ class PermissionController extends Controller
         $request->validate([
             'name' => 'required|string|max:255|unique:permissions,name,' . $id,
             'guard_name' => 'nullable|string|max:255',
+            'module' => 'required|string|max:255',
         ]);
 
         $permission = Permission::findOrFail($id);
         $permission->update([
             'name' => $request->name,
             'guard_name' => $request->guard_name ?? 'web',
+            'module' => $request->module,
         ]);
 
-        return redirect()->route('role.permissions.index')
+       
+
+        return redirect()->route('tenant.role.permissions.index')
             ->with('success', 'Permission updated successfully.');
     }
 
@@ -104,7 +119,7 @@ class PermissionController extends Controller
         $permission = Permission::findOrFail($id);
         $permission->delete();
 
-        return redirect()->route('role.permissions.index')
+        return redirect()->route('tenant.role.permissions.index')
             ->with('success', 'Permission deleted successfully.');
     }
 }

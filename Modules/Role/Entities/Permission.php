@@ -2,12 +2,13 @@
 
 namespace Modules\Role\Entities;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Spatie\Permission\Models\Permission as SpatiePermission;
+use App\Traits\BelongsToTenant;
 
-class Permission extends Model
+class Permission extends SpatiePermission
 {
-    use HasFactory;
+    use HasFactory, BelongsToTenant;
 
     protected $fillable = [
         'name',
@@ -18,10 +19,10 @@ class Permission extends Model
     /**
      * The roles that belong to the permission.
      */
-    public function roles()
-    {
-        return $this->belongsToMany(Role::class, 'role_permission', 'permission_id', 'role_id');
-    }
+    // public function roles()
+    // {
+    //     return $this->belongsToMany(Role::class, 'role_has_permissions', 'permission_id', 'role_id');
+    // }
     
     protected static function newFactory()
     {

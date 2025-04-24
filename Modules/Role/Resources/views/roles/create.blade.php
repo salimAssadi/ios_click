@@ -3,7 +3,6 @@
     {{ __('Create New Role') }}
 @endsection
 @section('content')
-<div class="container">
     <div class="row">
         <div class="col-md-12">
             <div class="card">
@@ -32,20 +31,45 @@
                             @enderror
                         </div>
 
-                        <div class="form-group mb-3">
-                            <label>{{ __('Permissions') }}</label>
-                            <div class="row">
-                                @foreach($permissions as $permission)
-                                    <div class="col-md-3 mb-2">
-                                        <div class="form-check">
-                                            <input type="checkbox" name="permissions[]" value="{{ $permission->id }}" class="form-check-input" id="permission_{{ $permission->id }}">
-                                            <label class="form-check-label" for="permission_{{ $permission->id }}">
-                                                {{ $permission->name }}
-                                            </label>
-                                        </div>
-                                    </div>
-                                @endforeach
-                            </div>
+                        <div class="form-group">
+                            @if (!empty($permissions))
+                                <h6 class="my-3">{{ __('Assign Permission to Roles') }} </h6>
+                                <table class="table mb-0" id="dataTable-1">
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                <input type="checkbox" class="form-check-input" id="checkall">
+                                            </th>
+                                            <th>{{ __('Module') }}</th>
+                                            <th>{{ __('Permissions') }}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($permissions as $module => $modulePermissions)
+                                            <tr>
+                                                <td>
+                                                    <input type="checkbox" class="form-check-input ischeck" data-id="{{ Str::slug($module) }}">
+                                                </td>
+                                                <td><label class="form-label">{{ __(ucfirst($module)) }}</label></td>
+                                                <td>
+                                                    <div class="row">
+                                                        @foreach ($modulePermissions as $permission)
+                                                            <div class="col-md-3 custom-control custom-checkbox">
+                                                                <input type="checkbox" name="permissions[]" value="{{ $permission->id }}"
+                                                                    class="form-check-input isscheck isscheck_{{ Str::slug($module) }}"
+                                                                    id="permission{{ $permission->id }}">
+                                                                <label for="permission{{ $permission->id }}" class="form-label font-weight-500">
+                                                                    {{ __($permission->name) }}
+                                                                </label>
+                                                            </div>
+                                                        @endforeach
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            @endif
                         </div>
 
                         <div class="form-group">
@@ -56,5 +80,18 @@
             </div>
         </div>
     </div>
-</div>
 @endsection
+@push('script-page')
+<script>
+    $(document).ready(function () {
+        $("#checkall").click(function () {
+            $('input:checkbox').not(this).prop('checked', this.checked);
+        });
+        $(".ischeck").click(function () {
+            var moduleSlug = $(this).data('id');
+            $('.isscheck_' + moduleSlug).prop('checked', this.checked);
+        });
+    });
+</script>
+@endpush
+

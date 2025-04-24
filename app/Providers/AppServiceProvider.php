@@ -5,6 +5,7 @@ namespace App\Providers;
 use Illuminate\Database\Migrations\Migrator;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Blade;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -21,12 +22,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // $paths = [
-        //     database_path('migrations/iso_dic'),
-        //     database_path('migrations/iso_stream'),
-        //     database_path('migrations/crm'),
-        // ];
-    
-        // app(Migrator::class)->path($paths);
+        Blade::if('tenantcan', function ($permission) {
+            return auth()->guard('tenant')->check() && auth()->guard('tenant')->user()->can($permission);
+        });
+       
     }
 }

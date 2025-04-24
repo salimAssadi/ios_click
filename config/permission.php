@@ -13,7 +13,7 @@ return [
          * `Spatie\Permission\Contracts\Permission` contract.
          */
 
-        'permission' => Spatie\Permission\Models\Permission::class,
+        'permission' => Modules\Role\Entities\Permission::class,
 
         /*
          * When using the "HasRoles" trait from this package, we need to know which
@@ -24,9 +24,11 @@ return [
          * `Spatie\Permission\Contracts\Role` contract.
          */
 
-        'role' => Spatie\Permission\Models\Role::class,
+        'role' => Modules\Role\Entities\Role::class,
 
     ],
+
+    'connection' => null,
 
     'table_names' => [
 
@@ -70,7 +72,7 @@ return [
 
         'role_has_permissions' => 'role_has_permissions',
     ],
-
+    
     'column_names' => [
         /*
          * Change this if you want to name the related pivots other than defaults
