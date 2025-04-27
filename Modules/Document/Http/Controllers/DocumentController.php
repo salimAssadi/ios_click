@@ -75,7 +75,7 @@ class DocumentController extends Controller
                     'document_type' => $request->document_type,
                     'document_number' => $request->document_number,
                     'related_process' => $request->related_process,
-                    'status' => $this->getRequestTypeId('draft'),
+                    'status' => 11,
                     'department' => $request->department,
                     'created_by' => auth('tenant')->id(),
                     'creation_date' => now(),
