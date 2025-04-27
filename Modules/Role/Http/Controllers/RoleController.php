@@ -42,12 +42,14 @@ class RoleController extends Controller
             'name' => 'required|string|max:255|unique:roles',
             'guard_name' => 'nullable|string|max:255',
             'permissions' => 'required|array',
+            'module' => 'required|string',
         ]);
 
         $name             = $request['name'];
         $role             = new Role();
         $role->name       = $name;
         $role->guard_name ="tenant";
+        $role->module     = $request['module'];
         $role->created_by = auth('tenant')->user()->id;
         $permissions      = $request['permissions'];
         $role->save();
@@ -103,7 +105,6 @@ class RoleController extends Controller
         $permissions = $request['permissions'];
         $role = Role::findOrFail($id);
         $role->fill($input)->save();
-
         $p_all = Permission::all();
 
         foreach($p_all as $p)

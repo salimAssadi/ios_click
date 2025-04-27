@@ -46,7 +46,7 @@ class PermissionController extends Controller
         Permission::create([
             'name' => $request->name,
             'guard_name' => $request->guard_name ?? 'web',
-            'module' => $request->module,
+            'module' => 'tenant',
         ]);
     
         if ($request->has('add_new')) {

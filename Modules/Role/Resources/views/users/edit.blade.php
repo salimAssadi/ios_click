@@ -7,23 +7,27 @@
         <div class="col-md-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5>{{ __('Edit User') }}: {{ $user->name }}</h5>
+                    <h5>{{ __('Edit User') }}: {{ $employee->name }}</h5>
                     <a href="{{ route('tenant.role.users.index') }}" class="btn btn-secondary btn-sm">
                         <i class="fa fa-arrow-left"></i> {{ __('Back to Users') }}
                     </a>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('tenant.role.users.update', $user->id) }}" method="POST">
+                    <form action="{{ route('tenant.role.users.update', $employee->id) }}" method="POST">
                         @csrf
                         @method('PUT')
-                        
+                        @error('name')
+                            <div class="alert alert-danger">
+                                {{ $message }}
+                            </div>
+                        @enderror
                         <div class="row">
                             <div class="col-md-6">
                                 <h4 class="mb-3">{{ __('User Information') }}</h4>
                                 
                                 <div class="form-group mb-3">
                                     <label for="name">{{ __('Full Name') }} <span class="text-danger">*</span></label>
-                                    <input type="text" name="name" id="name" class="form-control @error('name') is-invalid @enderror" value="{{ old('name', $user->name) }}" required>
+                                    <input type="text" name="name" id="name" class="form-control @error('name') is-invalid @enderror" value="{{ old('name', $employee->name) }}" required>
                                     <small class="form-text text-muted">{{ __('Enter first and last name') }}</small>
                                     @error('name')
                                         <span class="invalid-feedback">{{ $message }}</span>
@@ -32,7 +36,7 @@
 
                                 <div class="form-group mb-3">
                                     <label for="email">{{ __('Email Address') }} <span class="text-danger">*</span></label>
-                                    <input type="email" name="email" id="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email', $user->email) }}" required>
+                                    <input type="email" name="email" id="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email', $user ? $user->email : $employee->email) }}" required>
                                     @error('email')
                                         <span class="invalid-feedback">{{ $message }}</span>
                                     @enderror
@@ -63,8 +67,8 @@
                                 <div class="form-group mb-3">
                                     <label for="status">{{ __('Status') }} <span class="text-danger">*</span></label>
                                     <select name="status" id="status" class="form-control @error('status') is-invalid @enderror" required>
-                                        <option value="active" {{ old('status', $employee->status ?? ($user->is_active ? 'active' : 'inactive')) == 'active' ? 'selected' : '' }}>{{ __('Active') }}</option>
-                                        <option value="inactive" {{ old('status', $employee->status ?? ($user->is_active ? 'active' : 'inactive')) == 'inactive' ? 'selected' : '' }}>{{ __('Inactive') }}</option>
+                                        <option value="active" {{ old('status', $user ? $user->is_active : $employee->status ?? ($user->is_active ? 'active' : 'inactive')) == 'active' ? 'selected' : '' }}>{{ __('Active') }}</option>
+                                        <option value="inactive" {{ old('status', $user ? $user->is_active : $employee->status ?? ($user->is_active ? 'active' : 'inactive')) == 'inactive' ? 'selected' : '' }}>{{ __('Inactive') }}</option>
                                     </select>
                                     @error('status')
                                         <span class="invalid-feedback">{{ $message }}</span>

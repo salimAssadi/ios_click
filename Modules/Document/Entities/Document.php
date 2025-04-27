@@ -57,6 +57,9 @@ class Document extends BaseModel
         return '<span class="badge ' . $this->status->badge . '">' . __($this->status->name) . '</span>';
     }
 
-
+    public function reviewRequests()
+    {
+        return $this->hasMany(DocumentRequest::class);
+    }
 
 }

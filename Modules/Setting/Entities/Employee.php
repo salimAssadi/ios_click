@@ -5,6 +5,9 @@ namespace Modules\Setting\Entities;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use \App\Models\BaseModel;
+use Modules\Setting\Entities\Position;
+use Modules\Setting\Entities\Department;
+use Modules\Tenant\Entities\User;
 
 class Employee extends BaseModel
 {
@@ -21,7 +24,7 @@ class Employee extends BaseModel
 
     public function user()
     {
-        return $this->belongsTo(\App\Models\User::class);
+        return $this->belongsTo(User::class, 'user_id', 'id');
     }
 
     public function position()

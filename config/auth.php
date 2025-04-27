@@ -70,7 +70,7 @@ return [
         ],
         'tenant_users' => [ // New provider for tenant users
             'driver' => 'eloquent',
-            'model' => Modules\Tenant\Models\User::class,
+            'model' => Modules\Tenant\Entities\User::class,
         ],
     ],
 

@@ -29,7 +29,7 @@ use Modules\Tenant\Http\Controllers\SettingController;
 use Modules\Tenant\Http\Controllers\ComplaintController;
 use Modules\Tenant\Http\Controllers\ComplianceController;
 
-Route::prefix('tenant')->name('tenant.')->middleware(['XSS'])->group(function() {
+Route::prefix('tenant')->name('tenant.')->middleware(['xss'])->group(function() {
     // Guest routes
     Route::middleware('guest')->group(function () {
         Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
@@ -40,10 +40,10 @@ Route::prefix('tenant')->name('tenant.')->middleware(['XSS'])->group(function() 
     Route::get('locale/{locale}', [LocaleController::class, 'setLocale'])->name('locale');
 
     // Authenticated routes
-    Route::middleware(['auth:tenant', 'tenant'])->group(function () {
+    Route::middleware(['auth:tenant', 'XSS','tenant'])->group(function () {
         Route::get('/', [HomeController::class, 'index'])->name('dashboard');
         Route::post('logout', [LoginController::class, 'logout'])->name('logout');
-
+        Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
         // // Document Management
         // Route::resource('documents', DocumentController::class);
         // Route::get('document/history', [DocumentController::class, 'history'])->name('document.history');

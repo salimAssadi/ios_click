@@ -26,7 +26,7 @@
                     @endif
 
                     <div class="table-responsive">
-                        <table class="table table-striped">
+                        <table class="table table-striped basic-datatable">
                             <thead>
                                 <tr>
                                     <th>{{ __('ID') }}</th>
@@ -40,43 +40,35 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($users as $user)
+                                @foreach($employees as $employee)
                                 <tr>
-                                    <td>{{ $user->id }}</td>
-                                    <td>{{ $user->name }}</td>
-                                    <td>{{ $user->email }}</td>
+                                    <td>{{ $employee->id }}</td>
+                                    <td>{{ $employee->name }}</td>
+                                    <td>{{ $employee->user->email ?? __('No User') }}</td>
                                     <td>
-                                        @if($user->employee && $user->employee->position)
-                                            {{ $user->employee->position->name }}
+                                        @if($employee->position)
+                                            {{ $employee->position->name }}
                                         @else
                                             <span class="text-muted">{{ __('Not assigned') }}</span>
                                         @endif
                                     </td>
                                     <td>
-                                        @if($user->employee && $user->employee->position && $user->employee->position->department)
-                                            {{ $user->employee->position->department->name }}
+                                        @if($employee->position && $employee->position->department)
+                                            {{ $employee->position->department->name }}
                                         @else
                                             <span class="text-muted">{{ __('Not assigned') }}</span>
                                         @endif
                                     </td>
                                     <td>
-                                        @if($user->employee)
-                                            @if($user->employee->status == 'active')
-                                                <span class="badge bg-success">{{ __('Active') }}</span>
-                                            @else
-                                                <span class="badge bg-danger">{{ __('Inactive') }}</span>
-                                            @endif
+                                        @if($employee->status == 'active')
+                                            <span class="badge bg-success">{{ __('Active') }}</span>
                                         @else
-                                            @if($user->is_active)
-                                                <span class="badge bg-success">{{ __('Active') }}</span>
-                                            @else
-                                                <span class="badge bg-danger">{{ __('Inactive') }}</span>
-                                            @endif
+                                            <span class="badge bg-danger">{{ __('Inactive') }}</span>
                                         @endif
                                     </td>
                                     <td>
-                                        @if($user->roles->count() > 0)
-                                            @foreach($user->roles as $role)
+                                        @if($employee->user && $employee->user->roles->count() > 0)
+                                            @foreach($employee->user->roles as $role)
                                                 <span class="badge bg-info">{{ $role->name }}</span>
                                             @endforeach
                                         @else
@@ -85,19 +77,20 @@
                                     </td>
                                     <td>
                                         <div class="btn-group gap-2">
-                                            <a href="{{ route('tenant.role.users.show', $user->id) }}" class="btn btn-info btn-sm" title="{{ __('View') }}">
+                                            <a href="{{ route('tenant.role.users.show', $employee->id) }}" class="btn btn-info btn-sm" title="{{ __('View') }}">
                                                 <i class="fa fa-eye"></i>
                                             </a>
-                                            <a href="{{ route('tenant.role.users.edit', $user->id) }}" class="btn btn-primary btn-sm" title="{{ __('Edit') }}">
+                                            <a href="{{ route('tenant.role.users.edit', $employee->id) }}" class="btn btn-primary btn-sm" title="{{ __('Edit') }}">
                                                 <i class="fa fa-edit"></i>
                                             </a>
-                                            <form action="{{ route('tenant.role.users.destroy', $user->id) }}" method="POST" onsubmit="return confirm('{{ __('Are you sure you want to delete this user?') }}');" style="display: inline-block;">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-danger btn-sm" title="{{ __('Delete') }}">
-                                                    <i class="fa fa-trash"></i>
-                                                </button>
-                                            </form>
+                                                <form action="{{ route('tenant.role.users.destroy', $employee->id) }}" method="POST" onsubmit="return confirm('{{ __('Are you sure you want to delete this user?') }}');" style="display: inline-block;">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-danger btn-sm" title="{{ __('Delete') }}">
+                                                        <i class="fa fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                           
                                         </div>
                                     </td>
                                 </tr>

@@ -25,65 +25,85 @@
                     </a>
                 </li>
                 <!-- Document Control -->
-                @if(tenant_can('Manage Documents'))
-                <li
-                    class="pc-item pc-hasmenu {{ in_array($routeName, ['document.index', 'document.show', 'document.requests.index', 'document.requests.create', 'document.requests.my']) ? 'active' : '' }}">
-                    <a href="#!" class="pc-link">
-                        <span class="pc-micon"><i class="ti ti-file-text"></i></span>
-                        <span class="pc-mtext">{{ __('Document Control') }}</span>
-                        <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
-                    </a>
-                    <ul class="pc-submenu">
-                        <li class="pc-item {{ $routeName == 'document.index' ? 'active' : '' }}">
-                            <a href="{{ route('tenant.document.index') }}" class="pc-link">
-                                <span class="pc-mtext">{{ __('All Documents') }}</span>
-                            </a>
-                        </li>
-                        <li class="pc-item {{ $routeName == 'document.create' ? 'active' : '' }}">
-                            <a href="{{ route('tenant.document.create') }}" class="pc-link">
-                                <span class="pc-mtext">{{ __('Create New Document') }}</span>
-                            </a>
-                        </li>
-                        {{-- <li class="pc-item {{ $routeName == 'document.versions' ? 'active' : '' }}">
-                            <a href="" class="pc-link">
-                                <span class="pc-mtext">{{ __('Version Control') }}</span>
-                            </a>
-                        </li> --}}
-                        <li class="pc-item {{ $routeName == 'document.history' ? 'active' : '' }}">
-                            <a href="{{ route('tenant.document.history.index') }}" class="pc-link">
-                                <span class="pc-mtext">{{ __('Change History') }}</span>
-                            </a>
-                        </li>
-                        <li class="pc-item {{ $routeName == 'document.workflow' ? 'active' : '' }}">
-                            <a href="{{ route('tenant.document.workflow.index') }}" class="pc-link">
-                                <span class="pc-mtext">{{ __('Approval Workflow') }}</span>
-                            </a>
-                        </li>
-                        <li
-                            class="pc-item {{ in_array($routeName, ['tenant.document.requests.index', 'document.requests.create']) ? 'active' : '' }}">
-                            <a href="{{ route('tenant.document.requests.index') }}" class="pc-link">
-                                <span class="pc-mtext">{{ __('Review Notifications') }}</span>
-                            </a>
-                        </li>
-                        <li class="pc-item {{ $routeName == 'document.category' ? 'active' : '' }}">
-                            <a href="{{ route('tenant.document.category.index') }}" class="pc-link">
-                                <span class="pc-mtext">{{ __('Document Categories') }}</span>
-                            </a>
-                        </li>
-                        <li class="pc-item {{ $routeName == 'document.permissions' ? 'active' : '' }}">
-                            <a href="" class="pc-link">
-                                <span class="pc-mtext">{{ __('Access Permissions') }}</span>
-                            </a>
-                        </li>
-                        <li class="pc-item {{ $routeName == 'document.archive' ? 'active' : '' }}">
-                            <a href="" class="pc-link">
-                                <span class="pc-mtext">{{ __('Document Archive') }}</span>
-                            </a>
-                        </li>
-
-
-                    </ul>
-                </li>
+                
+                  
+                
+                @if(Gate::check('Manage Documents') || Gate::check('Create New Document') || Gate::check('Change History') || Gate::check('Approval Workflow') || Gate::check('Review Notifications') || Gate::check('Document Categories') || Gate::check('Access Permissions') || Gate::check('Document Archive') )
+                    <li
+                        class="pc-item pc-hasmenu {{ in_array($routeName, ['document.index', 'document.show', 'document.requests.index', 'document.requests.create', 'document.requests.my']) ? 'active' : '' }}">
+                        <a href="#!" class="pc-link">
+                            <span class="pc-micon"><i class="ti ti-file-text"></i></span>
+                            <span class="pc-mtext">{{ __('Document Control') }}</span>
+                            <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
+                        </a>
+                        <ul class="pc-submenu">
+                            @if(Gate::check('View Documents'))
+                            <li class="pc-item {{ $routeName == 'document.index' ? 'active' : '' }}">
+                                <a href="{{ route('tenant.document.index') }}" class="pc-link">
+                                    <span class="pc-mtext">{{ __('All Documents') }}</span>
+                                </a>
+                            </li>
+                            @endif
+                            @if(Gate::check('Create Documents'))
+                            <li class="pc-item {{ $routeName == 'document.create' ? 'active' : '' }}">
+                                <a href="{{ route('tenant.document.create') }}" class="pc-link">
+                                    <span class="pc-mtext">{{ __('Create New Document') }}</span>
+                                </a>
+                            </li>
+                            @endif
+                            @if(Gate::check('Manage Document Versions'))
+                            <li class="pc-item {{ $routeName == 'document.versions' ? 'active' : '' }}">
+                                <a href="" class="pc-link">
+                                    <span class="pc-mtext">{{ __('Version Control') }}</span>
+                                </a>
+                            </li>
+                            @endif
+                        
+                            @if(Gate::check('Manage Document Workflows'))
+                            <li class="pc-item {{ $routeName == 'document.workflow' ? 'active' : '' }}">
+                                <a href="{{ route('tenant.document.workflow.index') }}" class="pc-link">
+                                    <span class="pc-mtext">{{ __('Approval Workflow') }}</span>
+                                </a>
+                            </li>
+                            @endif
+                            @if(Gate::check('View Document Review Notifications'))
+                            <li
+                                class="pc-item {{ in_array($routeName, ['']) ? 'active' : '' }}">
+                                <a href="" class="pc-link">
+                                    <span class="pc-mtext">{{ __('Review Notifications') }}</span>
+                                </a>
+                            </li>
+                            @endif
+                            @if(Gate::check('Manage Document Categories'))
+                            <li class="pc-item {{ $routeName == 'document.category' ? 'active' : '' }}">
+                                <a href="{{ route('tenant.document.category.index') }}" class="pc-link">
+                                    <span class="pc-mtext">{{ __('Document Categories') }}</span>
+                                </a>
+                            </li>
+                            @endif
+                            @if(Gate::check('Manage Requests'))
+                            <li class="pc-item {{ in_array($routeName, ['tenant.document.requests.index', 'document.requests.create']) ? 'active' : '' }}">
+                                <a href="{{ route('tenant.document.requests.index') }}" class="pc-link">
+                                    <span class="pc-mtext">{{ __('Manage Requests') }}</span>
+                                </a>
+                            </li>
+                            @endif
+                            @if(Gate::check('Manage Document Archive'))
+                            <li class="pc-item {{ $routeName == 'document.archive' ? 'active' : '' }}">
+                                <a href="" class="pc-link">
+                                    <span class="pc-mtext">{{ __('Document Archive') }}</span>
+                                </a>
+                            </li>
+                            @endif
+                            @if(Gate::check('View Document Change History'))
+                            <li class="pc-item {{ $routeName == 'document.history' ? 'active' : '' }}">
+                                <a href="{{ route('tenant.document.history.index') }}" class="pc-link">
+                                    <span class="pc-mtext">{{ __('Change History') }}</span>
+                                </a>
+                            </li>
+                            @endif
+                        </ul>
+                    </li>
                 @endif
                 <!-- Audit Management -->
                 <li

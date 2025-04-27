@@ -28,14 +28,16 @@ use Modules\Tenant\Models\User;
 use Modules\Tenant\Models\IsoSystem;
 use Carbon\Carbon;
 
+
 class HomeController extends Controller
 {
 
     public function index()
-    {   
+    {    
+        // dd(auth('tenant')->user());
         
-        if (\Auth::check()) {
-            if (\Auth::user()->type == 'super admin') {
+        if (auth('tenant')->check()) {
+            if (auth('tenant')->user()->type == 'super admin') {
               
                 $result['totalUser'] = User::where('parent_id', parentId())->count();
                 $result['totalISOSystem'] = IsoSystem::count();
@@ -71,6 +73,28 @@ class HomeController extends Controller
 
 
                 return view('tenant::dashboard.index', compact('result'));
+            }else{
+                // Placeholder data for customer dashboard
+                $result = [
+                    'recentDocuments' => [
+                        ['name' => 'ISO 9001 Documentation', 'status' => 'Under Review', 'date' => '2025-04-20'],
+                        ['name' => 'Quality Manual', 'status' => 'Approved', 'date' => '2025-04-15'],
+                        ['name' => 'Process Procedures', 'status' => 'Pending', 'date' => '2025-04-25'],
+                    ],
+                    'documentStats' => [
+                        'total' => 15,
+                        'pending' => 5,
+                        'approved' => 8,
+                        'rejected' => 2
+                    ],
+                    'quickActions' => [
+                        ['name' => 'New Document', 'icon' => 'fas fa-file-alt', 'route' => '#'],
+                        ['name' => 'View Documents', 'icon' => 'fas fa-folder-open', 'route' => '#'],
+                        ['name' => 'My Profile', 'icon' => 'fas fa-user', 'route' => '#'],
+                    ]
+                ];
+
+                return view('tenant::dashboard.customer', compact('result'));
             }
         } else {
             if (!file_exists(setup())) {

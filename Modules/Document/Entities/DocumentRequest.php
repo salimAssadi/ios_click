@@ -4,7 +4,8 @@ namespace Modules\Document\Entities;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use App\Models\User;
+use Modules\Tenant\Entities\User;
+
 use Modules\Document\Entities\Document;
 use Modules\Document\Entities\RequestType;
 use Modules\Document\Entities\Status;
@@ -21,7 +22,9 @@ class DocumentRequest extends BaseModel
         'request_type_id',
         'requested_by',
         'assigned_to',
-        'notes',
+        'parent_request_id',
+        'response',
+        'request_details',
         'status_id',
         'action_at',
         'action_by',
@@ -88,5 +91,18 @@ class DocumentRequest extends BaseModel
     {
         return $this->belongsTo(DocumentVersion::class);
     }
+
+
+    public function parentRequest()
+    {
+        return $this->belongsTo(DocumentRequest::class, 'parent_request_id');
+    }
+
+    // Child requests relationship
+    public function childRequests()
+    {
+        return $this->hasMany(DocumentRequest::class, 'parent_request_id');
+    }
+
   
 }

@@ -50,7 +50,7 @@
                                             </a>
                                         </td>
                                         <td>{{ $request->requestType->name }}</td>
-                                        <td>{{ $request->creator->name }}</td>
+                                        <td>{{ $request->creator->employee->name }}</td>
                                         <td>{!! $request->requestStatusBadge !!}</td>
                                         <td>{{ $request->created_at->format('Y-m-d') }}</td>
                                         <td class="text-right">

@@ -52,7 +52,7 @@ Route::prefix('document')->name('tenant.document.')->middleware(['auth:tenant','
         Route::get('/create/{document}', [DocumentRequestController::class, 'create'])->name('create');
         Route::post('/', [DocumentRequestController::class, 'store'])->name('store');
         Route::get('/{request}', [DocumentRequestController::class, 'show'])->name('show');
-        Route::put('/{request}/status', [DocumentRequestController::class, 'updateStatus'])->name('update-status');
+        Route::post('/{request}/status', [DocumentRequestController::class, 'updateStatus'])->name('update-status');
     });
 
     // Document History Routes

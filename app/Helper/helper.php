@@ -106,12 +106,6 @@ if (!function_exists('settings')) {
     function settings()
     {
         $settingData = DB::table('settings');
-        if (\Auth::check()) {
-            $userId = parentId();
-            $settingData = $settingData->where('parent_id', $userId);
-        } else {
-            $settingData = $settingData->where('parent_id', 1);
-        }
         $settingData = $settingData->get();
         $details = settingsKeys();
 
@@ -299,11 +293,9 @@ if (!function_exists('priceFormat')) {
 if (!function_exists('parentId')) {
     function parentId()
     {
-        if (\Auth::user()->type == 'owner' || \Auth::user()->type == 'super admin') {
+        if (\Auth::user()->type == 'super admin') {
             return \Auth::user()->id;
-        } else {
-            return \Auth::user()->parent_id;
-        }
+        } 
     }
 }
 if (!function_exists('assignSubscription')) {

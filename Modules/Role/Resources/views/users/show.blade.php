@@ -25,7 +25,7 @@
                                 <tbody>
                                     <tr>
                                         <th style="width: 30%">{{ __('Full Name') }}</th>
-                                        <td>{{ $user->name }}</td>
+                                        <td>{{ $employee->name }}</td>
                                     </tr>
                                     <tr>
                                         <th>{{ __('Email') }}</th>
@@ -33,7 +33,7 @@
                                     </tr>
                                     <tr>
                                         <th>{{ __('Phone Number') }}</th>
-                                        <td>{{ $user->phone_number ?? 'N/A' }}</td>
+                                        <td>{{ $employee->phone ?? 'N/A' }}</td>
                                     </tr>
                                     <tr>
                                         <th>{{ __('Status') }}</th>
@@ -59,7 +59,6 @@
                         
                         <div class="col-md-6">
                             <h4 class="mb-3">{{ __('Employee Information') }}</h4>
-                            @if($employee)
                                 <table class="table table-bordered">
                                     <tbody>
                                         <tr>
@@ -86,64 +85,10 @@
                                         </tr>
                                     </tbody>
                                 </table>
-                            @else
-                                <div class="alert alert-warning">
-                                    {{ __('No employee record found for this user.') }}
-                                </div>
-                            @endif
                         </div>
                     </div>
                     
-                    <div class="row mt-4">
-                        <div class="col-md-12">
-                            <h4 class="mb-3">{{ __('Assigned Roles') }}</h4>
-                            @if($user->roles->count() > 0)
-                                <div class="table-responsive">
-                                    <table class="table table-bordered">
-                                        <thead>
-                                            <tr>
-                                                <th>{{ __('Role Name') }}</th>
-                                                <th>{{ __('Permissions') }}</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach($user->roles as $role)
-                                                <tr>
-                                                    <td style="width: 20%">{{ $role->name }}</td>
-                                                    <td>
-                                                        @if($role->permissions->count() > 0)
-                                                            @php
-                                                                $permissionsByModule = $role->permissions->groupBy(function($permission) {
-                                                                    return explode(' ', $permission->name)[0];
-                                                                });
-                                                            @endphp
-                                                            
-                                                            @foreach($permissionsByModule as $module => $permissions)
-                                                                <div class="mb-2">
-                                                                    <strong>{{ ucfirst($module) }}:</strong>
-                                                                    <div>
-                                                                        @foreach($permissions as $permission)
-                                                                            <span class="badge bg-info me-1 mb-1">{{ $permission->name }}</span>
-                                                                        @endforeach
-                                                                    </div>
-                                                                </div>
-                                                            @endforeach
-                                                        @else
-                                                            <span class="text-muted">{{ __('No permissions assigned') }}</span>
-                                                        @endif
-                                                    </td>
-                                                </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
-                                </div>
-                            @else
-                                <div class="alert alert-warning">
-                                    {{ __('No roles assigned to this user.') }}
-                                </div>
-                            @endif
-                        </div>
-                    </div>
+                   
                 </div>
             </div>
         </div>

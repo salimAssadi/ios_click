@@ -77,10 +77,8 @@ class LoginController extends Controller
                     'last_login_at' => now(),
                     'last_login_ip' => $request->ip()
                 ]);
-
                 $this->guard()->login($user);
-                $request->session()->regenerate();
-                
+                $request->session()->regenerateToken();
                 return redirect()->intended(route('tenant.dashboard'));
             }
         } catch (\Exception $e) {

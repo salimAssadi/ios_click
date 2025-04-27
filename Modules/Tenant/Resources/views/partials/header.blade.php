@@ -43,6 +43,27 @@
 
                     </div>
                 </li>
+                <div class="pc-head-right">
+                    <!-- Notifications dropdown -->
+                    <div class="dropdown pc-h-item">
+                        <a class="pc-head-link dropdown-toggle arrow-none me-0" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="false" aria-expanded="false">
+                            <i class="ti ti-bell"></i>
+                            <span class="badge bg-danger pc-h-badge notifications-count" style="display: none;"></span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end pc-h-dropdown">
+                            <div class="dropdown-header">
+                                <h5 class="text-overflow m-0"><span>{{ __('Notifications') }}</span></h5>
+                            </div>
+                            <div class="notifications-list" style="max-height: 300px; overflow-y: auto;">
+                                <!-- Notifications will be loaded here -->
+                            </div>
+                            <a href="{{ route('tenant.notifications.index') }}" class="dropdown-item text-center">
+                                {{ __('View all') }}
+                            </a>
+                        </div>
+                    </div>
+                    <!-- User dropdown -->
+                </div>
                 @if (auth('tenant')->user()->type == 'super admin' || auth('tenant')->user()->type == 'owner')
                     <li class="dropdown pc-h-item pc-mega-menu" data-bs-toggle="tooltip" data-bs-original-title="{{__('Theme Settings')}}" data-bs-placement="bottom">
                         <a href="#" class="pc-head-link head-link-secondary dropdown-toggle arrow-none me-0"

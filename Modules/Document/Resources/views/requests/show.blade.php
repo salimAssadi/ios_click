@@ -17,8 +17,18 @@
                 <div class="card-header">
                     <h5>{{ __('Request Details') }}</h5>
                 </div>
+
                 <div class="card-body">
                     <div class="row">
+                        @if($errors->any())
+    <div class="alert alert-danger">
+        <ul>
+            @foreach($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label fw-bold">{{ __('Document') }}</label>
@@ -68,20 +78,22 @@
                         @endif
                     </div>
 
-                    @if($documentRequest->requestStatus->code === 'pending')
+                    @if($documentRequest->requestStatus->code === 'pending' && $documentRequest->requested_by != auth('tenant')->id() )
                         <div class="mt-4">
                             <form action="{{ route('tenant.document.requests.update-status', $documentRequest->id) }}" method="POST">
                                 @csrf
-                                @method('PUT')
-                                
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label class="form-label">{{ __('Update Status') }} <span class="text-danger">*</span></label>
-                                            <select name="status" class="form-control @error('status') is-invalid @enderror" required>
+                                            <label class="form-label">{{ __('Status') }} <span class="text-danger">*</span></label>
+                                            <select name="status" id="status" class="form-control  @error('status') is-invalid @enderror" required>
                                                 <option value="">{{ __('Select Status') }}</option>
                                                 @foreach($requestStatus as $status)
-                                                    <option value="{{ $status->id }}" {{ old('status', $documentRequest->status_id) === $status->id ? 'selected' : '' }}>{{ $status->name }}</option>
+                                                    <option value="{{ $status->id }}" 
+                                                            data-code="{{ $status->code }}"
+                                                            {{ old('status') === $status->id ? 'selected' : '' }}>
+                                                        {{ $status->name }}
+                                                    </option>
                                                 @endforeach
                                             </select>
                                             @error('status')
@@ -101,14 +113,61 @@
                                             @enderror
                                         </div>
                                     </div>
-                                </div>
 
-                                <div class="mt-3">
-                                    <button type="submit" class="btn btn-primary">
-                                        {{ __('Update Status') }}
-                                    </button>
+                                    @if($documentRequest->requestType->code === 'review')
+                                    <div class="col-md-12 review-fields" style="display: none;">
+                                        <div class="form-group">
+                                            <label class="form-label">{{ __('Assigned To') }} <span class="text-danger">*</span></label>
+                                            <select name="assigned_to[]" class="form-control hidesearch @error('assigned_to') is-invalid @enderror" multiple>
+                                                @foreach($employees as $employee)
+                                                <option value="{{ $employee->id }}" {{ (is_array(old('assigned_to')) && in_array($employee->id, old('assigned_to'))) ? 'selected' : '' }}>
+                                                    {{ $employee->name }}
+                                                </option>
+                                                @endforeach
+                                            </select>
+                                            @error('assigned_to')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+
+                                        <div class="form-group mt-3">
+                                            <label class="form-label">{{ __('Request Details') }} <span class="text-danger">*</span></label>
+                                            <textarea name="request_details" rows="3" 
+                                                      class="form-control @error('request_details') is-invalid @enderror">{{ old('request_details') }}</textarea>
+                                            @error('request_details')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                    @endif
+
+                                    <div class="col-md-12 mt-3">
+                                        <button type="submit" class="btn btn-primary">{{ __('Update Status') }}</button>
+                                    </div>
                                 </div>
                             </form>
+
+                            @push('script-page')
+                            <script>
+                                $(document).ready(function() {
+                                
+
+                                    $('#status').on('change', function() {
+                                        var statusCode = $(this).find('option:selected').data('code');
+                                        if (statusCode === 'approved') {
+                                            $('.review-fields').slideDown();
+                                            $('.review-fields select, .review-fields textarea').prop('required', true);
+                                        } else {
+                                            $('.review-fields').slideUp();
+                                            $('.review-fields select, .review-fields textarea').prop('required', false);
+                                        }
+                                    });
+
+                                    // Trigger change on page load if status is pre-selected
+                                    $('#status').trigger('change');
+                                });
+                            </script>
+                            @endpush
                         </div>
                     @endif
                     

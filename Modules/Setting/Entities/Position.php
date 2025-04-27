@@ -41,7 +41,7 @@ class Position extends BaseModel
 
     public function employees()
     {
-        return $this->hasMany(Employee::class);
+        return $this->hasMany(Employee::class)->where('status', 'active');
     }
 
     public function currentEmployee()

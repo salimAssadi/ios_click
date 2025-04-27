@@ -52,7 +52,9 @@ class WorkflowController extends Controller
             $query->whereHas('status', function ($q) use ($status) {
                 $q->where('code', $status);
             });
-        })->count();
+        })
+        ->groupBy('document_id')
+        ->count();
     }
 
     private function getRequestTypeId($type)
@@ -78,7 +80,8 @@ class WorkflowController extends Controller
                 } else {
                     $q->where('code', 'under_review');
                 }
-            });
+            })
+            ->groupBy('document_id') ;
 
         return DataTables::of($requests)
             ->addColumn('title', function ($request) {
@@ -135,12 +138,7 @@ class WorkflowController extends Controller
         try {
             DB::beginTransaction();
             // Create a new version with the updated status
-            $currentVersion = $document->lastVersion;
-            $newVersion = $currentVersion->replicate();
-            $newVersion->version = $currentVersion->version + 0.1;
-            $newVersion->status_id = $statusRecord->id;
-            $newVersion->updated_by = Auth::id();
-            $newVersion->save();
+           
 
             // Create a document request for tracking
                 DocumentRequest::create([

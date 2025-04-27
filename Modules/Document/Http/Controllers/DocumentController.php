@@ -7,9 +7,11 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Modules\Document\Entities\Document;
+use Modules\Document\Entities\DocumentHistoryLog;
 use Modules\Document\Entities\DocumentVersion;
 use Modules\Document\Entities\IsoInstruction;
 use Modules\Document\Entities\IsoPolicy;
@@ -17,12 +19,10 @@ use Modules\Document\Entities\IsoSystem;
 use Modules\Document\Entities\IsoSystemProcedure;
 use Modules\Document\Entities\Procedure;
 use Modules\Document\Entities\Sample;
-use Modules\Setting\Entities\Department;
-use Yajra\DataTables\Facades\Datatables;
-use Modules\Tenant\Models\Setting;
-use Illuminate\Support\Facades\RateLimiter;
 use Modules\Document\Entities\Status;
-use Modules\Document\Entities\DocumentHistoryLog;
+use Modules\Setting\Entities\Department;
+use Modules\Tenant\Models\Setting;
+use Yajra\DataTables\Facades\Datatables;
 
 class DocumentController extends Controller
 {
@@ -30,90 +30,102 @@ class DocumentController extends Controller
 
     public function index()
     {
-        return view('document::document.index');
+        if (tenant_can('View Documents')) {
+            return view('document::document.index');
+        } else {
+            return redirect()->back()->with('error', __('You do not have permission to view documents'));
+        }
     }
 
     public function create()
     {
-        $isoSystems = IsoSystem::where('status', true)->get();
-        $department= Department::get();
-        return view('document::document.create-document', compact('isoSystems'));
+        if (tenant_can('Create Documents')) {
+            $isoSystems = IsoSystem::where('status', true)->get();
+            $department = Department::get();
+            return view('document::document.create-document', compact('isoSystems'));
+        } else {
+            return redirect()->back()->with('error', __('You do not have permission to create documents'));
+        }
     }
 
     public function store(Request $request)
     {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'document_number' => 'nullable|string|max:50',
-            'department' => 'required|string',
-            'version' => 'required|string',
-            'content' => 'nullable|string',
-            'file' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx|max:10240', // 10MB max
-            'document_type' => 'required|in:procedure,policy,instruction,sample,custom',
+        if (tenant_can('Create Documents')) {
+            $request->validate([
+                'title' => 'required|string|max:255',
+                'document_number' => 'nullable|string|max:50',
+                'department' => 'required|string',
+                'version' => 'required|string',
+                'content' => 'nullable|string',
+                'file' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx|max:10240', // 10MB max
+                'document_type' => 'required|in:procedure,policy,instruction,sample,custom',
 
-        ]);
-
-        $request->merge([
-            'document_number' => Str::uuid()->toString(),
-        ]);
-
-        try {
-            DB::beginTransaction();
-
-            // Create document record
-            $document = Document::create([
-                'title' => $request->title,
-                'document_type' => $request->document_type,
-                'document_number' => $request->document_number,
-                'related_process' => $request->related_process,
-                'department' => $request->department,
-                'created_by' => auth('tenant')->id(),
-                'creation_date' => now(),
-            ]);
-            $document->save();
-
-            $fileName = $this->generateFileName($request->document_number, $request->title);
-            $content = $request->hasFile('file') ? $request->file('file') : $request->content;
-
-            $filePath = $this->saveDocument(
-                auth('tenant')->user()->id,
-                $request->document_type,
-                $fileName,
-                $content,
-                'draft'
-            );
-            $request->issue_date = now();
-            $validYears = 3;
-            $expiryDate = Carbon::parse($request->issue_date)->addYears($validYears);
-            $reviewDate = Carbon::parse($request->issue_date)->addYears($validYears - 1);
-
-            $documentVersion = DocumentVersion::create([
-                'document_id' => $document->id,
-                'version' => 1.0,
-                'issue_date' => now(),
-                'expiry_date' => $expiryDate,
-                'review_due_date' => $reviewDate,
-                'status_id' => 1,
-                'storage_path' => $filePath,
-                'file_path' => $filePath,
-                'is_active' => true,
             ]);
 
-            DB::commit();
-
-            return response()->json([
-                'success' => true,
-                'message' => __('Document created successfully'),
-                'data' => $document,
-                'redirect' => route('tenant.document.index'),
+            $request->merge([
+                'document_number' => Str::uuid()->toString(),
             ]);
 
-        } catch (\Exception $e) {
-            DB::rollback();
-            return response()->json([
-                'success' => false,
-                'message' => __('Error creating document: ') . $e->getMessage(),
-            ], 500);
+            try {
+                DB::beginTransaction();
+
+                // Create document record
+                $document = Document::create([
+                    'title' => $request->title,
+                    'document_type' => $request->document_type,
+                    'document_number' => $request->document_number,
+                    'related_process' => $request->related_process,
+                    'department' => $request->department,
+                    'created_by' => auth('tenant')->id(),
+                    'creation_date' => now(),
+                ]);
+                $document->save();
+
+                $fileName = $this->generateFileName($request->document_number, $request->title);
+                $content = $request->hasFile('file') ? $request->file('file') : $request->content;
+
+                $filePath = $this->saveDocument(
+                    auth('tenant')->user()->id,
+                    $request->document_type,
+                    $fileName,
+                    $content,
+                    'draft'
+                );
+                $request->issue_date = now();
+                $validYears = 3;
+                $expiryDate = Carbon::parse($request->issue_date)->addYears($validYears);
+                $reviewDate = Carbon::parse($request->issue_date)->addYears($validYears - 1);
+
+                $documentVersion = DocumentVersion::create([
+                    'document_id' => $document->id,
+                    'version' => 1.0,
+                    'issue_date' => now(),
+                    'expiry_date' => $expiryDate,
+                    'review_due_date' => $reviewDate,
+                    'status_id' => 1,
+                    'storage_path' => $filePath,
+                    'file_path' => $filePath,
+                    'is_active' => true,
+                ]);
+
+                DB::commit();
+
+                return response()->json([
+                    'success' => true,
+                    'message' => __('Document created successfully'),
+                    'data' => $document,
+                    'redirect' => route('tenant.document.index'),
+                ]);
+
+            } catch (\Exception $e) {
+                DB::rollback();
+                return response()->json([
+                    'success' => false,
+                    'message' => __('Error creating document: ') . $e->getMessage(),
+                ], 500);
+            }
+        } else {
+            return redirect()->back()->with('error', __('You do not have permission to create documents'));
         }
     }
 
@@ -198,7 +210,7 @@ class DocumentController extends Controller
     {
         try {
             $query = Document::query()
-                ->with(['creator', 'lastVersion','status'])
+                ->with(['creator', 'lastVersion', 'status'])
                 ->when($request->document_type, function ($q) use ($request) {
                     return $q->byType($request->document_type);
                 })
@@ -215,29 +227,46 @@ class DocumentController extends Controller
                     return $document->getStatusBadgeAttribute();
                 })
                 ->addColumn('actions', function ($document) {
-                    return '<div class="btn-group" role="group">
-                        <a href="' . route('tenant.document.edit', $document->id) . '" 
-                           class="btn btn-sm btn-warning" 
-                           title="' . __('Edit Document') . '">
-                            <i class="fas fa-edit"></i>
-                        </a>
-                        <a href="' . route('tenant.document.show', $document->id) . '" 
-                           class="btn btn-sm btn-info" 
-                           title="' . __('View Details') . '">
-                            <i class="fas fa-info-circle"></i>
-                        </a>
-                        <a href="' . route('tenant.document.serve', ['id' => $document->id, 'preview' => true]) . '" 
-                           class="btn btn-sm btn-primary"
-                           target="_blank" 
-                           title="' . __('Preview') . '">
-                            <i class="fas fa-eye"></i>
-                        </a>
-                        <a href="' . route('tenant.document.serve', ['id' => $document->id]) . '" 
-                           class="btn btn-sm btn-success"
-                           title="' . __('Download') . '">
-                            <i class="fas fa-download"></i>
-                        </a>
-                    </div>';
+                    $actions = [
+                        'Edit Documents' => [
+                            'route' => route('tenant.document.edit', encrypt($document->id)),
+                            'class' => 'btn-warning',
+                            'icon' => 'fas fa-edit',
+                            'title' => __('Edit Document'),
+                        ],
+                        'View Document Details' => [
+                            'route' => route('tenant.document.show', encrypt($document->id)),
+                            'class' => 'btn-info',
+                            'icon' => 'fas fa-info-circle',
+                            'title' => __('View Details'),
+                        ],
+                        'Preview Document' => [
+                            'route' => route('tenant.document.serve', ['id' => encrypt($document->id), 'preview' => true]),
+                            'class' => 'btn-primary',
+                            'icon' => 'fas fa-eye',
+                            'title' => __('Preview'),
+                        ],
+                        'Download Document' => [
+                            'route' => route('tenant.document.serve', ['id' => encrypt($document->id)]),
+                            'class' => 'btn-success',
+                            'icon' => 'fas fa-download',
+                            'title' => __('Download'),
+                        ],
+                    ];
+                
+                    $buttons = '<div class="btn-group" role="group">';
+                    foreach ($actions as $permission => $action) {
+                        if (tenant_can($permission)) {
+                            $buttons .= '<a href="' . htmlspecialchars($action['route']) . '"
+                                class="btn btn-sm ' . $action['class'] . '"
+                                title="' . htmlspecialchars($action['title']) . '">
+                                <i class="' . htmlspecialchars($action['icon']) . '"></i>
+                            </a>';
+                        }
+                    }
+                    $buttons .= '</div>';
+                
+                    return $buttons;
                 })
                 ->rawColumns(['version_badge', 'status_badge', 'actions'])
                 ->make(true);
@@ -247,7 +276,6 @@ class DocumentController extends Controller
             ], 500);
         }
     }
-
 
     /**
      * Import documents from dictionary
@@ -261,7 +289,7 @@ class DocumentController extends Controller
         if (getSettingsValByName('import_dictionary') == 1) {
             return response()->json([
                 'success' => false,
-                'message' => __('Documents have already been imported')
+                'message' => __('Documents have already been imported'),
             ], 400);
         }
 
@@ -303,7 +331,7 @@ class DocumentController extends Controller
                         'created_by' => auth('tenant')->id(),
                         'creation_date' => now(),
                     ]);
-        
+
                     DocumentVersion::create([
                         'document_id' => $sampleDocument->id,
                         'version' => 1.0,
@@ -318,7 +346,7 @@ class DocumentController extends Controller
                 }
             }
             DB::commit();
-            Setting::updateOrCreate(['name' => 'import_dictionary'], ['value' => 1] , ['parent_id' => '1']);
+            Setting::updateOrCreate(['name' => 'import_dictionary'], ['value' => 1], ['parent_id' => '1']);
             return response()->json([
                 'success' => true,
                 'message' => __('Documents imported successfully'),
@@ -336,26 +364,32 @@ class DocumentController extends Controller
      * Show the form for editing the specified resource.
      */
     public function edit($id)
-    {
-        $document = Document::with(['lastVersion.status'])->findOrFail($id);
-        $statuses = Status::all();
-        return view('document::document.edit', compact('document', 'statuses'));
+    {   
+        $id = decrypt($id);
+        if (tenant_can('Edit Documents')) {
+            $document = Document::with(['lastVersion.status'])->findOrFail($id);
+            $statuses = Status::all();
+            return view('document::document.edit', compact('document', 'statuses'));
+        } else {
+            return redirect()->back()->with('error', __('You do not have permission to edit documents'));
+        }
     }
 
     /**
      * Update the specified resource in storage.
      */
     public function update(Request $request, $id)
-    {
+    {   
+        $id = decrypt($id);
         $document = Document::findOrFail($id);
-        
+
         // Validate request
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'file' => 'nullable|file|max:10240', // 10MB max
             'status' => 'required|numeric',
-            'version_notes' => 'nullable|string'
+            'version_notes' => 'nullable|string',
         ]);
 
         try {
@@ -364,7 +398,7 @@ class DocumentController extends Controller
             // Update document
             $document->update([
                 'title' => $request->title,
-                'description' => $request->description
+                'description' => $request->description,
             ]);
 
             // Handle file upload if provided
@@ -378,20 +412,20 @@ class DocumentController extends Controller
                     'file_path' => $filePath,
                     'status_id' => $request->status,
                     'change_notes' => $request->version_notes,
-                    'created_by' => auth('tenant')->id()
+                    'created_by' => auth('tenant')->id(),
                 ]);
             } else {
                 // Update existing version status if no new file
                 $document->lastVersion->update([
                     'status_id' => $request->status,
-                    'change_notes' => $request->version_notes
+                    'change_notes' => $request->version_notes,
                 ]);
             }
 
             \DB::commit();
 
             return redirect()
-                ->route('tenant.document.show', $document)
+                ->route('tenant.document.show', encrypt($document->id))
                 ->with('success', __('Document updated successfully'));
 
         } catch (\Exception $e) {
@@ -399,7 +433,7 @@ class DocumentController extends Controller
             \Log::error('Document update failed', [
                 'error' => $e->getMessage(),
                 'document_id' => $id,
-                'user_id' => auth('tenant')->id()
+                'user_id' => auth('tenant')->id(),
             ]);
 
             return redirect()
@@ -414,10 +448,11 @@ class DocumentController extends Controller
      */
     public function serveFile($id, Request $request)
     {
+        $id = decrypt($id);
         try {
             // 1. Get document and version
             $document = Document::with(['lastVersion'])->findOrFail($id);
-            
+
             // 2. Get specific version if requested
             if ($request->has('version')) {
                 $version = $document->versions()->findOrFail($request->version);
@@ -441,23 +476,23 @@ class DocumentController extends Controller
                     'user_id' => $user->id,
                     'tenant_id' => $user->tenant_id,
                     'document_id' => $document->id,
-                    'document_tenant' => $document->tenant_id
+                    'document_tenant' => $document->tenant_id,
                 ]);
                 return response()->json(['error' => 'Access denied'], 403);
             }
 
             // 5. Rate limiting
-            if (!RateLimiter::remaining('file-downloads:'.$user->id, 60)) {
+            if (!RateLimiter::remaining('file-downloads:' . $user->id, 60)) {
                 return response()->json(['error' => 'Too many download attempts. Please try again later.'], 429);
             }
-            RateLimiter::hit('file-downloads:'.$user->id);
+            RateLimiter::hit('file-downloads:' . $user->id);
 
             // 6. Get file path and validate
             $filePath = $version->file_path;
             if (!Storage::disk('tenants')->exists($filePath)) {
                 return response()->json([
                     'error' => 'File not found',
-                    'path' => $filePath
+                    'path' => $filePath,
                 ], 404);
             }
 
@@ -468,7 +503,7 @@ class DocumentController extends Controller
                 'document_id' => $document->id,
                 'version_id' => $version->id,
                 'ip' => $request->ip(),
-                'user_agent' => $request->userAgent()
+                'user_agent' => $request->userAgent(),
             ]);
 
             // 8. Generate temporary URL or serve file
@@ -481,7 +516,7 @@ class DocumentController extends Controller
                         'Content-Disposition' => 'inline; filename="' . basename($filePath) . '"',
                         'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
                         'Pragma' => 'no-cache',
-                        'Expires' => '0'
+                        'Expires' => '0',
                     ]
                 );
             }
@@ -490,26 +525,27 @@ class DocumentController extends Controller
             return Storage::disk('tenants')->download($filePath, basename($filePath), [
                 'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
                 'Pragma' => 'no-cache',
-                'Expires' => '0'
+                'Expires' => '0',
             ]);
-            
+
         } catch (\Exception $e) {
             \Log::error('File Access Error', [
                 'error' => $e->getMessage(),
                 'user_id' => auth('tenant')->id(),
                 'document_id' => $id,
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
-            
+
             return response()->json([
                 'error' => 'Error accessing file',
-                'message' => app()->environment('local') ? $e->getMessage() : 'An error occurred'
+                'message' => app()->environment('local') ? $e->getMessage() : 'An error occurred',
             ], 500);
         }
     }
 
     public function download($id)
     {
+        $id = decrypt($id);
         return $this->serveFile($id, request());
     }
 
@@ -526,14 +562,17 @@ class DocumentController extends Controller
 
     public function show($id)
     {
-        $document = Document::with(['creator', 'lastVersion' , 'status', 'versions' => function($query) {
+        $id = decrypt($id);
+        $document = Document::with(['creator', 'reviewRequests', 'lastVersion', 'status', 'versions' => function ($query) {
             $query->orderBy('created_at', 'desc')->with('status');
         }])->findOrFail($id);
-        return view('document::document.show', compact('document'));
+        $latestStatusRequest = $document->reviewRequests()->latest()->first();
+        return view('document::document.show', compact('document', 'latestStatusRequest'));
     }
 
     public function history(Document $document)
-    {
+    {   
+        
         $history = DocumentHistoryLog::with(['performer', 'version'])
             ->where('document_id', $document->id)
             ->orderBy('created_at', 'desc')

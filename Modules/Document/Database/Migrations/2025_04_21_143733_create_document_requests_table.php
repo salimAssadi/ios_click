@@ -20,7 +20,9 @@ class CreateDocumentRequestsTable extends Migration
             $table->foreignId('request_type_id')->constrained('request_types')->onDelete('restrict');
             $table->foreignId('requested_by')->constrained('users')->onDelete('cascade');
             $table->foreignId('assigned_to')->nullable()->constrained('users')->onDelete('set null');
-            $table->text('notes')->nullable();
+            $table->text('response')->nullable();
+            $table->foreignId('version_id')->nullable()->constrained('document_versions')->onDelete('set null');
+            $table->foreignId('parent_request_id')->nullable()->constrained('document_requests')->onDelete('cascade');
             $table->foreignId('status_id')->constrained('statuses')->default(1);
             $table->timestamp('action_at')->nullable(); // متى تم اعتماد أو رفض الطلب
             $table->foreignId('action_by')->nullable()->constrained('users')->onDelete('set null');

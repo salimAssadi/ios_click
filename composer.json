@@ -17,6 +17,7 @@
         "kkomelin/laravel-translatable-string-exporter": "^1.22",
         "lab404/laravel-impersonate": "^1.7",
         "laravel/framework": "^10.10",
+        "laravel/reverb": "^1.5",
         "laravel/sanctum": "^3.3",
         "laravel/tinker": "^2.8",
         "laravel/ui": "^4.6",

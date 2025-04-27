@@ -21,7 +21,6 @@ class OrganizationController extends BaseModuleController
     public function index()
     {
         $departments = Department::with(['positions.employees', 'children'])
-            ->whereNull('parent_id')
             ->get();
 
         $positions = Position::with(['department', 'reportsTo'])
@@ -48,8 +47,10 @@ class OrganizationController extends BaseModuleController
         }
 
         Department::create($validated);
-
-        return $this->success('Department added successfully.');
+        return response()->json([
+            'success' => true,
+            'message' => 'Department added successfully.'
+        ]);
     }
 
     public function storePosition(Request $request)
@@ -63,8 +64,10 @@ class OrganizationController extends BaseModuleController
         ]);
 
         Position::create($validated);
-
-        return $this->success('Position added successfully.');
+        return response()->json([
+            'success' => true,
+            'message' => 'Position added successfully.'
+        ]);
     }
 
     public function storeEmployee(Request $request)
@@ -79,8 +82,10 @@ class OrganizationController extends BaseModuleController
         ]);
 
         Employee::create($validated);
-
-        return $this->success('Employee added successfully.');
+        return response()->json([
+            'success' => true,
+            'message' => 'Employee added successfully.'
+        ]);
     }
 
     public function updateDepartment(Request $request, $id)
@@ -197,16 +202,18 @@ class OrganizationController extends BaseModuleController
                 ];
 
                 // إضافة الموظف الحالي إن وجد
-                if ($position->currentEmployee) {
-                    $posNode['children'][] = [
-                        'id' => 'emp_' . $position->currentEmployee->id,
-                        'text' => $position->currentEmployee->name,
-                        'type' => 'employee',
-                        'icon' => 'fas fa-user-tie text-success',
-                        'state' => ['opened' => false],
-                    ];
+                if ($position->employees->isNotEmpty()) {
+                    foreach ($position->employees as $employee) {
+                        $posNode['children'][] = [
+                            'id' => 'emp_' . $employee->id,
+                            'text' => $employee->name,
+                            'type' => 'employee',
+                            'icon' => 'fas fa-user-tie text-success',
+                            'state' => ['opened' => false],
+                        ];
+                    }
                 }
-
+                
                 $positionMap[$position->id] = $posNode;
             }
 
@@ -238,7 +245,7 @@ class OrganizationController extends BaseModuleController
     public function showDepartment($id)
     {
         $department = Department::findOrFail($id);
-        $departments = Department::whereNull('parent_id')->get();
+        $departments = Department::get();
         
         return response()->json([
             'id' => $department->id,

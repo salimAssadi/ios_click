@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Modules\Setting\Entities\Employee;
 use Modules\Setting\Entities\Position;
 use Modules\Setting\Entities\Department;
+use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
@@ -20,9 +21,9 @@ class UserController extends Controller
      * @return Renderable
      */
     public function index()
-    {
-        $users = User::with(['roles', 'employee', 'employee.position', 'employee.position.department'])->get();
-        return view('role::users.index', compact('users'));
+    {   
+        $employees = Employee::with(['user', 'user.roles', 'position', 'position.department'])->get();
+        return view('role::users.index', compact('employees'));
     }
 
     /**
@@ -54,28 +55,36 @@ class UserController extends Controller
             'status' => 'required|in:active,inactive',
         ]);
 
-        // Split name into first_name and last_name
-        $nameParts = explode(' ', $request->name, 2);
-        $firstName = $nameParts[0];
-        $lastName = isset($nameParts[1]) ? $nameParts[1] : '';
-
         DB::beginTransaction();
-        
+
         try {
+            // Get role type first
+            $userType = 'employee'; // default type
+            if ($request->has('roles')) {
+                $role = Role::find($request->roles[0]); // Get first role
+                if ($role) {
+                    $userType = strtolower($role->name);
+                }
+            }
+
+            // Create user first
             $user = User::create([
-                'first_name' => $firstName,
-                'last_name' => $lastName,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
                 'is_active' => $request->status === 'active' ? 1 : 0,
                 'phone_number' => $request->phone,
+                'type' => $userType
             ]);
 
+            // Assign roles if any
             if ($request->has('roles')) {
-                $user->syncRoles($request->roles);
+                $roleNames = Role::whereIn('id', $request->roles)
+                    ->pluck('name')
+                    ->toArray();
+                $user->syncRoles($roleNames);
             }
 
-            // Create employee record
+            // Create employee and link to user
             Employee::create([
                 'user_id' => $user->id,
                 'position_id' => $request->position_id,
@@ -104,9 +113,9 @@ class UserController extends Controller
      */
     public function show($id)
     {
-        $user = User::with(['roles', 'roles.permissions'])->findOrFail($id);
-        $employee = Employee::with(['position', 'position.department', 'reportsTo'])->where('user_id', $id)->first();
         
+        $employee = Employee::with(['user', 'user.roles', 'position', 'position.department', 'reportsTo'])->findOrFail($id);
+        $user = $employee->user;
         return view('role::users.show', compact('user', 'employee'));
     }
 
@@ -116,15 +125,18 @@ class UserController extends Controller
      * @return Renderable
      */
     public function edit($id)
-    {
-        $user = User::findOrFail($id);
+    {   
+        $employee = Employee::with(['user', 'user.roles', 'position', 'position.department', 'reportsTo'])->findOrFail($id);
         $roles = Role::where('guard_name', 'tenant')->get();
-        $userRoles = $user->roles->pluck('id')->toArray();
+        $user = $employee->user ? $employee->user : null;
+        if ($user) {
+            $userRoles = $user->roles->pluck('id')->toArray();
+        } else {
+            $userRoles = [];
+        }
         $positions = Position::with('department')->get();
         $departments = Department::all();
-        $employee = Employee::where('user_id', $id)->first();
-        
-        return view('role::users.edit', compact('user', 'roles', 'userRoles', 'positions', 'departments', 'employee'));
+        return view('role::users.edit', compact('user', 'employee', 'roles', 'userRoles', 'positions', 'departments'));
     }
 
     /**
@@ -135,69 +147,82 @@ class UserController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $user = User::findOrFail($id);
+        // Find the employee by ID
+        $employee = Employee::findOrFail($id);
         
+        // Define validation rules
         $rules = [
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $id,
+            'email' => 'required|string|email|max:255|unique:users,email,' . ($employee->user ? $employee->user->id : ''),
             'roles' => 'nullable|array',
             'position_id' => 'required|exists:positions,id',
             'phone' => 'nullable|string|max:20',
             'status' => 'required|in:active,inactive',
         ];
         
-        // Only validate password if it's provided
+        // Validate password if provided
         if ($request->filled('password')) {
             $rules['password'] = 'string|min:6|confirmed';
         }
         
         $request->validate($rules);
         
-        // Split name into first_name and last_name
-        $nameParts = explode(' ', $request->name, 2);
-        $firstName = $nameParts[0];
-        $lastName = isset($nameParts[1]) ? $nameParts[1] : '';
-        
         DB::beginTransaction();
         
         try {
+            // Get role type first
+            $userType = 'employee'; // default type
+            if ($request->has('roles')) {
+                $role = Role::find($request->roles[0]); // Get first role
+                if ($role) {
+                    $userType = strtolower($role->name);
+                }
+            }
+
+            // Prepare user data
             $userData = [
-                'first_name' => $firstName,
-                'last_name' => $lastName,
                 'email' => $request->email,
                 'is_active' => $request->status === 'active' ? 1 : 0,
                 'phone_number' => $request->phone,
+                'type' => $userType
             ];
             
-            // Only update password if it's provided
             if ($request->filled('password')) {
                 $userData['password'] = Hash::make($request->password);
             }
             
-            $user->update($userData);
+            // Get or create user
+            if ($employee->user) {
+                $user = $employee->user;
+                $user->update($userData);
+            } else {
+                // Create new user if not exists
+                $userData['password'] = $userData['password'] ?? Hash::make('password');
+                $user = User::create($userData);
+                
+                // Link user to employee
+                $employee->user_id = $user->id;
+                $employee->save();
+            }
             
             // Sync roles
             if ($request->has('roles')) {
                 $roleNames = Role::whereIn('id', $request->roles)
-                ->pluck('name')
-                ->toArray();
-        
-            $user->syncRoles($roleNames);
+                    ->pluck('name')
+                    ->toArray();
+                $user->syncRoles($roleNames);
             } else {
                 $user->syncRoles([]);
             }
             
-            // Update or create employee record
-            $employee = Employee::updateOrCreate(
-                ['user_id' => $user->id],
-                [
-                    'position_id' => $request->position_id,
-                    'name' => $request->name,
-                    'email' => $request->email,
-                    'phone' => $request->phone,
-                    'status' => $request->status,
-                ]
-            );
+            // Update employee record
+            $employee->update([
+                'position_id' => $request->position_id,
+                'name' => $request->name,
+                'email' => $request->email,
+                'phone' => $request->phone,
+                'status' => $request->status,
+            ]);
             
             DB::commit();
             
@@ -240,8 +265,3 @@ class UserController extends Controller
         }
     }
 }
-
-
-
-
-
