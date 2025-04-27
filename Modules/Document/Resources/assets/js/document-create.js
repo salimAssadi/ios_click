@@ -244,3 +244,130 @@ document.addEventListener('DOMContentLoaded', function() {
         showStep(1);
     }, 100);
 });
+
+                        successImg, 4000);
+                    window.location.href = response.redirect;
+                },
+                error: function(xhr) {
+                    $submitBtn.prop('disabled', false)
+                        .html(
+                            '<i class="ti ti-device-floppy me-1"></i>' + Lang.get('Create Document')
+                        );
+
+                    if (xhr.status === 422) {
+                        const errors = xhr.responseJSON.errors;
+                        Object.keys(errors).forEach(field => {
+                            notifier.show('Error!', errors[field][0], 'error',
+                                errorImg, 4000);
+                        });
+                    } else {
+                        notifier.show('Error!',
+                            xhr.responseJSON.message ||
+                            Lang.get('An error occurred while creating the document'),
+                            'error',
+                            errorImg, 4000);
+                    }
+                }
+            });
+        }
+    });
+
+    // Initialize wizard
+    setTimeout(function() {
+        showStep(1);
+    }, 100);
+
+    // تحميل بيانات الإجراءات من النماذج وحفظها كـ JSON عند إرسال النموذج
+    document.getElementById('documentWizard').addEventListener('submit', function(e) {
+        if (document.getElementById('document_type').value === 'procedure') {
+            try {
+                // حصر جميع البيانات من علامات التبويب المختلفة
+                var procedureData = {
+                    purpose: collectDataFromTable('dynamic-table-purpose'),
+                    scope: collectDataFromTable('dynamic-table-scope'),
+                    responsibility: collectDataFromTable('dynamic-table-responsibility'),
+                    definitions: collectDataFromTable('dynamic-table-definitions'),
+                    forms: collectDataFromTable('forms-table'),
+                    procedures: collectDataFromTable('procedures-table'),
+                    risk_matrix: collectDataFromTable('risk-matrix-table'),
+                    kpis: collectDataFromTable('kpis-table')
+                };
+                
+                // حفظ البيانات في حقل خفي
+                document.getElementById('procedure_data').value = JSON.stringify(procedureData);
+                console.log('Procedure data collected and serialized successfully');
+            } catch (error) {
+                console.error('Error collecting procedure data:', error);
+            }
+        }
+    });
+
+    function collectDataFromTable(tableId) {
+        var table = document.getElementById(tableId);
+        if (!table) {
+            console.warn(`Table ${tableId} not found`);
+            return [];
+        }
+        
+        var rows = table.querySelectorAll('tbody tr');
+        var data = [];
+        
+        rows.forEach(function(row, index) {
+            // تجاهل صف "لا توجد بيانات"
+            if (row.cells.length <= 1 || row.textContent.includes('لا توجد بيانات') || row.textContent.includes('No Data')) {
+                return;
+            }
+            
+            var rowData = {};
+            var inputs = row.querySelectorAll('input, select, textarea');
+            
+            inputs.forEach(function(input) {
+                // استخراج اسم الحقل من الاسم
+                var name = input.getAttribute('name');
+                if (name) {
+                    // استخراج الفهرس والمفتاح من اسم الحقل (مثال: content[0][value] أو content[0][col-0])
+                    var matches = name.match(/content\[(\d+)\]\[([^\]]+)\]/);
+                    if (matches) {
+                        var key = matches[2];
+                        rowData[key] = input.value;
+                    }
+                }
+            });
+            
+            if (Object.keys(rowData).length > 0) {
+                data.push(rowData);
+            }
+        });
+        
+        return data;
+    }
+
+    function populateTableFromJSON(tableId, data) {
+        const table = document.getElementById(tableId);
+        if (!table) return;
+        
+        // Clear existing rows except the first (header)
+        const tbody = table.querySelector('tbody');
+        while (tbody.rows.length > 1) {
+            tbody.deleteRow(1);
+        }
+        
+        // Add rows with data
+        data.forEach((item, index) => {
+            // If not the first row, add a new one
+            if (index > 0) {
+                const addButton = table.querySelector('.add-row-btn');
+                if (addButton) addButton.click();
+            }
+            
+            // Fill the row with data
+            const row = tbody.rows[index];
+            if (row) {
+                Object.keys(item).forEach(key => {
+                    const input = row.querySelector(`[name^="content[${index}][${key}]"]`);
+                    if (input) input.value = item[key];
+                });
+            }
+        });
+    }
+});
