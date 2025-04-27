@@ -66,7 +66,7 @@ class HomeController extends Controller
                 $result['archivedDocs'] = DocumentRequest::whereHas('approvalStatus', function($q) {
                     $q->where('code', 'archived');
                 })->count();
-                $result['draftDocs'] = Document::where('status_id', 17)->count();
+                $result['draftDocs'] = Document::where('status_id', 11)->count();
 
                 $result['documentByCategory'] = $this->documentByCategory();
                 $result['documentBySubCategory'] = $this->documentBySubCategory();

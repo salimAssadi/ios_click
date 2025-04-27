@@ -334,7 +334,7 @@
                             </div>
                         </div>
                         <div class="flex-grow-1 ms-3">
-                            <p class="mb-1">{{ __('Draft Policies') }}</p>
+                            <p class="mb-1">{{ __('Draft') }}</p>
                             <div class="d-flex align-items-center justify-content-between">
                                 <h4 class="mb-0">{{ $result['draftDocs'] }}
                                 </h4>
