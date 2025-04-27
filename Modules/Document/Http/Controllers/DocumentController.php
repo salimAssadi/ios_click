@@ -22,7 +22,7 @@ use Modules\Document\Entities\Sample;
 use Modules\Document\Entities\Status;
 use Modules\Setting\Entities\Department;
 use Modules\Tenant\Models\Setting;
-use Yajra\DataTables\Facades\Datatables;
+use Yajra\DataTables\Facades\DataTables;
 
 class DocumentController extends Controller
 {
@@ -224,7 +224,7 @@ class DocumentController extends Controller
                     return $q->byStatus($request->status);
                 });
 
-            return Datatables::of($query)
+            return DataTables::of($query)
                 ->addColumn('version_badge', function ($document) {
                     $version = $document->lastVersion->version ?? '1.0';
                     return '<span class="badge bg-info">v' . $version . '</span>';
