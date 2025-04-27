@@ -323,27 +323,27 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div>--}}
         <div class="col-lg-3 col-md-6">
             <div class="card">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="flex-shrink-0">
                             <div class="avtar bg-light-danger">
-                                <i class="ti ti-credit-card f-24"></i>
+                                <i class="ti ti-edit-card f-24"></i>
                             </div>
                         </div>
                         <div class="flex-grow-1 ms-3">
-                            <p class="mb-1">{{ __('Total policies') }}</p>
+                            <p class="mb-1">{{ __('Draft Policies') }}</p>
                             <div class="d-flex align-items-center justify-content-between">
-                                <h4 class="mb-0">{{ $result['totalPolicies'] }}
+                                <h4 class="mb-0">{{ $result['draftDocs'] }}
                                 </h4>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div> --}}
+        </div> 
 
         <div class="col-lg-3 col-md-6">
             <div class="card">
