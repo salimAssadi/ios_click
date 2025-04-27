@@ -23,6 +23,7 @@ use Modules\Document\Entities\Status;
 use Modules\Setting\Entities\Department;
 use Modules\Tenant\Models\Setting;
 use Yajra\DataTables\Facades\DataTables;
+use PhpOffice\PhpWord\IOFactory; // لإضافة تحويل DOCX إلى HTML قبل PDF
 
 class DocumentController extends Controller
 {
@@ -110,7 +111,7 @@ class DocumentController extends Controller
                 ]);
 
                 DB::commit();
-                
+
 
                 return response()->json([
                     'success' => true,
