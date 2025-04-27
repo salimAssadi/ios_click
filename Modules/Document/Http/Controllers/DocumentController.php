@@ -75,7 +75,7 @@ class DocumentController extends Controller
                     'document_type' => $request->document_type,
                     'document_number' => $request->document_number,
                     'related_process' => $request->related_process,
-                    'status' => 11,
+                    'status_id' => 11,
                     'department' => $request->department,
                     'created_by' => auth('tenant')->id(),
                     'creation_date' => now(),
@@ -103,7 +103,7 @@ class DocumentController extends Controller
                     'issue_date' => now(),
                     'expiry_date' => $expiryDate,
                     'review_due_date' => $reviewDate,
-                    'status_id' => 1,
+                    'status_id' => 17,
                     'storage_path' => $filePath,
                     'file_path' => $filePath,
                     'is_active' => true,
@@ -129,6 +129,11 @@ class DocumentController extends Controller
             return redirect()->back()->with('error', __('You do not have permission to create documents'));
         }
     }
+
+
+
+
+
 
     public function getTemplates(Request $request)
     {
