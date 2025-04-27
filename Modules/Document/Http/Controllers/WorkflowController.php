@@ -53,7 +53,7 @@ class WorkflowController extends Controller
                 $q->where('code', $status);
             });
         })
-        ->groupBy('document_id')
+
         ->count();
     }
 
@@ -81,7 +81,7 @@ class WorkflowController extends Controller
                     $q->where('code', 'under_review');
                 }
             })
-            ->groupBy('document_id') ;
+           ;
 
         return DataTables::of($requests)
             ->addColumn('title', function ($request) {
