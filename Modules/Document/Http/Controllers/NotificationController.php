@@ -10,20 +10,20 @@ class NotificationController extends Controller
 {
     public function index()
     {
-        $notifications = Auth::user()->notifications()->paginate(10);
+        $notifications = auth('tenant')->user()->notifications()->paginate(10);
         return view('document::notifications.index', compact('notifications'));
     }
 
     public function getUnreadCount()
     {
         return response()->json([
-            'count' => Auth::user()->unreadNotifications()->count()
+            'count' => auth('tenant')->user()->unreadNotifications()->count()
         ]);
     }
 
     public function getLatestNotifications()
     {
-        $notifications = Auth::user()->unreadNotifications()
+        $notifications = auth('tenant')->user()->unreadNotifications()
             ->latest()
             ->take(5)
             ->get();
@@ -35,7 +35,7 @@ class NotificationController extends Controller
 
     public function markAsRead($id)
     {
-        $notification = Auth::user()->notifications()->findOrFail($id);
+        $notification = auth('tenant')->user()->notifications()->findOrFail($id);
         $notification->markAsRead();
 
         return response()->json(['success' => true]);
@@ -43,7 +43,7 @@ class NotificationController extends Controller
 
     public function markAllAsRead()
     {
-        Auth::user()->unreadNotifications->markAsRead();
+        auth('tenant')->user()->unreadNotifications->markAsRead();
         return response()->json(['success' => true]);
     }
 }

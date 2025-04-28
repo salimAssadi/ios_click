@@ -85,7 +85,7 @@ class WorkflowController extends Controller
 
         return DataTables::of($requests)
             ->addColumn('title', function ($request) {
-                return '<a href="' . route('tenant.document.show', $request->document_id) . '">' . $request->document->title . '</a>';
+                return '<a href="' . route('tenant.document.show', encrypt($request->document_id)) . '">' . $request->document->title . '</a>';
             })
             ->addColumn('version', function ($request) {
                 return 'v' . optional($request->document->lastVersion)->version;

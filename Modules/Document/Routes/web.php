@@ -53,6 +53,10 @@ Route::prefix('document')->name('tenant.document.')->middleware(['auth:tenant','
         Route::post('/', [DocumentRequestController::class, 'store'])->name('store');
         Route::get('/{request}', [DocumentRequestController::class, 'show'])->name('show');
         Route::post('/{request}/status', [DocumentRequestController::class, 'updateStatus'])->name('update-status');
+        Route::post('/{id}/approve', [DocumentRequestController::class, 'approve'])->name('approve');
+        Route::post('/{id}/reject', [DocumentRequestController::class, 'reject'])->name('reject');
+        Route::post('/{id}/request-modification', [DocumentRequestController::class, 'requestModification'])->name('request-modification');
+
     });
 
     // Document History Routes

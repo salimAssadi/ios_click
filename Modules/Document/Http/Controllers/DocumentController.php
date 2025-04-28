@@ -6,6 +6,7 @@ use App\Traits\TenantFileManager;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Storage;
@@ -16,14 +17,14 @@ use Modules\Document\Entities\DocumentVersion;
 use Modules\Document\Entities\IsoInstruction;
 use Modules\Document\Entities\IsoPolicy;
 use Modules\Document\Entities\IsoSystem;
-use Modules\Document\Entities\IsoSystemProcedure;
 use Modules\Document\Entities\Procedure;
+use Modules\Document\Entities\ProcedureTemplate;
 use Modules\Document\Entities\Sample;
 use Modules\Document\Entities\Status;
 use Modules\Setting\Entities\Department;
+use Modules\Setting\Entities\Position; // لإضافة تحويل DOCX إلى HTML قبل PDF
 use Modules\Tenant\Models\Setting;
 use Yajra\DataTables\Facades\DataTables;
-use PhpOffice\PhpWord\IOFactory; // لإضافة تحويل DOCX إلى HTML قبل PDF
 
 class DocumentController extends Controller
 {
@@ -60,7 +61,7 @@ class DocumentController extends Controller
                 'content' => 'nullable|string',
                 'file' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx|max:10240', // 10MB max
                 'document_type' => 'required|in:procedure,policy,instruction,sample,custom',
-
+                'procedure_data' => 'nullable|string', // Validar el campo JSON para datos de procedimiento
             ]);
 
             $request->merge([
@@ -69,7 +70,55 @@ class DocumentController extends Controller
 
             try {
                 DB::beginTransaction();
-
+                // Removing dd() that stops execution
+                // dd($request->all());
+                
+                // Log data for debugging
+                \Log::info('Document creation data:', [
+                    'all_request' => $request->all(),
+                    'procedure_data_exists' => $request->filled('procedure_data'),
+                    'procedure_setup_data_exists' => $request->filled('procedure_setup_data')
+                ]);
+                
+                if ($request->document_type === 'procedure' && $request->filled('procedure_setup_data')) {
+                    // Validar que el JSON es válido
+                    $procedure_id = $request->template_id;
+                    
+                    \Log::info('Procedure data processing:', [
+                        'procedure_id' => $procedure_id,
+                        'procedure_setup_data' => $request->procedure_setup_data
+                    ]);
+                    
+                    if (!empty($procedure_id)) {
+                        $procedureData = json_decode($request->procedure_setup_data, true);
+                        if (json_last_error() !== JSON_ERROR_NONE) {
+                            throw new \Exception('Invalid procedure data format: ' . json_last_error_msg());
+                        }
+                        $procedure = Procedure::where('id', $procedure_id)->first();
+                        if (!$procedure) {
+                            throw new \Exception('Invalid procedure ID');
+                        }
+                        
+                        // Guardar en ProcedureTemplate
+                        $procedureTemplate = ProcedureTemplate::create([
+                            'title' => $request->title,
+                            'procedure_id' => $procedure_id,
+                            'content' => $procedureData,
+                            'parent_id' =>1
+                        ]);
+                        
+                        \Log::info('Created procedure template:', [
+                            'template_id' => $procedureTemplate->id
+                        ]);
+                    } else {
+                        \Log::warning('Empty procedure_id, not creating template');
+                    }
+                } else {
+                    \Log::info('Not processing procedure data - conditions not met:', [
+                        'document_type' => $request->document_type,
+                        'has_procedure_setup_data' => $request->filled('procedure_setup_data')
+                    ]);
+                }
                 // Create document record
                 $document = Document::create([
                     'title' => $request->title,
@@ -82,6 +131,9 @@ class DocumentController extends Controller
                     'creation_date' => now(),
                 ]);
                 $document->save();
+
+                // Si es un procedimiento y tiene datos de configuración, guardarlos en ProcedureTemplate
+               
 
                 $fileName = $this->generateFileName($request->document_number, $request->title);
                 $content = $request->hasFile('file') ? $request->file('file') : $request->content;
@@ -112,7 +164,6 @@ class DocumentController extends Controller
 
                 DB::commit();
 
-
                 return response()->json([
                     'success' => true,
                     'message' => __('Document created successfully'),
@@ -121,6 +172,7 @@ class DocumentController extends Controller
                 ]);
 
             } catch (\Exception $e) {
+                throw $e;
                 DB::rollback();
                 return response()->json([
                     'success' => false,
@@ -131,11 +183,6 @@ class DocumentController extends Controller
             return redirect()->back()->with('error', __('You do not have permission to create documents'));
         }
     }
-
-
-
-
-
 
     public function getTemplates(Request $request)
     {
@@ -171,25 +218,88 @@ class DocumentController extends Controller
         $documentType = $request->input('documentType');
 
         if ($documentType == 'procedure') {
-            $template = IsoSystemProcedure::with(['procedure'])->find($templateId);
-            $template->name = $template->procedure->procedure_name_ar;
-            $template->number = $template->procedure->procedure_number;
-            $template->version = $template->procedure->version;
-            $template->content = $template->procedure->content;
+            $template = Procedure::find($templateId);
+
+            if (!$template) {
+                return response()->json([
+                    'error' => 'Template not found',
+                ], 404);
+            }
+
+            // Buscar si existe una plantilla de procedimiento ya creada
+            $procedureTemplate = ProcedureTemplate::where('procedure_id', $templateId)->first();
+
+            // Si no existe un registro en ProcedureTemplate, crear datos básicos del template tradicional
+            if (!$procedureTemplate) {
+
+                $template->template_id = $template->id;
+                $template->name = $template->procedure_name_ar;
+                $template->number = $template->procedure_number;
+                $template->version = $template->version;
+                $template->content = $template->content;
+
+                // Obtener datos del procedimiento en formato estructurado
+                $jobRoles = Position::all()->pluck('name_ar', 'id');
+
+                // Renderizar la configuración como antes (solo para compatibilidad)
+                $defaultContent = ['content' => [], 'id' => 0];
+
+                $template->config = view('document::partials.procedure_setup', [
+                    'procedure' => $template,
+                    'jobRoles' => $jobRoles,
+                    'purposes' => $defaultContent,
+                    'scopes' => $defaultContent,
+                    'responsibilities' => $defaultContent,
+                    'definitions' => $defaultContent,
+                    'forms' => $defaultContent,
+                    'procedures' => $defaultContent,
+                    'risk_matrix' => (object) $defaultContent,
+                    'kpis' => (object) $defaultContent,
+                ])->render();
+            } else {
+                // Si existe un registro, usar directamente los datos almacenados en formato JSON
+                $template->template_id = $template->id;
+                $template->name = $template->procedure_name_ar;
+                $template->number = $template->procedure_number;
+                $template->version = $template->version;
+                $template->content = $template->content;
+                $jobRoles = Position::all()->pluck('title_ar', 'id');
+
+                // Convertir datos de JSON a estructura para la vista
+                $contentData = $procedureTemplate->content;
+                $template->config = view('document::partials.procedure_setup', [
+                    'procedure' => $template,
+                    'jobRoles' => $jobRoles,
+                    'purposes' => ($contentData['purpose'] ?? []),
+                    'scopes' => ($contentData['scope'] ?? []),
+                    'responsibilities' => ($contentData['responsibility'] ?? []),
+                    'definitions' => ($contentData['definitions'] ?? []),
+                    'forms' => ($contentData['forms'] ?? []),
+                    'procedures' => ($contentData['procedures'] ?? []),
+                    'risk_matrix' => ($contentData['risk_matrix'] ?? []),
+                    'kpis' => ($contentData['kpis'] ?? []),
+                ])->render();
+
+                // dd($template->config);
+                // Usar directamente los datos JSON almacenados como config
+            }
         } elseif ($documentType == 'policy') {
             $template = IsoPolicy::find($templateId);
+            $template->template_id = $template->id;
             $template->name = $template->name;
             $template->number = $template->number;
             $template->version = $template->version;
             $template->content = $template->content;
         } elseif ($documentType == 'sample') {
             $template = Sample::find($templateId);
+            $template->template_id = $template->id;
             $template->name = $template->sample_name_ar;
             $template->number = $template->number;
             $template->version = $template->version;
             $template->content = $template->content;
         } elseif ($documentType == 'instruction') {
             $template = IsoInstruction::find($templateId);
+            $template->template_id = $template->id;
             $template->name = $template->name;
             $template->number = $template->number;
             $template->version = $template->version;
@@ -206,9 +316,11 @@ class DocumentController extends Controller
 
         return response()->json([
             'data' => [
+                'template_id' => $template->template_id,
                 'name' => $template->name,
                 'number' => $template->number ?? '',
                 'version' => $template->version ?? '1.0',
+                'config' => $template->config ?? '',
                 'content' => $template->content ?? '',
             ],
         ]);
@@ -261,7 +373,7 @@ class DocumentController extends Controller
                             'title' => __('Download'),
                         ],
                     ];
-                
+
                     $buttons = '<div class="btn-group" role="group">';
                     foreach ($actions as $permission => $action) {
                         if (tenant_can($permission)) {
@@ -273,7 +385,7 @@ class DocumentController extends Controller
                         }
                     }
                     $buttons .= '</div>';
-                
+
                     return $buttons;
                 })
                 ->rawColumns(['version_badge', 'status_badge', 'actions'])
@@ -372,7 +484,7 @@ class DocumentController extends Controller
      * Show the form for editing the specified resource.
      */
     public function edit($id)
-    {   
+    {
         $id = decrypt($id);
         if (tenant_can('Edit Documents')) {
             $document = Document::with(['lastVersion.status'])->findOrFail($id);
@@ -387,7 +499,7 @@ class DocumentController extends Controller
      * Update the specified resource in storage.
      */
     public function update(Request $request, $id)
-    {   
+    {
         $id = decrypt($id);
         $document = Document::findOrFail($id);
 
@@ -579,8 +691,8 @@ class DocumentController extends Controller
     }
 
     public function history(Document $document)
-    {   
-        
+    {
+
         $history = DocumentHistoryLog::with(['performer', 'version'])
             ->where('document_id', $document->id)
             ->orderBy('created_at', 'desc')

@@ -214,13 +214,43 @@
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
+                                <div class="col-md-12 mb-3">
+                                    <ul class="nav nav-tabs" id="myTab" role="tablist">
 
-                                <div class="col-12 mb-3">
-                                    <label class="form-label">{{ __('Description') }}</label>
-                                    <textarea name="content" id="document_content" class="form-control summernote @error('description') is-invalid @enderror" rows="3">{{ old('description') }}</textarea>
-                                    @error('description')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link active" id="config-tab" data-bs-toggle="tab" href="#config"
+                                                role="tab" aria-controls="config"
+                                                aria-selected="true">{{ __('Config') }}</a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="editor-tab" data-bs-toggle="tab"
+                                                href="#editor" role="tab" aria-controls="editor"
+                                                aria-selected="false">{{ __('Editor') }}</a>
+                                        </li>
+                                    </ul>
+                                    <div class="tab-content" id="myTabContent">
+
+                                        <div class="tab-pane fade show active" id="config" role="tabpanel"
+                                            aria-labelledby="config-tab">
+                                            <div class="row mt-3">
+                                                <div class="col-12" id="document_config">
+                                                    <!-- سيتم إضافة نموذج الإجراء هنا ديناميكياً -->
+                                                </div>
+                                                <input type="hidden" name="procedure_data" id="procedure_data" value="">
+                                            </div>
+                                        </div>
+
+                                        <div class="tab-pane fade " id="editor" role="tabpanel"
+                                            aria-labelledby="editor-tab">
+                                            <div class="row mt-3">
+                                                <div class="col-12" id="document_content">
+                                                    <label class="form-label">{{ __('Content') }}</label>
+                                                    <textarea name="content" id="document_content" class="form-control summernote @error('content') is-invalid @enderror"
+                                                        rows="3"></textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -238,8 +268,13 @@
                             <i class="ti ti-device-floppy me-1"></i> {{ __('Create Document') }}
                         </button>
                     </div>
+                    
+                    <!-- Campo oculto para los datos del procedimiento -->
+                    <input type="hidden" name="procedure_data" id="procedure_data" value="">
                 </form>
             </div>
         </div>
     </div>
 @endsection
+
+

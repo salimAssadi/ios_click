@@ -129,6 +129,9 @@ document.addEventListener('DOMContentLoaded', function() {
                                 $('#title').val(template.name || '');
                                 $('#document_number').val(template.number || '');
                                 $('#version').val(template.version || '');
+                                $('#document_config').html(template.config || '');
+                                $('#procedure_data').val(template.template_id || '');
+
                                 if (template.content) {
                                     tinymce.get('document_content').setContent(template.content);
                                 }
@@ -197,10 +200,30 @@ document.addEventListener('DOMContentLoaded', function() {
             const $form = $(this);
             const $submitBtn = $('#submitBtn');
 
+            // Collect all form data from procedure setup if available
+            let formData = new FormData(this);
+            
+            // Check if the collectAllFormData function exists and add the data
+            if (typeof window.collectAllFormData === 'function') {
+                try {
+                    const allProcedureData = window.collectAllFormData();
+                    
+                    // Add the collected data as a JSON string to the form data
+                    formData.append('procedure_setup_data', JSON.stringify(allProcedureData));
+                    
+                    console.log('Added procedure setup data:', allProcedureData);
+                } catch (error) {
+                    console.error('Error collecting procedure setup data:', error);
+                }
+            } else {
+                console.warn('collectAllFormData function not found in current context');
+            }
+
             $.ajax({
                 url: $form.attr('action'),
                 method: 'POST',
-                data: new FormData(this),
+                data: formData,
+
                 processData: false,
                 contentType: false,
                 beforeSend: function() {
@@ -213,7 +236,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     notifier.show('Success!',
                         Lang.get('Document created successfully'), 'success',
                         successImg, 4000);
-                    window.location.href = response.redirect;
+                        window.location.href = response.redirect;
                 },
                 error: function(xhr) {
                     $submitBtn.prop('disabled', false)

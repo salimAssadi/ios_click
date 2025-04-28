@@ -28,6 +28,8 @@ use Modules\Tenant\Http\Controllers\IsoReferenceController;
 use Modules\Tenant\Http\Controllers\SettingController;
 use Modules\Tenant\Http\Controllers\ComplaintController;
 use Modules\Tenant\Http\Controllers\ComplianceController;
+use Modules\Document\Http\Controllers\NotificationController;
+use Modules\Tenant\Http\Controllers\DocumentRequestController;
 
 Route::prefix('tenant')->name('tenant.')->middleware(['xss'])->group(function() {
     // Guest routes
@@ -128,6 +130,8 @@ Route::prefix('tenant')->name('tenant.')->middleware(['xss'])->group(function() 
         // Route::get('file-manager', [FileManagerController::class, 'index'])->name('file-manager.index');
         // Route::get('file-manager/config', [FileManagerController::class, 'getConfig'])->name('file-manager.config');
         // Route::post('file-manager/upload', [FileManagerController::class, 'upload'])->name('file-manager.upload');
+
+       
     });
 
 });
