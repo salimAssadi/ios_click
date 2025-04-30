@@ -76,10 +76,10 @@ class SettingController extends Controller
 
     public function accountDelete(Request $request)
     {
-        $loginUser = \Auth::user();
-        $loginUser->delete();
+        // $loginUser = \Auth::user();
+        // $loginUser->delete();
 
-        return redirect()->back()->with('success', 'Your account successfully deleted.');
+        // return redirect()->back()->with('success', 'Your account successfully deleted.');
     }
 
     //    ---------------------- Password --------------------------------------------------------
@@ -799,7 +799,7 @@ class SettingController extends Controller
                         $s_value,
                         $s_key,
                         'footer',
-                        parentId(),
+                        1,
                     ]
                 );
             }

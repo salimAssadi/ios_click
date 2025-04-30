@@ -22,7 +22,10 @@ class CompanyProfileController extends BaseModuleController
         return $this->view('index', compact('profile'));
     }
 
-    public function store(Request $request)
+
+
+    
+    public function update(Request $request)
     {
         $validated = $request->validate([
             'company_name' => 'required|string|max:255',
@@ -36,10 +39,10 @@ class CompanyProfileController extends BaseModuleController
             'website' => 'nullable|url',
             'tax_number' => 'nullable|string',
             'registration_number' => 'nullable|string',
+            
         ]);
-
+        
         $profile = CompanyProfile::updateOrCreate(
-            ['tenant_id' => tenantId()],
             $validated
         );
 
@@ -50,4 +53,7 @@ class CompanyProfileController extends BaseModuleController
 
         return $this->success('Company profile updated successfully.');
     }
+
+
+
 }

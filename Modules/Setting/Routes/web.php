@@ -24,10 +24,29 @@ use Modules\Tenant\Http\Middleware\XSSMiddleware;
 
 Route::prefix('setting')->name('tenant.setting.')->middleware(['auth:tenant', 'XSS','tenant'])->group(function() {
     // Company Profile
-    Route::get('/', [CompanyProfileController::class, 'index'])->name('index');
-    Route::post('/', [CompanyProfileController::class, 'store'])->name('store');
-    Route::put('/', [CompanyProfileController::class, 'update'])->name('update');
 
+    Route::get('/', [SettingController::class, 'index'])->name('index');
+    // Route::get('/', [CompanyProfileController::class, 'index'])->name('index');
+    // Route::post('/', [CompanyProfileController::class, 'store'])->name('store');
+    // Route::put('/', [CompanyProfileController::class, 'update'])->name('update');
+    
+    Route::post('updateSetting', [SettingController::class, 'footerData'])->name('updateSetting');
+    
+    // General Settings
+    Route::post('/account', [SettingController::class, 'accountData'])->name('account');
+    Route::post('/password', [SettingController::class, 'passwordData'])->name('password');
+    Route::post('/general', [SettingController::class, 'generalData'])->name('general');
+    Route::post('/smtp', [SettingController::class, 'smtpData'])->name('smtp');
+    Route::post('/company', [SettingController::class, 'companyData'])->name('company');
+    Route::post('/smtp/test', [SettingController::class, 'smtpTest'])->name('smtp.test');
+    Route::post('/signature', [SettingController::class, 'signatureData'])->name('signature');
+    
+    // 2FA Settings
+    Route::post('/2fa/enable', [SettingController::class, 'twofaEnable'])->name('2fa.enable');
+    
+    // Tenant Files
+    Route::get('/tenant-file/{path}', [SettingController::class, 'getTenantFile'])->where('path', '.*')->name('file');
+    
     // Organization Structure
     Route::prefix('organization')->name('organization.')->group(function() {
         Route::get('/', [OrganizationController::class, 'index'])->name('index');

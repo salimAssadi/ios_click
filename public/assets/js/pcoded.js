@@ -413,6 +413,9 @@ function font_change(name) {
     if (name == 'Cairo') {
         srcs = 'https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&display=swap';
     }
+    if (name == 'Arial') {
+        srcs = 'https://fonts.googleapis.com/css2?family=Arial:wght@400;500;700&display=swap';
+    }
     document.querySelector('#main-font-link').setAttribute('href', srcs);
     document.querySelector('body').setAttribute('style', 'font-family:"' + name + '", sans-serif');
     var control = document.querySelector('.pct-offcanvas');

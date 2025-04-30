@@ -25,7 +25,10 @@ class LoginController extends Controller
     }
     
     public function showLoginForm()
-    {
+    {   
+        if($this->guard()->check()) {
+            return redirect()->route('tenant.dashboard');
+        }
         return view('tenant::auth.login');
     }
     

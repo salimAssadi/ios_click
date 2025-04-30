@@ -41,9 +41,9 @@ class ProcedureController extends Controller
     {
         $isoSystems = IsoSystem::where('status', STATUS::ENABLE)->get()->pluck('name_ar', 'id');
         $isoSystems->prepend(__('Select ISO System'), '');
-        $category = Category::where('parent_id', parentId())->get()->pluck('title', 'id');
-        $category->prepend(__('Select Category'), '');
-        return view($this->iso_dic_path . '.procedures.create', compact('category', 'isoSystems'));
+        $categories = Category::get()->pluck('title', 'id');
+        $categories->prepend(__('Select Category'), '');
+        return view($this->iso_dic_path . '.procedures.create', compact('categories', 'isoSystems'));
     }
 
 
@@ -56,6 +56,7 @@ class ProcedureController extends Controller
         $validator = Validator::make($request->all(), [
             'procedure_name_en' => 'required|string|max:255',
             'procedure_name_ar' => 'required|string|max:255',
+            'category_id' =>'required',
             'procedure_description_en' => 'nullable|string|max:1000',
             'procedure_description_ar' => 'nullable|string|max:1000',
             'is_optional' => 'required|boolean',
@@ -70,6 +71,7 @@ class ProcedureController extends Controller
         DB::beginTransaction();
         try {
             $procedure = new Procedure();
+            $procedure->category_id= $request->input('category_id');
             $procedure->procedure_name_ar = $request->input('procedure_name_ar');
             $procedure->procedure_name_en = $request->input('procedure_name_en');
             $procedure->description_ar = $request->input('procedure_description_ar');
@@ -117,12 +119,14 @@ class ProcedureController extends Controller
     {
         $id = Crypt::decrypt($id);
         $procedure = Procedure::find($id);
+        $categories = Category::get()->pluck('title', 'id');
+
         if ($procedure) {
             $procedure->load('attachments');
             $form = $procedure->form()->where('act', 'procedure_' . $id)->first();
             $pageTitle =  $procedure->procedure_name;
             $identifier = 'procedure_' . $id;
-            return view($this->iso_dic_path . '.procedure_view', compact('pageTitle', 'form', 'identifier'));
+            return view($this->iso_dic_path . '.procedure_view', compact('pageTitle', 'form', 'categories','identifier'));
         }
         return redirect()->back()->with('error', __('Not Found'));
     }
@@ -158,6 +162,7 @@ class ProcedureController extends Controller
             'procedure_description_en' => 'nullable|string|max:1000',
             'procedure_description_ar' => 'nullable|string|max:1000',
             'is_optional' => 'required|boolean',
+            'category_id' =>'required',
             'status' => 'required|boolean',
             'attachments.*' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx|max:10240',
         ]);
@@ -171,6 +176,7 @@ class ProcedureController extends Controller
             $procedure = Procedure::findOrFail($id);
             
             // Update the procedure data
+            $procedure->category_id= $request->input('category_id');
             $procedure->procedure_name_ar = $request->input('procedure_name_ar');
             $procedure->procedure_name_en = $request->input('procedure_name_en');
             $procedure->description_ar = $request->input('procedure_description_ar');
@@ -291,46 +297,36 @@ class ProcedureController extends Controller
     {
 
         $procedure   = Procedure::findOrFail($id);
-        $templateTitles = [
-            Config::get('procedure_templates.purpose_title'),
-            Config::get('procedure_templates.scope_title'),
-            Config::get('procedure_templates.responsibility_title'),
-            Config::get('procedure_templates.definition_title'),
-            Config::get('procedure_templates.forms_title'),
-            Config::get('procedure_templates.procedure_title'),
-            Config::get('procedure_templates.risk_matrix_title'),
-            Config::get('procedure_templates.kpis'),
-        ];
-
-        $procedureTemplates = ProcedureTemplate::whereIn('title', $templateTitles)->get();
-
-        $groupedTemplates = $procedureTemplates->keyBy('title');
-        $pageTitle = __('Configure') . ' ' . $procedure->procedure_name;
-
+        
+        // $jobRoles = Position::all()->pluck('name_ar', 'id');
         $jobRoles = [
-            "مدير إدارة",
-            "رئيس لجنة الجودة",
-            "موظف جودة",
-            "مشرف قسم",
-            "مدير مشروع",
-            "أخصائي تدريب",
-            "مسؤول موارد بشرية",
-            "مهندس جودة",
-            "فني صيانة",
-            "مستشار قانوني"
+            1 => 'Department Manager',
+            2 => 'Quality Committee Head',
+            3 => 'Quality Officer',
+            4 => 'Section Supervisor',
+            5 => 'Project Manager',
+            6 => 'Training Specialist',
+            7 => 'HR Officer',
+            8 => 'Quality Engineer',
+            9 => 'Maintenance Technician',
+            10 => 'Legal Advisor',
         ];
+        
+        $contentData = $procedure->content;
+        $pageTitle = __('Configure') . ' ' . $procedure->procedure_name;
+            // dd($contentData);
         return view($this->iso_dic_path . '.procedures.configure', [
             'pageTitle' => $pageTitle,
             'procedure' => $procedure,
             'jobRoles' => $jobRoles,
-            'purposes' => $groupedTemplates->get(Config::get('procedure_templates.purpose_title')),
-            'scopes' => $groupedTemplates->get(Config::get('procedure_templates.scope_title')),
-            'responsibilities' => $groupedTemplates->get(Config::get('procedure_templates.responsibility_title')),
-            'definitions' => $groupedTemplates->get(Config::get('procedure_templates.definition_title')),
-            'forms' => $groupedTemplates->get(Config::get('procedure_templates.forms_title')),
-            'procedures' => $groupedTemplates->get(Config::get('procedure_templates.procedure_title')),
-            'risk_matrix' => $groupedTemplates->get(Config::get('procedure_templates.risk_matrix_title')),
-            'kpis' => $groupedTemplates->get(Config::get('procedure_templates.kpis')),
+            'purposes' => ($contentData['purpose'] ?? []),
+            'scopes' => ($contentData['scope'] ?? []),
+            'responsibilities' => ($contentData['responsibility'] ?? []),
+            'definitions' => ($contentData['definitions'] ?? []),
+            'forms' => ($contentData['forms'] ?? []),
+            'procedures' => ($contentData['procedures'] ?? []),
+            'risk_matrix' => ($contentData['risk_matrix'] ?? []),
+            'kpis' => ($contentData['kpis'] ?? []),
         ]);
     }
 
@@ -344,25 +340,28 @@ class ProcedureController extends Controller
     }
 
     public function saveConfigure(Request $request, $id)
-    {
-
-        $validated = $request->validate([
-            'content' => 'required|array',
-        ]);
-        $template = ProcedureTemplate::where('title', $id)->first();
-        if ($template) {
-            $template->update([
-                'content' => $validated['content'],
+    {   
+        try {
+            $request->validate([
+                'procedure_setup_data' => 'required',
             ]);
-            return response()->json(['message' => 'تم تحديث البيانات بنجاح']);
-        } else {
-            $template = new ProcedureTemplate();
-            $template->create([
-                'title' => $id,
-                'content' => $validated['content'],
-            ]);
+            
+            // تحويل البيانات من JSON إلى كائن PHP
+            $procedureData = json_decode($request->procedure_setup_data, true);
+            
+            // التأكد من صحة البيانات
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                return response()->json(['message' => 'خطأ في تنسيق بيانات الإجراء: ' . json_last_error_msg()], 422);
+            }
+            
+            $procedure = Procedure::findOrFail($id);
+            $procedure->content = $procedureData;
+            $procedure->save();
+            
+            return response()->json(['message' => 'تم حفظ بيانات الإجراء بنجاح']);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'حدث خطأ أثناء حفظ البيانات: ' . $e->getMessage()], 500);
         }
-        return response()->json(['message' => 'تم حفظ البيانات بنجاح']);
     }
     // public function saveConfigure($id)
     // {

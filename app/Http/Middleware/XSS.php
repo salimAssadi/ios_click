@@ -37,7 +37,7 @@ class XSS
         $data = $request->all();
         array_walk_recursive(
             $data, function (&$data){
-            $data = strip_tags($data);
+            // $data = strip_tags($data);
         }
         );
         $request->merge($data);

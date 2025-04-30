@@ -11,7 +11,7 @@
     <div class="navbar-wrapper">
         <div class="m-header">
             <a href="#" class="b-brand text-primary">
-                <img src="{{ asset(Storage::url('upload/logo/')) . '/' . (isset($admin_logo) && !empty($admin_logo) ? $admin_logo : 'logo.png') }}"
+                <img src="{{ route('tenant.setting.file',getSettingsValByName('company_logo')) }}"
                     alt="" class="logo logo-lg" />
             </a>
         </div>
@@ -68,8 +68,8 @@
                             @endif
                             @if(Gate::check('View Document Review Notifications'))
                             <li
-                                class="pc-item {{ in_array($routeName, ['']) ? 'active' : '' }}">
-                                <a href="" class="pc-link">
+                                class="pc-item {{ in_array($routeName, ['tenant.notifications.index']) ? 'active' : '' }}">
+                                <a href="{{ route('tenant.notifications.index') }}" class="pc-link">
                                     <span class="pc-mtext">{{ __('Review Notifications') }}</span>
                                 </a>
                             </li>
@@ -303,7 +303,7 @@
                     <ul class="pc-submenu">
                         <li class="pc-item {{ $routeName == 'tenant.setting.index' ? 'active' : '' }}">
                             <a href="{{ route('tenant.setting.index') }}" class="pc-link">
-                                <span class="pc-mtext">{{ __('Company Profile') }}</span>
+                                <span class="pc-mtext">{{ __('Settings') }}</span>
                             </a>
                         </li>
                         <li

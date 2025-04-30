@@ -1,10 +1,20 @@
 <?php
+
 return [
     // Directories to search in.
     'directories'=> [
         'app',
         'resources',
+        'Modules/*/Resources'
     ],
+    // 'directories' => array_merge(
+    //     [
+    //         'app',
+    //         'resources',
+    //         'Modules/*/Resources'
+    //     ],
+      
+    // ),
 
     // Directories to exclude from search.
     //

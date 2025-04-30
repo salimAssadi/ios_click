@@ -13,7 +13,7 @@ $base64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAK8AAAAsCAIAAACc1H9UAAA
         <tr>
             <td width="33%" class="text-center" style="word-wrap: break-word;">
                 <p class="top-info"> إجراء  </p>
-                <p style="line-height: 10px;" class="top-info">سياق شركة والأطراف المهتمة</p>
+                <p style="line-height: 10px;" class="top-info">سياق المنظمة</p>
                 <p class="top-info"> ASD-P-QMS-01</p>
             </td>
             

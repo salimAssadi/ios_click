@@ -25,6 +25,10 @@
                 </div>
                 <div class="card-body">
                     {{ Form::model($procedure, ['route' => ['iso_dic.procedures.update', $procedure->id], 'method' => 'PUT', 'files' => true]) }}
+                        <div class="form-group col-md-12">
+                            {{ Form::label('category_id', __('Category'), ['class' => 'form-label']) }}
+                            {{ Form::select('category_id', $categories, $procedure->category_id, ['class' => 'form-control hidesearch']) }}
+                        </div>
                         <div class="row">
                             <div class="form-group col-md-6">
                                 {{ Form::label('procedure_name_ar', __('Procedure Name (arabic)') . ' <span class="text-danger">*</span>', ['class' => 'form-label'], false) }}

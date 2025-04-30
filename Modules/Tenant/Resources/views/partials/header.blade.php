@@ -46,19 +46,30 @@
                 <div class="pc-head-right">
                     <!-- Notifications dropdown -->
                     <div class="dropdown pc-h-item">
-                        <a class="pc-head-link dropdown-toggle arrow-none me-0" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="false" aria-expanded="false">
+                        <a class="pc-head-link dropdown-toggle arrow-none me-0 notification-bell" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="false" aria-expanded="false">
                             <i class="ti ti-bell"></i>
-                            <span class="badge bg-danger pc-h-badge notifications-count" style="display: none;"></span>
+                            <span class="badge bg-danger pc-h-badge notifications-count pulse-badge" style="display: none;"></span>
                         </a>
-                        <div class="dropdown-menu dropdown-menu-end pc-h-dropdown">
-                            <div class="dropdown-header">
+                        <div class="dropdown-menu dropdown-menu-end pc-h-dropdown notification-dropdown">
+                            <div class="dropdown-header d-flex align-items-center justify-content-between">
                                 <h5 class="text-overflow m-0"><span>{{ __('Notifications') }}</span></h5>
+                                <button class="btn btn-sm btn-light-secondary mark-all-read">
+                                    <i class="ti ti-check me-1"></i>{{ __('Mark all read') }}
+                                </button>
                             </div>
+                            <div class="notification-divider"></div>
                             <div class="notifications-list" style="max-height: 300px; overflow-y: auto;">
                                 <!-- Notifications will be loaded here -->
+                                <div class="notification-empty text-center p-3 d-none">
+                                    <div class="empty-icon mb-2">
+                                        <i class="ti ti-bell-off fs-1 text-muted"></i>
+                                    </div>
+                                    <p class="text-muted">{{ __('No new notifications') }}</p>
+                                </div>
                             </div>
-                            <a href="{{ route('tenant.notifications.index') }}" class="dropdown-item text-center">
-                                {{ __('View all') }}
+                            <div class="notification-divider"></div>
+                            <a href="{{ route('tenant.notifications.index') }}" class="dropdown-item text-center fw-medium">
+                                <i class="ti ti-list me-1"></i>{{ __('View all') }}
                             </a>
                         </div>
                     </div>
