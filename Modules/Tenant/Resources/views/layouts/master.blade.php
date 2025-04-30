@@ -39,5 +39,8 @@
     </div>
 
     @livewireScripts
+    
+    <!-- JavaScript to load notifications -->
+   
 </body>
 </html>

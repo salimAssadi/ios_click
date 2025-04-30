@@ -5,6 +5,7 @@ namespace Modules\Setting\Http\Controllers;
 use App\Http\Controllers\BaseModuleController;
 use Modules\Setting\Models\Setting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class SettingController extends BaseModuleController
 {
@@ -38,6 +39,29 @@ class SettingController extends BaseModuleController
         return $this->success('Settings updated successfully.');
     }
 
+    public function footerData(Request $request)
+    {   
+        $settings = $request->all();
+        unset($settings['_token']);
+        unset($settings['tenant']);
+        foreach ($settings as $s_key => $s_value) {
+            if (!empty($s_value)) {
+                if (is_array($s_value)) {
+                    $s_value = json_encode($s_value); // Convert array to JSON string
+                }
+                DB::insert(
+                    'insert into settings (`value`, `name`, `type`) values (?, ?, ?) ON DUPLICATE KEY UPDATE `value` = VALUES(`value`) ',
+                    [
+                        $s_value,
+                        $s_key,
+                        null
+                    ]
+                );
+            }            
+        }
+
+        return $this->success('Footer settings save successfully.');
+    }
     public function show($group)
     {
         $settings = Setting::where('group', $group)->get();

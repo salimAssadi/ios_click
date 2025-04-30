@@ -95,5 +95,8 @@ Route::get('/',function(){
 //-------------------------------FAQ-------------------------------------------
 Route::impersonate();
 
+// Add explicit broadcasting auth route
+// Broadcast::routes(['middleware' => ['web']]);
+
 Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
 ->name('logout');

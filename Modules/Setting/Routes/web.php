@@ -27,7 +27,8 @@ Route::prefix('setting')->name('tenant.setting.')->middleware(['auth:tenant', 'X
     Route::get('/', [CompanyProfileController::class, 'index'])->name('index');
     Route::post('/', [CompanyProfileController::class, 'store'])->name('store');
     Route::put('/', [CompanyProfileController::class, 'update'])->name('update');
-
+    
+    Route::post('updateSetting', [SettingController::class, 'footerData'])->name('updateSetting');
     // Organization Structure
     Route::prefix('organization')->name('organization.')->group(function() {
         Route::get('/', [OrganizationController::class, 'index'])->name('index');

@@ -67,6 +67,11 @@
                                                         </a>
                                                     </li>
                                                 @endif
+                                              
+                                                <button type="button" id="replacePlaceholdersBtn" class="btn btn-primary mx-2">
+                                                    <i class="fas fa-exchange-alt"></i>
+                                                </button>
+                                               
                                             </ul>
 
                                         </div>
@@ -77,7 +82,16 @@
                                         @if ($procedure->has_menual_config)
                                             <div class="tab-pane fade  show active" id="menual_config" role="tabpanel"
                                                 aria-labelledby="menual_config-tab">
-                                                @include('iso_dic.procedures.config.procedure')
+                                                @include('iso_dic.procedures.config.procedure' , [
+                                                    'purposes' => $purposes,
+                                                    'scopes' => $scopes,
+                                                    'responsibilities' => $responsibilities,
+                                                    'definitions' => $definitions,
+                                                    'forms' => $forms,
+                                                    'procedures' => $procedures,
+                                                    'risk_matrix' => $risk_matrix,
+                                                    'kpis' => $kpis,
+                                                ])
 
                                             </div>
                                         @endif

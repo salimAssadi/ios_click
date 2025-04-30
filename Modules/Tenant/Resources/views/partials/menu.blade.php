@@ -68,8 +68,8 @@
                             @endif
                             @if(Gate::check('View Document Review Notifications'))
                             <li
-                                class="pc-item {{ in_array($routeName, ['']) ? 'active' : '' }}">
-                                <a href="" class="pc-link">
+                                class="pc-item {{ in_array($routeName, ['tenant.notifications.index']) ? 'active' : '' }}">
+                                <a href="{{ route('tenant.notifications.index') }}" class="pc-link">
                                     <span class="pc-mtext">{{ __('Review Notifications') }}</span>
                                 </a>
                             </li>

@@ -57,7 +57,11 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label fw-bold">{{ __('Status') }}</label>
+                                @if (isset($documentRequest->requestStatus))
                                 <p>{!! $documentRequest->requestStatusBadge !!}</p>
+                                @elseif($documentRequest->approvalStatus)
+                                <p>{!! $documentRequest->approvalStatusBadge !!}</p>
+                                @endif
                             </div>
                         </div>
 

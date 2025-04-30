@@ -27,6 +27,9 @@ class Procedure extends Model
         'status',
     ];
 
+    protected $casts = [
+        'content' => 'array',
+    ];
     public function form()
     {
         return $this->belongsTo(Form::class);

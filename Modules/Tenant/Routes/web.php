@@ -8,6 +8,7 @@ use Modules\Tenant\Http\Controllers\IsoSystemController;
 use Modules\Tenant\Http\Controllers\IsoSpecificationItemController;
 use Modules\Tenant\Http\Controllers\IsoAttachmentController;
 use Modules\Tenant\Http\Controllers\DocumentController;
+use Modules\Tenant\Http\Controllers\DocumentHistoryController;
 use Modules\Tenant\Http\Controllers\ProcedureController;
 use Modules\Tenant\Http\Controllers\SampleController;
 use Modules\Tenant\Http\Controllers\CountryController;
@@ -33,7 +34,7 @@ use Modules\Tenant\Http\Controllers\DocumentRequestController;
 
 Route::prefix('tenant')->name('tenant.')->middleware(['xss'])->group(function() {
     // Guest routes
-    Route::middleware('guest')->group(function () {
+    Route::middleware('guest:tenant')->group(function () {
         Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
         Route::post('login', [LoginController::class, 'login']);
     });
@@ -46,91 +47,29 @@ Route::prefix('tenant')->name('tenant.')->middleware(['xss'])->group(function() 
         Route::get('/', [HomeController::class, 'index'])->name('dashboard');
         Route::post('logout', [LoginController::class, 'logout'])->name('logout');
         Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
-        // // Document Management
-        // Route::resource('documents', DocumentController::class);
-        // Route::get('document/history', [DocumentController::class, 'history'])->name('document.history');
-        // Route::get('document/{id}/comment', [DocumentController::class, 'comment'])->name('document.comment');
-        // Route::get('document/{id}/version-history', [DocumentController::class, 'versionHistory'])->name('document.version.history');
-
-        // // Audit Management
-        // Route::resource('audits', AuditController::class);
         
-        // // Risk Management
-        // Route::resource('risks', RiskController::class);
-        
-        // // Corrective Actions
-        // Route::resource('corrective-actions', CorrectiveActionController::class);
-        
-        // // Training Management
-        // Route::resource('trainings', TrainingController::class);
-        
-        // // Meeting Management
-        // Route::resource('meetings', MeetingController::class);
-        
-        // // KPI Management
-        // Route::resource('kpis', KpiController::class);
-        
-        // // Signature and Authority
-        // Route::resource('signatures', SignatureController::class);
+        // Document routes
+        Route::prefix('documents')->name('documents.')->middleware(['auth:tenant'])->group(function () {
+            Route::get('/', [DocumentController::class, 'index'])->name('index');
+            Route::get('/create', [DocumentController::class, 'create'])->name('create');
+            Route::post('/', [DocumentController::class, 'store'])->name('store');
+            Route::get('/{id}', [DocumentController::class, 'show'])->name('show');
+            Route::get('/{id}/edit', [DocumentController::class, 'edit'])->name('edit');
+            Route::put('/{id}', [DocumentController::class, 'update'])->name('update');
+            Route::delete('/{id}', [DocumentController::class, 'destroy'])->name('destroy');
+            
+            // Document history routes
+            Route::get('/{id}/approval-history', [DocumentHistoryController::class, 'approvalHistory'])->name('approval-history');
+            Route::get('/{id}/approval-timeline-data', [DocumentHistoryController::class, 'getApprovalTimelineData'])->name('approval-timeline-data');
+        });
 
-        // // ISO Systems
-        // Route::resource('iso-systems', IsoSystemController::class);
-        // Route::get('iso-systems/{id}/procedures', [IsoSystemController::class, 'procedures'])->name('iso-systems.procedures');
-        // Route::get('iso-systems/{id}/samples', [IsoSystemController::class, 'samples'])->name('iso-systems.samples');
-
-        // // ISO Policies
-        // Route::resource('policies', IsoPolicyController::class);
-        // Route::get('policies/{id}/attachments', [IsoPolicyController::class, 'attachments'])->name('policies.attachments');
-
-        // // ISO Instructions
-        // Route::resource('instructions', IsoInstructionController::class);
-        // Route::get('instructions/{id}/attachments', [IsoInstructionController::class, 'attachments'])->name('instructions.attachments');
-
-        // // ISO References
-        // Route::resource('references', IsoReferenceController::class);
-        // Route::get('references/{id}/attachments', [IsoReferenceController::class, 'attachments'])->name('references.attachments');
-
-        // // Procedures
-        // Route::resource('procedures', ProcedureController::class);
-        // Route::get('procedures/{id}/configure', [ProcedureController::class, 'configure'])->name('procedures.configure');
-        // Route::post('procedures/{id}/save-config', [ProcedureController::class, 'saveConfig'])->name('procedures.save-config');
-
-        // // Samples
-        // Route::resource('samples', SampleController::class);
-        // Route::get('samples/{id}/configure', [SampleController::class, 'configure'])->name('samples.configure');
-        // Route::post('samples/{id}/save-config', [SampleController::class, 'saveConfig'])->name('samples.save-config');
-
-        // // Complaints Management
-        // Route::resource('complaints', ComplaintController::class);
-        
-        // // Compliance Management
-        // Route::resource('compliance', ComplianceController::class);
-
-        // // Settings
-        // Route::get('settings', [SettingController::class, 'index'])->name('settings.index');
-        // Route::post('settings/general', [SettingController::class, 'updateGeneral'])->name('settings.general');
-        // Route::post('settings/email', [SettingController::class, 'updateEmail'])->name('settings.email');
-        // Route::post('settings/appearance', [SettingController::class, 'updateAppearance'])->name('settings.appearance');
-
-        // // Users
-        // Route::resource('users', UserController::class);
-        
-        // // Categories
-        // Route::resource('categories', CategoryController::class);
-        // Route::resource('subcategories', SubCategoryController::class);
-        
-        // // Tags
-        // Route::resource('tags', TagController::class);
-
-        // // Countries and Cities
-        // Route::resource('countries', CountryController::class);
-        // Route::get('countries/{country}/cities', [CountryController::class, 'cities'])->name('countries.cities');
-
-        // // File Manager
-        // Route::get('file-manager', [FileManagerController::class, 'index'])->name('file-manager.index');
-        // Route::get('file-manager/config', [FileManagerController::class, 'getConfig'])->name('file-manager.config');
-        // Route::post('file-manager/upload', [FileManagerController::class, 'upload'])->name('file-manager.upload');
-
+        // Notifications
+        Route::prefix('notifications')->name('notifications.')->middleware('auth:tenant')->group(function () {
+            Route::get('/', [NotificationController::class, 'index'])->name('index');
+            Route::get('/get-unread', [NotificationController::class, 'getUnread'])->name('get-unread');
+            Route::post('/mark-as-read/{id}', [NotificationController::class, 'markAsRead'])->name('mark-as-read');
+            Route::post('/mark-all-as-read', [NotificationController::class, 'markAllAsRead'])->name('mark-all-as-read');
+        });
        
     });
 

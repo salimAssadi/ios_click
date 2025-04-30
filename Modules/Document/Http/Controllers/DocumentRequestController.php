@@ -15,6 +15,9 @@ use Modules\Document\Notifications\DocumentRequestApproved;
 use Modules\Document\Notifications\DocumentRequestRejected;
 use Modules\Document\Notifications\DocumentRequestModification;
 use Modules\Setting\Entities\Employee;
+use Modules\Tenant\Entities\User;
+use Modules\Document\Entities\DocumentHistoryLog;
+use Modules\Document\Events\NotificationReceived;
 
 class DocumentRequestController extends Controller
 {
@@ -60,10 +63,11 @@ class DocumentRequestController extends Controller
 
     public function create($documentId)
     {
+        $employees = Employee::whereHas('user')->get();
         $document = Document::findOrFail($documentId);
         $requestTypes = RequestType::get();
 
-        return view('document::requests.create', compact('document', 'requestTypes'));
+        return view('document::requests.create', compact('document', 'requestTypes', 'employees'));
     }
 
     public function store(Request $request)
@@ -71,7 +75,7 @@ class DocumentRequestController extends Controller
         $request->validate([
             'document_id' => 'required|exists:documents,id',
             'assigned_to' => 'required|exists:users,id',
-            'request_details' => 'required|string',
+            'request_details' => 'required|string'
         ]);
 
         DB::beginTransaction();
@@ -79,20 +83,44 @@ class DocumentRequestController extends Controller
             $documentRequest = DocumentRequest::create([
                 'document_id' => $request->document_id,
                 'request_type_id' => $request->request_type_id,
-                'notes' => $request->request_details,
+                'request_details' => $request->request_details,
                 'requested_by' => auth('tenant')->id(),
                 'assigned_to' => $request->assigned_to,
                 'status_id' => Status::where('type', 'request')->where('code', 'pending')->first()->id,
 
             ]);
+            DocumentHistoryLog::create([
+                'document_id' => $documentRequest->document_id,
+                'version_id' => $documentRequest->document->lastVersion->id,
+                'action_type' => 'Request',
+                'performed_by' => auth('tenant')->id(),
+                'notes' => $request->request_details,
+                'change_summary' => 'Document request created',
+            ]);
+
             // Send notification to assigned user
             $assignedUser = User::find($request->assigned_to);
+            
+            // Send notification
             $assignedUser->notify(new DocumentRequestAssigned($documentRequest));
+            
+            // Get the latest notification
+            $latestNotification = $assignedUser->notifications()->latest()->first();
 
+            
+            // Trigger the notification event
+            // if ($latestNotification) {
+            //     event(new NotificationReceived(
+            //         $latestNotification,
+            //         $assignedUser->id
+            //     ));
+            // }
+            
             DB::commit();
             return redirect()->route('tenant.document.requests.my')
                 ->with('success', __('Request submitted successfully'));
         } catch (\Exception $e) {
+            throw $e;
             DB::rollBack();
             return redirect()->back()
                 ->withInput()
@@ -168,7 +196,6 @@ class DocumentRequestController extends Controller
             DB::commit();
             return redirect()->back()->with('success', __('Request status updated successfully'));
         } catch (\Exception $e) {
-            throw $e;
             DB::rollBack();
             return redirect()->back()
                 ->withInput()
@@ -201,13 +228,21 @@ class DocumentRequestController extends Controller
             // Update the request
             $documentRequest->update([
                 'status_id' => $approvedStatus->id,
-                'notes' => $request->notes,
+                'response' => $request->notes,
                 'action_at' => now(),
                 'action_by' => auth('tenant')->id(),
             ]);
-            
+              // Log the status change
+              DocumentHistoryLog::create([
+                'document_id' => $documentRequest->document_id,
+                'version_id' => $documentRequest->version_id,
+                'action_type' => 'approved',
+                'performed_by' => auth('tenant')->id(),
+                'response' => $request->notes,
+                'change_summary' => 'Document status changed to approved',
+            ]);
             // Update the document status if needed
-            $this->updateDocumentStatus($documentRequest->document_id, 'approved');
+            // $this->updateDocumentStatus($documentRequest->document_id, 'approved');
             
             // Notify the document owner
             $this->notifyRequestUpdate($documentRequest, 'approved');

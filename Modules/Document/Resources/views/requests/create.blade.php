@@ -46,9 +46,26 @@
                                     @enderror
                                 </div>
                             </div>
-                            
-                            <div class="col-md-12">
+                            <div class="col-md-12 review-fields" >
                                 <div class="form-group">
+                                    <label class="form-label">{{ __('Assigned To') }} <span
+                                            class="text-danger">*</span></label>
+                                    <select name="assigned_to"
+                                        class="form-control hidesearch @error('assigned_to') is-invalid @enderror"
+                                        >
+                                        @foreach ($employees as $employee)
+                                            <option value="{{ $employee->user_id }}"
+                                                {{ is_array(old('assigned_to')) && in_array($employee->user_id, old('assigned_to')) ? 'selected' : '' }}>
+                                                {{ $employee->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('assigned_to')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <div class="form-group mt-3">
                                     <label class="form-label">{{ __('Request Details') }} <span class="text-danger">*</span></label>
                                     <textarea name="request_details" rows="5" 
                                               class="form-control @error('request_details') is-invalid @enderror" 

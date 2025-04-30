@@ -15,7 +15,7 @@ return [
     |
     */
 
-    'default' => env('BROADCAST_DRIVER', 'reverb'),
+    'default' => 'reverb',
 
     /*
     |--------------------------------------------------------------------------
@@ -40,6 +40,7 @@ return [
             'port' => env('REVERB_PORT', 8080),
             'scheme' => env('REVERB_SCHEME', 'http'),
             'region' => env('REVERB_REGION', 'local'),
+            'cluster' => env('REVERB_CLUSTER', 'eu'),
         ],
 
         'pusher' => [

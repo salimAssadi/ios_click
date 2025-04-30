@@ -960,5 +960,11 @@
   "Add Department": "إضافة قسم",
   "Add Position": "إضافة منصب",
   "Add Employee": "إضافة موظف",
-  "Management": "إدارة"
+  "Management": "إدارة",
+  "Request Modification": "طلب تعديل",
+  "Approve": "موافقة",
+  "Notification": "اشعار",
+  "Notifications": "الاشعارات",
+  "Activity History": "سجل الأنشطة"
+
 }

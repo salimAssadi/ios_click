@@ -19,7 +19,18 @@ class DocumentRequestAssigned extends Notification
 
     public function via($notifiable)
     {
-        return ['database'];
+        return ['database','broadcast'];
+    }
+
+    public function broadcastWith()
+    {
+        return [
+            'message' => __('You have been assigned a new document request'),
+            'request_id' => $this->documentRequest->id,
+            'document_title' => $this->documentRequest->document->title,
+            'requester_name' => $this->documentRequest->creator->name,
+            'url' => route('tenant.document.requests.show', $this->documentRequest->id)
+        ];
     }
 
     public function toArray($notifiable)
