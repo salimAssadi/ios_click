@@ -5,8 +5,14 @@ namespace Modules\Document\Providers;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Eloquent\Factory;
 use App\Providers\BaseModuleServiceProvider;
+use Livewire\Livewire;
+use Modules\Document\Http\Livewire\CreateDocument;
 
-
+/**
+ * Class DocumentServiceProvider
+ *
+ * @author  Anuj Jaha Er <eranujjaha@gmail.com>
+ */
 class DocumentServiceProvider extends BaseModuleServiceProvider
 {
     /**
@@ -30,6 +36,7 @@ class DocumentServiceProvider extends BaseModuleServiceProvider
         $this->registerConfig();
         $this->registerViews();
         $this->registerAssets();
+        $this->registerLivewireComponents();
         $this->loadMigrationsFrom(module_path($this->moduleName, 'Database/Migrations'));
     }
 
@@ -102,6 +109,16 @@ class DocumentServiceProvider extends BaseModuleServiceProvider
         $this->publishes([
             module_path($this->moduleName, 'Resources/assets') => public_path('modules/' . $this->moduleNameLower),
         ], ['assets', $this->moduleNameLower . '-module-assets']);
+    }
+
+    /**
+     * Register Livewire components.
+     *
+     * @return void
+     */
+    protected function registerLivewireComponents()
+    {
+        Livewire::component('document::create-document', CreateDocument::class);
     }
 
     /**

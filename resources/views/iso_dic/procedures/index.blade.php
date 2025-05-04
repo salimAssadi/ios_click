@@ -17,6 +17,7 @@
                 <div class="row align-items-center g-3">
                     <div class="col">
                         <h4 class="mb-0">{{ __('Procedures') }}</h4>
+                      
                     </div>
                     <div class="col-auto">
                         <a href="{{ route('iso_dic.procedures.create') }}" class="btn btn-primary">
@@ -28,10 +29,51 @@
             </div>
             
             <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <form action="{{ route('iso_dic.procedures.index') }}" method="GET">
+                            <div class="row g-2">
+                                <div class="col-md-5">
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-end-0">
+                                            <i class="ti ti-filter text-primary"></i>
+                                        </span>
+                                        <select name="category_id" id="category_id" class="form-select border-start-0" onchange="this.form.submit()">
+                                            @foreach($categories as $id => $title)
+                                                <option value="{{ $id }}" {{ $id == $category_id ? 'selected' : '' }}>{{ $title }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-5">
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-end-0">
+                                            <i class="ti ti-search text-primary"></i>
+                                        </span>
+                                        <input type="text" name="search" class="form-control border-start-0" placeholder="{{ __('Search procedures...') }}" value="{{ $search ?? '' }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="d-flex gap-2">
+                                        <button type="submit" class="btn btn-primary flex-grow-1">
+                                            {{ __('Apply') }}
+                                        </button>
+                                        @if($category_id || isset($search))
+                                        <a href="{{ route('iso_dic.procedures.index') }}" class="btn btn-warning" title="{{ __('Clear filters') }}">
+                                            <i class="ti ti-x"></i>
+                                        </a>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
                 <div class="table-responsive">
                     <table class="table table-hover table-striped">
                         <thead class="thead-light">
                             <tr>
+                                <th>{{ __('N') }}</th>
                                 <th>{{ __('Procedure Name') }}</th>
                                 <th>{{ __('Description') }}</th>
                                 <th class="w-15">{{ __('Attachments') }}</th>
@@ -42,6 +84,7 @@
                         <tbody>
                             @forelse ($procedures as $procedure)
                                 <tr>
+                                    <td>{{ $loop->iteration }}</td>
                                     <td>
                                         <div class="d-flex align-items-center">
                                             <div>
@@ -113,6 +156,15 @@
                                                 title="{{ __('Preview') }}">
                                                 <i class="ti ti-eye"></i>
                                             </a>
+                                            @if ($procedure->status == 0)
+                                            <a href="{{ route('iso_dic.procedures.publish', \Illuminate\Support\Facades\Crypt::encrypt($procedure->id)) }}"
+                                                class="btn btn-sm btn-icon btn-light-primary"
+                                                data-bs-toggle="tooltip"
+                                                data-bs-placement="top"
+                                                title="{{ __('Publish') }}">
+                                                <i class="ti ti-rocket"></i>
+                                            </a>
+                                            @endif
                                             {!! Form::close() !!}
                                         </div>
                                     </td>
@@ -132,7 +184,7 @@
                 </div>
 
                 <div class="d-flex justify-content-end mt-4">
-                    {{ $procedures->links('pagination::bootstrap-5') }}
+                    {{ $procedures->appends(request()->except('page'))->links('pagination::bootstrap-5') }}
                 </div>
             </div>
         </div>

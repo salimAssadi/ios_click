@@ -30,9 +30,15 @@ class Procedure extends Model
     protected $casts = [
         'content' => 'array',
     ];
+
     public function form()
     {
         return $this->belongsTo(Form::class);
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
     }
 
     public function getProcedureNameAttribute()

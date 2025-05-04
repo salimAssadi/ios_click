@@ -965,6 +965,13 @@
   "Approve": "موافقة",
   "Notification": "اشعار",
   "Notifications": "الاشعارات",
-  "Activity History": "سجل الأنشطة"
+  "Activity History": "سجل الأنشطة",
+  "Main Procedures": "الإجراءات الرئيسية",
+  "Public Procedures": "الإجراءات العامة",
+  "Private Procedures": "الإجراءات الخاصة",
+  "Search procedures...": "بحث عن إجراء...",
+  "All Categories": "جميع التصنيفات",
+  "Apply": "تطبيق",
+  "Clear filters": "مسح الفلاتر"
 
 }

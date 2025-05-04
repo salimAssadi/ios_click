@@ -705,4 +705,15 @@ class DocumentController extends Controller
     {
         // TODO: Delete document implementation
     }
+
+    public function createWithLivewire()
+    {
+        if (tenant_can('Create Documents')) {
+            return view('document::document.create-with-livewire');
+        } else {
+            return redirect()->back()->with('error', __('You do not have permission to create documents'));
+        }
+    }
+
+    
 }

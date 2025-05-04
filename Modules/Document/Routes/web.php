@@ -20,15 +20,31 @@ use Modules\Document\Http\Controllers\HistoryLogController;
 use Modules\Tenant\Http\Middleware\TenantMiddleware;
 use Modules\Tenant\Http\Middleware\XSSMiddleware;
 use Modules\Document\Http\Controllers\CategoryController;
+use Modules\Document\Http\Controllers\ProcedureController;
 
 Route::prefix('document')->name('tenant.document.')->middleware(['auth:tenant','XSS', 'tenant'])->group(function() {
     Route::get('/', [DocumentController::class, 'index'])->name('index');
     Route::post('/import-dictionary', [DocumentController::class, 'importFromDictionary'])->name('import-dictionary');
     Route::get('/create', [DocumentController::class, 'create'])->name('create');
+    Route::get('/create-livewire', [DocumentController::class, 'createWithLivewire'])->name('create-livewire');
     Route::get('/templates', [DocumentController::class, 'getTemplates'])->name('templates');
     Route::get('/list', [DocumentController::class, 'list'])->name('list');
     Route::get('/template/data/{templateId}', [DocumentController::class, 'getTemplateData'])->name('template.data');
     Route::post('/', [DocumentController::class, 'store'])->name('store');
+    
+    // Specific routes that need to be defined BEFORE the {document} catch-all route
+    Route::controller(ProcedureController::class)->prefix('procedures')->name('procedures.')->group(function () {
+        Route::get('main', 'mainProcedures')->name('main');
+        Route::get('public', 'publicProcedures')->name('public');
+        Route::get('private', 'privateProcedures')->name('private');
+        Route::get('all', 'all')->name('all');
+        Route::post('save/{id?}', 'save')->name('save');
+        Route::get('configure/{id}', 'configure')->name('configure');
+        Route::post('configure/{id}/save', 'saveConfigure')->name('saveConfigure');;
+        Route::post('status/{id}', 'status')->name('status');
+    });
+
+    // Catch-all route for documents - must be placed AFTER specific routes
     Route::get('/{document}', [DocumentController::class, 'show'])->name('show');
     Route::get('/{document}/history', [DocumentController::class, 'history'])->name('history');
     Route::get('/{document}/edit', [DocumentController::class, 'edit'])->name('edit');
@@ -56,7 +72,6 @@ Route::prefix('document')->name('tenant.document.')->middleware(['auth:tenant','
         Route::post('/{id}/approve', [DocumentRequestController::class, 'approve'])->name('approve');
         Route::post('/{id}/reject', [DocumentRequestController::class, 'reject'])->name('reject');
         Route::post('/{id}/request-modification', [DocumentRequestController::class, 'requestModification'])->name('request-modification');
-
     });
 
     // Document History Routes
@@ -77,6 +92,7 @@ Route::prefix('document')->name('tenant.document.')->middleware(['auth:tenant','
         Route::put('/{category}', [CategoryController::class, 'update'])->name('update');
         Route::delete('/{category}', [CategoryController::class, 'destroy'])->name('destroy');
     });
+
     // Document Versions Routes
     Route::prefix('versions')->name('versions.')->group(function () {
         Route::get('/data', [DocumentVersionController::class, 'data'])->name('data');

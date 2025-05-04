@@ -1,18 +1,9 @@
 <?php
 
-namespace App\Http\Controllers\iso_dic;
+namespace Modules\Document\Http\Controllers;
 
 use App\Constants\Status;
 use App\Http\Controllers\Controller;
-use App\Lib\FormProcessor;
-use App\Models\Category;
-use App\Models\Document;
-use App\Models\Form;
-use App\Models\IsoSystem;
-use App\Models\IsoSystemProcedure;
-use App\Models\Procedure;
-use App\Models\ProcedureAttachment;
-use App\Models\ProcedureTemplate;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -22,38 +13,38 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Database\QueryException;
+use Modules\Document\Entities\Procedure;
+use Modules\Document\Entities\Category;
+use Modules\Document\Entities\IsoSystem;
 
 class ProcedureController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index()
     {
-        $category_id = $request->category_id;
-        $search = $request->search;
-        $query = Procedure::with(['form','attachments','category']);
-        
-        if ($category_id) {
-            $query->where('category_id', $category_id);
-        }
-        
-        if ($search) {
-            $query->where(function($q) use ($search) {
-                $q->where('procedure_name_ar', 'like', "%{$search}%")
-                  ->orWhere('procedure_name_en', 'like', "%{$search}%")
-                  ->orWhere('description_ar', 'like', "%{$search}%")
-                  ->orWhere('description_en', 'like', "%{$search}%");
-            });
-        }
-        
-        $procedures = $query->paginate(10);
-        $categories = Category::get()->pluck('title', 'id');
-        $categories->prepend(__('All Categories'), '');
-        
-        return view($this->iso_dic_path . '.procedures.index', compact('procedures', 'categories', 'category_id', 'search'));
+        $procedures = Procedure::searchable(['name'])->with(['form','attachments', 'document.category'])->paginate(10);
+        return view($this->iso_dic_path . '.procedures.index', compact('procedures'));
     }
 
+   public function mainProcedures()
+    {
+        $procedures = Procedure::where('category_id', '1')->paginate(20);
+        return view('document::document.procedures.main', compact('procedures'));
+    }
+
+    public function publicProcedures()
+    {
+        $procedures = Procedure::where('category_id', '2')->paginate(20);
+        return view('document::document.procedures.public', compact('procedures'));
+    }
+
+    public function privateProcedures()
+    {
+        $procedures = Procedure::where('category_id', '3')->paginate(20);
+        return view('document::document.procedures.private', compact('procedures'));
+    }
     /**
      * Show the form for creating a new resource.
      */
@@ -318,7 +309,7 @@ class ProcedureController extends Controller
 
         $procedure   = Procedure::findOrFail($id);
         
-        // $jobRoles = Position::all()->pluck('title_ar', 'id');
+        // $jobRoles = Position::all()->pluck('name_ar', 'id');
         $jobRoles = [
             1 => 'Department Manager',
             2 => 'Quality Committee Head',
@@ -335,7 +326,7 @@ class ProcedureController extends Controller
         $contentData = $procedure->content;
         $pageTitle = __('Configure') . ' ' . $procedure->procedure_name;
             // dd($contentData);
-        return view($this->iso_dic_path . '.procedures.configure', [
+        return view('document::document.procedures.configure', [
             'pageTitle' => $pageTitle,
             'procedure' => $procedure,
             'jobRoles' => $jobRoles,
@@ -383,7 +374,6 @@ class ProcedureController extends Controller
             return response()->json(['message' => 'حدث خطأ أثناء حفظ البيانات: ' . $e->getMessage()], 500);
         }
     }
-
     // public function saveConfigure($id)
     // {
     //     $procedure          = Procedure::findOrFail($id);

@@ -176,7 +176,8 @@ Route::prefix('iso_dic')->middleware(['XSS'])->name('iso_dic.')->group(function 
             Route::get('configure/{id}', 'configure')->name('configure');
             Route::post('configure/{id}/save', 'saveConfigure')->name('saveConfigure');;
             Route::post('configure/{id}', 'saveTemplatePath')->name('saveTemplatePath');
-            Route::post('status/{id}', 'status')->name('status');
+            Route::post('publish/{id}', 'publish')->name('publish');
+
         });
 
         Route::controller(SampleController::class)->prefix('samples')->name('samples.')->group(function () {

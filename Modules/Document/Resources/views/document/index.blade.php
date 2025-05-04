@@ -237,6 +237,9 @@
                             <a href="{{ route('tenant.document.create') }}" class="btn btn-primary btn-sm">
                                 <i class="fas fa-plus me-1"></i>{{ __('New Document') }}
                             </a>
+                            {{-- <a href="{{ route('tenant.document.create-livewire') }}" class="btn btn-success btn-sm">
+                                <i class="fas fa-bolt me-1"></i>{{ __('New Document (Livewire)') }}
+                            </a> --}}
                             @if(getSettingsValByName('import_dictionary')!='1')
                             <button type="button" class="btn btn-info btn-sm" id="importDictionary">
                                 <i class="fas fa-download me-1"></i>{{ __('Get Dictionary Documents') }}
@@ -283,6 +286,7 @@
             </div>
         </div>
     </div>
+    
 @endsection
 
 @push('script-page')

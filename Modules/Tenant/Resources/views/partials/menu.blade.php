@@ -30,7 +30,7 @@
                 
                 @if(Gate::check('Manage Documents') || Gate::check('Create New Document') || Gate::check('Change History') || Gate::check('Approval Workflow') || Gate::check('Review Notifications') || Gate::check('Document Categories') || Gate::check('Access Permissions') || Gate::check('Document Archive') )
                     <li
-                        class="pc-item pc-hasmenu {{ in_array($routeName, ['document.index', 'document.show', 'document.requests.index', 'document.requests.create', 'document.requests.my']) ? 'active' : '' }}">
+                        class="pc-item pc-hasmenu {{ in_array($routeName, ['document.index', 'document.show', 'document.requests.index','document.procedures.main','document.procedures.public','document.procedures.private', 'document.requests.create', 'document.requests.my']) ? 'active' : '' }}">
                         <a href="#!" class="pc-link">
                             <span class="pc-micon"><i class="ti ti-file-text"></i></span>
                             <span class="pc-mtext">{{ __('Document Control') }}</span>
@@ -38,19 +38,39 @@
                         </a>
                         <ul class="pc-submenu">
                             @if(Gate::check('View Documents'))
-                            <li class="pc-item {{ $routeName == 'document.index' ? 'active' : '' }}">
-                                <a href="{{ route('tenant.document.index') }}" class="pc-link">
+                            <li class="pc-item pc-hasmenu {{ $routeName == 'document.index' ? 'active' : '' }}">
+                                <a href="#!" class="pc-link">
                                     <span class="pc-mtext">{{ __('All Documents') }}</span>
+                                    <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
                                 </a>
+                                <ul class="pc-submenu">
+                                    <li class="pc-item {{ $routeName == 'document.procedures.main' ? 'active' : '' }}">
+                                        <a href="{{ route('tenant.document.procedures.main') }}" class="pc-link">
+                                            <span class="pc-mtext">{{ __('Main Procedures') }}</span>
+                                        </a>
+                                    </li>
+                                    <li class="pc-item {{ $routeName == 'document.procedures.public' ? 'active' : '' }}">
+                                        <a href="{{ route('tenant.document.procedures.public') }}" class="pc-link">
+                                            <span class="pc-mtext">{{ __('Public Procedures') }}</span>
+                                        </a>
+                                    </li>
+                                    <li class="pc-item {{ $routeName == 'document.procedures.private' ? 'active' : '' }}">
+                                        <a href="{{ route('tenant.document.procedures.private') }}" class="pc-link">
+                                            <span class="pc-mtext">{{ __('Private Procedures') }}</span>
+                                        </a>
+                                    </li>
+                                  
+                                </ul>
                             </li>
                             @endif
-                            @if(Gate::check('Create Documents'))
+
+                            {{-- @if(Gate::check('Create Documents'))
                             <li class="pc-item {{ $routeName == 'document.create' ? 'active' : '' }}">
                                 <a href="{{ route('tenant.document.create') }}" class="pc-link">
                                     <span class="pc-mtext">{{ __('Create New Document') }}</span>
                                 </a>
                             </li>
-                            @endif
+                            @endif --}}
                             @if(Gate::check('Manage Document Versions'))
                             <li class="pc-item {{ $routeName == 'document.versions' ? 'active' : '' }}">
                                 <a href="" class="pc-link">
