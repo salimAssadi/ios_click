@@ -1,4 +1,4 @@
-{{Form::model($category, array('route' => array('category.update', $category->id), 'method' => 'PUT')) }}
+{{Form::model($category, array('route' => array('tenant.document.categories.update', $category->id), 'method' => 'PUT')) }}
 <div class="modal-body">
     <div class="row">
         <div class="form-group  col-md-12">

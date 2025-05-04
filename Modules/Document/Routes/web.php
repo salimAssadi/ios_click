@@ -21,6 +21,7 @@ use Modules\Tenant\Http\Middleware\TenantMiddleware;
 use Modules\Tenant\Http\Middleware\XSSMiddleware;
 use Modules\Document\Http\Controllers\CategoryController;
 use Modules\Document\Http\Controllers\ProcedureController;
+use Modules\Document\Http\Controllers\SupportingDocumentController;
 
 Route::prefix('document')->name('tenant.document.')->middleware(['auth:tenant','XSS', 'tenant'])->group(function() {
     Route::get('/', [DocumentController::class, 'index'])->name('index');
@@ -37,12 +38,22 @@ Route::prefix('document')->name('tenant.document.')->middleware(['auth:tenant','
         Route::get('main', 'mainProcedures')->name('main');
         Route::get('public', 'publicProcedures')->name('public');
         Route::get('private', 'privateProcedures')->name('private');
-        Route::get('all', 'all')->name('all');
-        Route::post('save/{id?}', 'save')->name('save');
+        Route::get('private/create', 'create')->name('private.create');
+        Route::post('private/store', 'store')->name('private.store');
         Route::get('configure/{id}', 'configure')->name('configure');
         Route::post('configure/{id}/save', 'saveConfigure')->name('saveConfigure');;
-        Route::post('status/{id}', 'status')->name('status');
     });
+
+
+    Route::controller(SupportingDocumentController::class)->prefix('supporting-documents')->name('supporting-documents.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/create', 'create')->name('create');
+        Route::post('/', 'store')->name('store');
+        Route::get('/download/{id}', 'download')->name('download');
+        Route::get('/{id}', 'show')->name('show');
+    });
+
+   
 
     // Catch-all route for documents - must be placed AFTER specific routes
     Route::get('/{document}', [DocumentController::class, 'show'])->name('show');
@@ -83,14 +94,16 @@ Route::prefix('document')->name('tenant.document.')->middleware(['auth:tenant','
     Route::get('/workflow/data', [WorkflowController::class, 'data'])->name('workflow.data');
     Route::put('/workflow/{document}/status', [WorkflowController::class, 'updateStatus'])->name('workflow.status');
 
-    Route::group(['prefix' => 'category', 'as' => 'category.'], function () {
-        Route::get('/see', [CategoryController::class, 'index'])->name('index');
-        Route::get('/create', [CategoryController::class, 'create'])->name('create');
-        Route::post('/', [CategoryController::class, 'store'])->name('store');
-        Route::get('/{category}', [CategoryController::class, 'show'])->name('show');
-        Route::get('/{category}/edit', [CategoryController::class, 'edit'])->name('edit');
-        Route::put('/{category}', [CategoryController::class, 'update'])->name('update');
-        Route::delete('/{category}', [CategoryController::class, 'destroy'])->name('destroy');
+    // Main route group already includes prefix 'document' and name 'tenant.document.'
+    Route::group(['prefix' => 'categories'], function () {
+        Route::get('/', [CategoryController::class, 'index'])->name('categories.index');
+        Route::get('/create', [CategoryController::class, 'create'])->name('categories.create');
+        Route::post('/', [CategoryController::class, 'store'])->name('categories.store');
+        Route::post('/ajax-store', [CategoryController::class, 'storeAjax'])->name('categories.store.ajax');
+        Route::get('/{category}', [CategoryController::class, 'show'])->name('categories.show');
+        Route::get('/{category}/edit', [CategoryController::class, 'edit'])->name('categories.edit');
+        Route::put('/{category}', [CategoryController::class, 'update'])->name('categories.update');
+        Route::delete('/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
     });
 
     // Document Versions Routes

@@ -9,7 +9,7 @@
         <a href="">{{ __('Dashboard') }}</a>
     </li>
     <li class="breadcrumb-item">
-        <a href="{{ route('iso_dic.procedures.index') }}">{{ __('Procedures') }}</a>
+        <a href="{{ route('tenant.document.procedures.private') }}">{{ __('Private Procedures') }}</a>
     </li>
     <li class="breadcrumb-item" aria-current="page">
         {{ __('Edit Procedure') }}
@@ -24,30 +24,30 @@
                     <h5>{{ __('Edit Procedure') }}</h5>
                 </div>
                 <div class="card-body">
-                    {{ Form::model($procedure, ['route' => ['iso_dic.procedures.update', $procedure->id], 'method' => 'PUT', 'files' => true]) }}
+                    {{ Form::model($procedure, ['route' => ['tenant.document.procedures.private.update', $procedure->id], 'method' => 'PUT', 'files' => true]) }}
                         <div class="form-group col-md-12">
                             {{ Form::label('category_id', __('Category'), ['class' => 'form-label']) }}
-                            {{ Form::select('category_id', $categories, $procedure->category_id, ['class' => 'form-control hidesearch']) }}
+                            {{ Form::select('category_id', $categories, old('category_id', $procedure->category_id), ['class' => 'form-control hidesearch']) }}
                         </div>
                         <div class="row">
                             <div class="form-group col-md-6">
                                 {{ Form::label('procedure_name_ar', __('Procedure Name (arabic)') . ' <span class="text-danger">*</span>', ['class' => 'form-label'], false) }}
-                                {{ Form::text('procedure_name_ar', $procedure->procedure_name_ar, ['class' => 'form-control', 'placeholder' => __('Enter Procedure Name (arabic)'), 'required' => 'required']) }}
+                                {{ Form::text('procedure_name_ar', old('procedure_name_ar', $procedure->procedure_name_ar), ['class' => 'form-control', 'placeholder' => __('Enter Procedure Name (arabic)'), 'required' => 'required']) }}
                             </div>
 
                             <div class="form-group col-md-6">
                                 {{ Form::label('procedure_name_en', __('Procedure Name (english)') . ' <span class="text-danger">*</span>', ['class' => 'form-label'], false) }}
-                                {{ Form::text('procedure_name_en', $procedure->procedure_name_en, ['class' => 'form-control', 'placeholder' => __('Enter Procedure Name (english)'), 'required' => 'required']) }}
+                                {{ Form::text('procedure_name_en', old('procedure_name_en', $procedure->procedure_name_en), ['class' => 'form-control', 'placeholder' => __('Enter Procedure Name (english)'), 'required' => 'required']) }}
                             </div>
 
                             <div class="form-group col-md-6">
                                 {{ Form::label('procedure_description_ar', __('Procedure Description (arabic)'), ['class' => 'form-label']) }}
-                                {{ Form::textarea('procedure_description_ar', $procedure->description_ar, ['class' => 'form-control', 'placeholder' => __('Enter Procedure Description (arabic)'), 'rows' => 2]) }}
+                                {{ Form::textarea('procedure_description_ar', old('procedure_description_ar', $procedure->description_ar), ['class' => 'form-control', 'placeholder' => __('Enter Procedure Description (arabic)'), 'rows' => 2]) }}
                             </div>
 
                             <div class="form-group col-md-6">
                                 {{ Form::label('procedure_description_en', __('Procedure Description (english)'), ['class' => 'form-label']) }}
-                                {{ Form::textarea('procedure_description_en', $procedure->description_en, ['class' => 'form-control', 'placeholder' => __('Enter Procedure Description (english)'), 'rows' => 2]) }}
+                                {{ Form::textarea('procedure_description_en', old('procedure_description_en', $procedure->description_en), ['class' => 'form-control', 'placeholder' => __('Enter Procedure Description (english)'), 'rows' => 2]) }}
                             </div>
 
                             @if ($procedure->attachments->count() > 0)
@@ -98,7 +98,7 @@
                                 @enderror
                             </div>
 
-                            <div class="form-group col-md-6">
+                            <div class="form-group col-md-6 " style="display: none;">
                                 {{ Form::label('is_optional', __('Is Required'), ['class' => 'form-label d-block']) }}
                                 <div class="form-check form-check-inline">
                                     {{ Form::radio('is_optional', 1, $procedure->is_optional == 1, ['class' => 'form-check-input', 'id' => 'is_optional']) }}
@@ -122,7 +122,7 @@
                                 </div>
                             </div>
 
-                            <div class="form-group col-md-12">
+                            <div class="form-group col-md-12" style="display: none;">
                                 <div class="form-check form-check-inline">
                                     {!! Form::checkbox('enable_upload_file', 1, $procedure->enable_upload_file, ['class' => 'form-check-input', 'id' => 'enable_upload_file']) !!}
                                     {!! Form::label('enable_upload_file', __('Enable Upload File'), ['class' => 'form-check-label']) !!}

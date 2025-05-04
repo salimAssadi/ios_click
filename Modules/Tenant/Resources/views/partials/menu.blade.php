@@ -59,6 +59,11 @@
                                             <span class="pc-mtext">{{ __('Private Procedures') }}</span>
                                         </a>
                                     </li>
+                                    <li class="pc-item {{ $routeName == 'document.supporting-documents' ? 'active' : '' }}">
+                                        <a href="{{ route('tenant.document.supporting-documents.index') }}" class="pc-link">
+                                            <span class="pc-mtext">{{ __('Supporting Documents') }}</span>
+                                        </a>
+                                    </li>
                                   
                                 </ul>
                             </li>
@@ -95,10 +100,10 @@
                             </li>
                             @endif
                             @if(Gate::check('Manage Document Categories'))
-                            <li class="pc-item {{ $routeName == 'document.category' ? 'active' : '' }}">
-                                <a href="{{ route('tenant.document.category.index') }}" class="pc-link">
+                            <li class="pc-item {{ $routeName == 'document.categories.index' ? 'active' : '' }}">
+                                <a href="{{ route('tenant.document.categories.index') }}" class="pc-link">
                                     <span class="pc-mtext">{{ __('Document Categories') }}</span>
-                                </a>
+                                </a>                                                    
                             </li>
                             @endif
                             @if(Gate::check('Manage Requests'))

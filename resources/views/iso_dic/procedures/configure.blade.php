@@ -9,13 +9,13 @@
 @section('breadcrumb')
     <ul class="breadcrumb mb-0">
         <li class="breadcrumb-item">
-            <a href="">{{ __('Dashboard') }}</a>
+            <a href="{{ route('iso_dic.home') }}">{{ __('Dashboard') }}</a>
         </li>
         <li class="breadcrumb-item">
-            <a href="">{{ __('ISO Systems') }}</a>
+            <a href="{{ route('iso_dic.procedures.index') }}">{{ __('Procedures') }}</a>
         </li>
         <li class="breadcrumb-item active">
-            <a href="#"> {{ $pageTitle }} </a>
+            <a href=""> {{ $pageTitle }} </a>
         </li>
     </ul>
 @endsection

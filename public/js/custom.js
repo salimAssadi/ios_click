@@ -3,6 +3,10 @@ $(document).ready(function () {
     select2();
     datatable();
     ckediter();
+    setTimeout(function() {
+        datepicker();
+    }, 500);
+
     setInterval(() => {
         feather.replace();
     }, 1000);
@@ -113,7 +117,7 @@ function toastrs(title, message, status) {
     if (status == "success") {
         notifier.show("Success!", message, "success", successImg, 4000);
     } else {
-        notifier.show("Success!", message, "success", errorImg, 4000);
+        notifier.show("Error!", message, "error", errorImg, 4000);
     }
 }
 
@@ -184,7 +188,6 @@ function datatable() {
         $(".basic-datatable").DataTable({
             scrollX: true,
             stateSave: true,
-            
             // paging: false,
         });
     }
@@ -226,6 +229,110 @@ function datatable() {
                 "colvis",
             ],
         });
+    }
+}
+
+function datepicker() {
+    // Check if datepicker elements exist
+    if (!$('#issue_date').length && !$('#expiry_date').length) {
+        return;
+    }
+    
+    try {
+        // For Bootstrap 5 Datepicker
+        if (typeof Datepicker !== 'undefined') {
+            let issueDatePicker;
+            let expiryDatePicker;
+            
+            // Issue date picker
+            if ($('#issue_date').length) {
+                issueDatePicker = new Datepicker(document.getElementById('issue_date'), {
+                    format: 'yyyy-mm-dd',
+                    autohide: true,
+                    todayHighlight: true,
+                    clearBtn: true
+                });
+                
+                // Add click handler to calendar icon
+                $('#issue_date').next('.input-group-text').on('click', function() {
+                    issueDatePicker.show();
+                });
+            }
+            
+            // Expiry date picker
+            if ($('#expiry_date').length) {
+                expiryDatePicker = new Datepicker(document.getElementById('expiry_date'), {
+                    format: 'yyyy-mm-dd',
+                    autohide: true,
+                    todayHighlight: true,
+                    clearBtn: true
+                });
+                
+                // Add click handler to calendar icon
+                $('#expiry_date').next('.input-group-text').on('click', function() {
+                    expiryDatePicker.show();
+                });
+            }
+            
+            // Add change event listener for issue date
+            if (document.getElementById('issue_date') && issueDatePicker) {
+                document.getElementById('issue_date').addEventListener('changeDate', function(e) {
+                    const selectedDate = e.detail.date;
+                    
+                    // Update expiry date's minimum date
+                    if (expiryDatePicker) {
+                        expiryDatePicker.setOptions({
+                            minDate: selectedDate
+                        });
+                    }
+                });
+            }
+            
+            return;
+        }
+        
+        // Fallback for jQuery UI Datepicker
+        if (typeof $.fn.datepicker === 'function') {
+            var issueDateInput = $('#issue_date');
+            var expiryDateInput = $('#expiry_date');
+
+            var commonOptions = {
+                format: 'yyyy-mm-dd',
+                autoclose: true,
+                todayHighlight: true,
+                clearBtn: true,
+                orientation: 'bottom'
+            };
+
+            if (issueDateInput.length) {
+                issueDateInput.datepicker(commonOptions)
+                    .on('changeDate', function(e) {
+                        // Update expiry date min date when issue date changes
+                        if (expiryDateInput.length) {
+                            expiryDateInput.datepicker('setStartDate', e.date);
+                        }
+                    });
+            }
+
+            if (expiryDateInput.length) {
+                expiryDateInput.datepicker(commonOptions);
+            }
+
+            // Add click handler to calendar icons
+            $('.input-group-text').on('click', function() {
+                var input = $(this).siblings('input');
+                if (input.length && typeof input.datepicker === 'function') {
+                    input.datepicker('show');
+                }
+            });
+            
+            console.log('jQuery Datepicker initialized');
+            return;
+        }
+        
+        console.warn('No datepicker library detected');
+    } catch (error) {
+        console.error('Error initializing datepicker:', error);
     }
 }
 

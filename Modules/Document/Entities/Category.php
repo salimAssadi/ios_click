@@ -5,13 +5,31 @@ namespace Modules\Document\Entities;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\BaseModel;
+use Modules\Tenant\Traits\Localizable;
 
 class Category extends BaseModel
 {
-    use HasFactory;
+    use HasFactory,Localizable;
     public $fillable=[
-        'title',
+        'title_ar',
+        'title_en',
+        'type',
         'parent_id',
     ];
+
+    public function parent()
+    {
+        return $this->belongsTo(Category::class, 'parent_id');
+    }
+
+    public function children()
+    {
+        return $this->hasMany(Category::class, 'parent_id');
+    }
+    
+    public function getTitleAttribute()
+    {
+        return $this->getLocalizedAttribute('title');
+    }
 
 }

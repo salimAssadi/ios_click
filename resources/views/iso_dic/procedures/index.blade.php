@@ -116,9 +116,9 @@
                                     </td>
                                     <td>
                                         @if ($procedure->status == 1)
-                                            <span class="badge bg-success-subtle text-success">{{ __('publish') }}</span>
+                                            <span class="badge bg-success">{{ __('publish') }}</span>
                                         @else
-                                            <span class="badge bg-danger-subtle text-danger">{{ __('unpublish') }}</span>
+                                            <span class="badge bg-danger">{{ __('unpublish') }}</span>
                                         @endif
                                     </td>
                                     <td>
@@ -148,6 +148,7 @@
                                                 title="{{ __('Delete') }}">
                                                 <i class="ti ti-trash"></i>
                                             </button>
+                                            {!! Form::close() !!}
 
                                             <a href="{{ route('iso_dic.procedures.show', \Illuminate\Support\Facades\Crypt::encrypt($procedure->id)) }}"
                                                 class="btn btn-sm btn-icon btn-light-warning"
@@ -156,16 +157,18 @@
                                                 title="{{ __('Preview') }}">
                                                 <i class="ti ti-eye"></i>
                                             </a>
-                                            @if ($procedure->status == 0)
-                                            <a href="{{ route('iso_dic.procedures.publish', \Illuminate\Support\Facades\Crypt::encrypt($procedure->id)) }}"
-                                                class="btn btn-sm btn-icon btn-light-primary"
-                                                data-bs-toggle="tooltip"
-                                                data-bs-placement="top"
-                                                title="{{ __('Publish') }}">
-                                                <i class="ti ti-rocket"></i>
-                                            </a>
-                                            @endif
-                                            {!! Form::close() !!}
+                                            <form action="{{ route('iso_dic.procedures.publish', \Illuminate\Support\Facades\Crypt::encrypt($procedure->id)) }}" method="POST" class="d-inline publish-form">
+                                                @csrf
+                                                <button type="button" 
+                                                    class="btn btn-sm btn-icon btn-light-primary confirm_dialog"
+                                                    data-bs-toggle="tooltip"
+                                                    data-bs-placement="top"
+                                                    data-dialog-text="{{ __('Are you sure you want to publish this procedure to all tenants?') }}"
+                                                    data-dialog-title="{{ __('Publish Procedure') }}"
+                                                    title="{{ __('Publish') }}">
+                                                    <i class="ti ti-rocket"></i>
+                                                </button>
+                                            </form>
                                         </div>
                                     </td>
                                 </tr>

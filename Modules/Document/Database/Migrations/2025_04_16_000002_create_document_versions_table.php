@@ -17,11 +17,11 @@ class CreateDocumentVersionsTable extends Migration
             Schema::create('document_versions', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('document_id')->constrained()->onDelete('cascade');
-                $table->integer('version');
+                $table->string('version');
                 $table->date('issue_date');
                 $table->date('expiry_date');
                 $table->date('review_due_date')->nullable();
-                $table->enum('status', ['draft', 'under_review', 'approved', 'modified', 'obsolete']);
+                $table->foreignId('status_id')->constrained('statuses')->default(1);
                 $table->date('approval_date')->nullable();
                 $table->foreignId('approved_by')->nullable()->constrained('users');
                 $table->string('storage_path'); 

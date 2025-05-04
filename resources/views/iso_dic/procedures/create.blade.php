@@ -74,11 +74,11 @@
                     <div class="form-group col-md-6">
                         {{ Form::label('status', __('Status'), ['class' => 'form-label d-block']) }}
                         <div class="form-check form-check-inline">
-                            {{ Form::radio('status', 1, true, ['class' => 'form-check-input', 'id' => 'status_active']) }}
+                            {{ Form::radio('status', 1, false, ['class' => 'form-check-input', 'id' => 'status_active']) }}
                             {{ Form::label('status_active', __('Active'), ['class' => 'form-check-label']) }}
                         </div>
                         <div class="form-check form-check-inline">
-                            {{ Form::radio('status', 0, false, ['class' => 'form-check-input', 'id' => 'status_inactive']) }}
+                            {{ Form::radio('status', 0, true, ['class' => 'form-check-input', 'id' => 'status_inactive']) }}
                             {{ Form::label('status_inactive', __('Inactive'), ['class' => 'form-check-label']) }}
                         </div>
                     </div>
@@ -95,7 +95,7 @@
                         </div>
 
                         <div class="form-check form-check-inline">
-                            {!! Form::checkbox('has_menual_config', 1, null, ['class' => 'form-check-input', 'id' => 'has_menual_config']) !!}
+                            {!! Form::checkbox('has_menual_config', 1, null, ['class' => 'form-check-input', 'id' => 'has_menual_config' , 'checked' => true ,'readonly' => true]) !!}
                             {!! Form::label('has_menual_config', __('Has Manual Config'), ['class' => 'form-check-label']) !!}
                         </div>
                     </div>

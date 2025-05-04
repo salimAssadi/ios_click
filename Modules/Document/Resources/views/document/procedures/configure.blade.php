@@ -15,7 +15,7 @@
             <a href="{{ route('tenant.document.index') }}">{{ __('Documents') }}</a>
         </li>
         <li class="breadcrumb-item">
-            <a href="{{ route('tenant.document.procedures.main') }}">{{ __('Main Procedures') }}</a>
+            <a href="{{ route('tenant.document.procedures.main') }}">{{ __('Procedures') }}</a>
         </li>
         <li class="breadcrumb-item active">
             <a href=""> {{ $pageTitle }} </a>

@@ -8,14 +8,14 @@
             <a href="">{{ __('Dashboard') }}</a>
         </li>
         <li class="breadcrumb-item active">
-            <a href="#">{{ __('Category') }}</a>
+            <a href="#">{{ __('Document Categories') }}</a>
         </li>
     </ul>
 @endsection
 @section('card-action-btn')
     @if (!Gate::check('create category'))
         <a class="btn btn-secondary btn-sm ml-20 customModal" href="#" data-size="md"
-            data-url="{{ route('tenant.document.category.create') }}" data-title="{{ __('Create Category') }}"> <i
+            data-url="{{ route('tenant.document.categories.create') }}" data-title="{{ __('Create Category') }}"> <i
                 class="ti-plus mr-5"></i>{{ __('Create Category') }}</a>
     @endif
 @endsection
@@ -66,12 +66,12 @@
                                         @if (!Gate::check('edit category') || !Gate::check('delete category'))
                                             <td class="text-right">
                                                 <div class="cart-action">
-                                                    {!! Form::open(['method' => 'DELETE', 'route' => ['tenant.document.category.destroy', $category->id]]) !!}
+                                                    {!! Form::open(['method' => 'DELETE', 'route' => ['tenant.document.categories.destroy', $category->id]]) !!}
 
                                                     @if (!Gate::check('edit category'))
                                                         <a class="avtar avtar-xs btn-link-secondary text-secondary customModal" data-bs-toggle="tooltip"
                                                             data-bs-original-title="{{ __('Edit') }}" href="#"
-                                                            data-url="{{ route('tenant.document.category.edit', $category->id) }}"
+                                                            data-url="{{ route('te  nant.document.categories.edit', $category->id) }}"
                                                             data-title="{{ __('Edit Category') }}"> <i
                                                                 data-feather="edit"></i></a>
                                                     @endif

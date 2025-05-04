@@ -52,7 +52,18 @@
     <link rel="stylesheet" href="{{ asset('assets/fonts/material.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}" id="main-style-link" />
     <link rel="stylesheet" href="{{ asset('assets/css/style-preset.css') }}" />
+    <style>
+        .tooltip-inner {
+            background-color: var(--bs-secondary-light);
+            color: #070606;
+            font-size: 14px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-family: 'Cairo', sans-serif;
+        }
+    </style>
     @stack('css-page')
+    
     <link href="{{ asset('css/custom.css') }}"  rel="stylesheet">
     <link href="{{ asset('vendor/file-manager/css/file-manager.css') }}" rel="stylesheet">
     <script src="{{ asset('assets/js/form_generator.js') }}"></script>

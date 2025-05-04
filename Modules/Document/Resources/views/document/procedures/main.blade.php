@@ -12,20 +12,14 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">{{ __('Main Procedures') }}</h5>
-                    <div>
-                        <a href="{{ route('tenant.document.create') }}" class="btn btn-primary btn-sm">
-                            <i class="fas fa-plus me-1"></i>{{ __('New Document') }}
-                        </a>
-                        {{-- <a href="{{ route('tenant.document.create-livewire') }}" class="btn btn-success btn-sm">
-                            <i class="fas fa-bolt me-1"></i>{{ __('New Document (Livewire)') }}
-                        </a> --}}
-                    </div>
+                   
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-hover table-striped basic-datatable">
                             <thead class="thead-light">
                                 <tr>
+                                    <th>{{ __('N') }}</th>
                                     <th>{{ __('Procedure Name') }}</th>
                                     <th>{{ __('Description') }}</th>
                                     <th class="w-10">{{ __('Status') }}</th>
@@ -35,6 +29,7 @@
                             <tbody>
                                 @forelse ($procedures as $procedure)
                                     <tr>
+                                        <td>{{ $loop->iteration }}</td>
                                         <td>
                                             <div class="d-flex align-items-center">
                                                 <div>
@@ -47,9 +42,9 @@
                                         </td>
                                         <td>
                                             @if ($procedure->status == 1)
-                                                <span class="badge bg-success-subtle text-success">{{ __('publish') }}</span>
+                                                <span class="badge bg-success">{{ __('publish') }}</span>
                                             @else
-                                                <span class="badge bg-danger-subtle text-danger">{{ __('unpublish') }}</span>
+                                                <span class="badge bg-danger">{{ __('unpublish') }}</span>
                                             @endif
                                         </td>
                                         <td>

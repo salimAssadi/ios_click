@@ -8,9 +8,6 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
 
-
-
-
 class CategoryController extends Controller
 {
 
@@ -112,5 +109,51 @@ class CategoryController extends Controller
     {
         $subCategory = SubCategory::where('category_id', $category_id)->get()->pluck('title', 'id');
         return response()->json($subCategory);
+    }
+
+    /**
+     * Store a new category via AJAX request.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function storeAjax(Request $request)
+    {
+        if (!Auth::user()->can('create category')) {
+            $validator = \Validator::make(
+                $request->all(), [
+                'name_ar' => 'required|string|max:255',
+                'name_en' => 'required|string|max:255',
+            ]);
+            
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $validator->errors()->first(),
+                ], 422);
+            }
+
+            $parentCategory = Category::where('parent_id', null)->where('type', 'supporting')->first();
+            $category = new Category();
+            $category->title_ar = $request->name_ar;
+            $category->title_en = $request->name_en;
+            $category->type = 'supporting';
+            $category->parent_id = $parentCategory->id;
+            $category->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => __('Category successfully created!'),
+                'category' => [
+                    'id' => $category->id,
+                    'name' => $category->title, 
+                ],
+            ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => __('Permission Denied!'),
+            ], 403);
+        }
     }
 }

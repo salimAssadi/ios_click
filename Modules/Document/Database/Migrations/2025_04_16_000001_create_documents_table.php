@@ -16,11 +16,14 @@ class CreateDocumentsTable extends Migration
         if (!Schema::hasTable('documents')) {
         Schema::create('documents', function (Blueprint $table) {
             $table->id();
-            $table->string('title');
+            $table->string('title_ar');
+            $table->string('title_en');
             $table->string('document_number')->unique();
+            $table->foreignId('category_id')->constrained('categories')->onDelete('cascade');
             $table->string('document_type'); // policy, procedure, work_instruction, form, manual
             $table->string('department')->nullable(); // quality, operations, hr, finance, it
-            $table->text('description')->nullable();
+            $table->text('description_ar')->nullable();
+            $table->text('description_en')->nullable();
             $table->string('related_process')->nullable();
             $table->foreignId('created_by')->constrained('users');
             $table->date('creation_date');
