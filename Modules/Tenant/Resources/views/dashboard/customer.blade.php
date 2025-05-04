@@ -5,6 +5,7 @@
 @section('content')
     <!-- Quick Stats -->
     <div class="row">
+
         <div class="col-xl-3 col-md-6">
             <div class="card">
                 <div class="card-body">
@@ -52,6 +53,7 @@
                 </div>
             </div>
         </div>
+        
     </div>
 
     <!-- Quick Actions -->

@@ -93,22 +93,45 @@
                     </a>
                     <div class="dropdown-menu dropdown-user-profile dropdown-menu-end pc-h-dropdown">
                         <div class="dropdown-header">
-                            <h4>
-                                {{ __('Good Morning') }},
-                                <span class="small text-muted">{{auth('tenant')->user()->name}}</span>
-                            </h4>
-                            <p class="text-muted">{{auth('tenant')->user()->type}}</p>
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="flex-shrink-0">
+                                    <img src="{{(!empty($users->profile)? $profile.'/'.$users->profile : $profile.'/avatar.png')}}" alt="user-image" class="img-fluid rounded-circle" style="width: 50px;" />
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h5 class="mb-1">{{auth('tenant')->user()->name}}</h5>
+                                    <p class="text-muted small mb-0">{{auth('tenant')->user()->type}}</p>
+                                </div>
+                            </div>
 
-                            <div class="profile-notification-scroll position-relative"
-                                style="max-height: calc(100vh - 280px)">
-                                <hr />
-                                <a href="{{ route('tenant.logout') }}" class="dropdown-item"  onclick="event.preventDefault(); document.getElementById('frm-logout').submit();">
-                                    <i class="ti ti-logout"></i>
-                                    <span>{{ __('Logout') }}</span>
+                            <div class="profile-notification-scroll position-relative" style="max-height: calc(100vh - 280px)">
+                                <div class="list-group list-group-flush">
+                                    <!-- User Profile Link -->
+                                    <a href="" class="list-group-item list-group-item-action">
+                                        <div class="d-flex align-items-center">
+                                            <i class="ti ti-user-circle me-2 text-primary"></i>
+                                            <span>{{ __('My Profile') }}</span>
+                                        </div>
+                                    </a>
+                                    
+                                    <!-- My Reminders Link -->
+                                    <a href="{{ route('tenant.reminder.my') }}" class="list-group-item list-group-item-action">
+                                        <div class="d-flex align-items-center">
+                                            <i class="ti ti-bell me-2 text-warning"></i>
+                                            <span>{{ __('My Reminders') }}</span>
+                                        </div>
+                                    </a>
+                                    
+                                    <!-- Logout Link -->
+                                    <a href="{{ route('tenant.logout') }}" class="list-group-item list-group-item-action" onclick="event.preventDefault(); document.getElementById('frm-logout').submit();">
+                                        <div class="d-flex align-items-center">
+                                            <i class="ti ti-logout me-2 text-danger"></i>
+                                            <span>{{ __('Logout') }}</span>
+                                        </div>
+                                    </a>
                                     <form id="frm-logout" action="{{ route('tenant.logout') }}" method="POST" class="d-none">
                                         {{ csrf_field() }}
                                     </form>
-                                </a>
+                                </div>
                             </div>
                         </div>
                     </div>

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Models\BaseModel;
 use Modules\Document\Entities\Status;
+use Modules\Reminder\Entities\Reminder;
 
 class DocumentVersion extends BaseModel
 {
@@ -42,46 +43,59 @@ class DocumentVersion extends BaseModel
        return $this->belongsTo(Status::class,'status_id','id')->where('type','revision');
    }
 
+    /**
+     * Get the document that owns the version.
+     */
     public function document()
     {
         return $this->belongsTo(Document::class);
     }
 
-    public function updater()
-    {
-        return $this->belongsTo(\App\Models\User::class, 'updated_by');
-    }
-
+    /**
+     * Get the user who approved the document.
+     */
     public function approver()
     {
-        return $this->belongsTo(\App\Models\User::class, 'approved_by');
+        return $this->belongsTo(\Modules\Tenant\Entities\User::class, 'approved_by');
+    }
+
+    /**
+     * Get the user who created the document.
+     */
+    public function creator()
+    {
+        return $this->belongsTo(\Modules\Tenant\Entities\User::class, 'created_by');
+    }
+
+    /**
+     * Get all reminders associated with this document version through the remindable relationship
+     */
+    public function reminders()
+    {
+        return $this->morphMany(Reminder::class, 'remindable');
+    }
+    
+    /**
+     * Get days remaining until expiry
+     *
+     * @return int|null
+     */
+    public function getDaysUntilExpiryAttribute()
+    {
+        if (!$this->expiry_date) {
+            return null;
+        }
+        
+        $now = now();
+        if ($now->greaterThan($this->expiry_date)) {
+            return 0;
+        }
+        
+        return $now->diffInDays($this->expiry_date);
     }
     
     protected static function newFactory()
     {
         return \Modules\Document\Database\factories\DocumentVersionFactory::new();
     }
-
-    public function getStatusBadgeAttribute()
-    {
-        if (!$this->status) {
-            return null;
-        }
-        return '<span class="badge ' . $this->status->badge . '">' . __($this->status->name) . '</span>';
-    }
-
-    public function getVersionBadgeAttribute()
-    {
-        return '<span class="badge bg-primary">v' . number_format($this->version, 1) . '</span>';
-    }
-
-    /**
-     * Set the status attribute with validation
-     */
-  
-
-    /**
-     * Get the status attribute with default
-     */
-  
 }

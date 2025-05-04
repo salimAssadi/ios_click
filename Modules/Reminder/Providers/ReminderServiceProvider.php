@@ -1,29 +1,23 @@
 <?php
 
-namespace Modules\Document\Providers;
+namespace Modules\Reminder\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Eloquent\Factory;
-use App\Providers\BaseModuleServiceProvider;
-use Livewire\Livewire;
-use Modules\Document\Http\Livewire\CreateDocument;
+use Modules\Reminder\Console\Commands\SendReminders;
+use Modules\Reminder\Console\Commands\MigrateDocumentReminders;
 
-/**
- * Class DocumentServiceProvider
- *
- * @author  Anuj Jaha Er <eranujjaha@gmail.com>
- */
-class DocumentServiceProvider extends BaseModuleServiceProvider
+class ReminderServiceProvider extends ServiceProvider
 {
     /**
      * @var string $moduleName
      */
-    protected $moduleName = 'Document';
+    protected $moduleName = 'Reminder';
 
     /**
      * @var string $moduleNameLower
      */
-    protected $moduleNameLower = 'document';
+    protected $moduleNameLower = 'reminder';
 
     /**
      * Boot the application events.
@@ -35,8 +29,6 @@ class DocumentServiceProvider extends BaseModuleServiceProvider
         $this->registerTranslations();
         $this->registerConfig();
         $this->registerViews();
-        $this->registerAssets();
-        $this->registerLivewireComponents();
         $this->loadMigrationsFrom(module_path($this->moduleName, 'Database/Migrations'));
     }
 
@@ -50,7 +42,10 @@ class DocumentServiceProvider extends BaseModuleServiceProvider
         $this->app->register(RouteServiceProvider::class);
         
         // Register the commands
-        
+        $this->commands([
+            SendReminders::class,
+            MigrateDocumentReminders::class,
+        ]);
     }
 
     /**
@@ -100,28 +95,6 @@ class DocumentServiceProvider extends BaseModuleServiceProvider
         } else {
             $this->loadTranslationsFrom(module_path($this->moduleName, 'Resources/lang'), $this->moduleNameLower);
         }
-    }
-
-    /**
-     * Register assets.
-     *
-     * @return void
-     */
-    protected function registerAssets()
-    {
-        $this->publishes([
-            module_path($this->moduleName, 'Resources/assets') => public_path('modules/' . $this->moduleNameLower),
-        ], ['assets', $this->moduleNameLower . '-module-assets']);
-    }
-
-    /**
-     * Register Livewire components.
-     *
-     * @return void
-     */
-    protected function registerLivewireComponents()
-    {
-        Livewire::component('document::create-document', CreateDocument::class);
     }
 
     /**

@@ -97,7 +97,20 @@
                             @enderror
                         </div>
 
-                    
+                        <div class="form-group col-md-6 mt-3">
+                            {{ Form::label('reminder_days', __('Reminder Before Expiry') . ' <span class="text-danger">*</span>', ['class' => 'form-label'], false) }}
+                            <div class="input-group">
+                                {{ Form::number('reminder_days', old('reminder_days', 30), ['class' => 'form-control' . ($errors->has('reminder_days') ? ' is-invalid' : ''), 'required' => 'required', 'min' => '1', 'max' => '365', 'id' => 'reminder_days']) }}
+                                <span class="input-group-text bg-info">
+                                    <i class="ti ti-bell text-white"></i>
+                                </span>
+                            </div>
+                            <small class="text-muted">{{ __('Number of days before expiry to send reminder') }}</small>
+                            @error('reminder_days')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
                         <div class="form-group col-md-6 mt-3">
                             {{ Form::label('file', __('Document File') . ' <span class="text-danger">*</span>', ['class' => 'form-label'], false) }}
                             {{ Form::file('file', ['class' => 'form-control' . ($errors->has('file') ? ' is-invalid' : ''), 'required' => 'required']) }}

@@ -24,7 +24,7 @@
                     <h5 class="mb-0">{{ __('Supporting Documents') }}</h5>
                     <div>
                         <a href="{{ route('tenant.document.supporting-documents.create') }}" class="btn btn-primary btn-sm">
-                            <i class="ti ti-plus me-1"></i>{{ __('New Supporting Document') }}
+                            <i class="ti ti-plus me-1"></i>{{ __('Create Supporting Document') }}
                         </a>
                     </div>
                 </div>

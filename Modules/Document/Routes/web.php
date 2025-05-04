@@ -112,4 +112,17 @@ Route::prefix('document')->name('tenant.document.')->middleware(['auth:tenant','
         Route::post('/{document}', [DocumentVersionController::class, 'store'])->name('store');
         Route::get('/{version}', [DocumentVersionController::class, 'show'])->name('show');
     });
+    
+    // // Document Reminders Routes
+    // Route::prefix('reminders')->name('reminders.')->group(function () {
+    //     Route::get('/', [DocumentReminderController::class, 'index'])->name('index');
+    //     Route::get('/create', [DocumentReminderController::class, 'create'])->name('create');
+    //     Route::post('/', [DocumentReminderController::class, 'store'])->name('store');
+    //     Route::get('/{id}', [DocumentReminderController::class, 'show'])->name('show');
+    //     Route::get('/{id}/edit', [DocumentReminderController::class, 'edit'])->name('edit');
+    //     Route::put('/{id}', [DocumentReminderController::class, 'update'])->name('update');
+    //     Route::delete('/{id}', [DocumentReminderController::class, 'destroy'])->name('destroy');
+    //     Route::post('/add-default', [DocumentReminderController::class, 'addDefaultReminder'])->name('add-default');
+    //     Route::post('/{id}/toggle-active', [DocumentReminderController::class, 'toggleActive'])->name('toggle-active');
+    // });
 });

@@ -11,15 +11,23 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Modules\Document\Entities\Category;
 use Modules\Document\Entities\Document;
+use Modules\Document\Entities\DocumentVersion;
+use Modules\Reminder\Services\ReminderService;
 
 class SupportingDocumentController extends BaseModuleController
 {
-    public function __construct()
+    /**
+     * @var ReminderService
+     */
+    protected $reminderService;
+    
+    public function __construct(ReminderService $reminderService)
     {
         parent::__construct();
         $this->viewPath = 'document::document.supporting-documents';
         $this->routePrefix = 'document.supporting-documents';
         $this->moduleName = 'Supporting Documents';
+        $this->reminderService = $reminderService;
     }
 
     /**
@@ -69,7 +77,10 @@ class SupportingDocumentController extends BaseModuleController
             'description_ar' => 'nullable|string',
             'description_en' => 'nullable|string',
             'category_id' => 'required|exists:categories,id',
-            'file' => 'required|file|mimes:pdf,doc,docx,xls,xlsx|max:10240',
+            'issue_date' => 'required|date',
+            'expiry_date' => 'required|date|after:issue_date',
+            'reminder_days' => 'required|integer|min:1|max:365',
+            'file' => 'required|file|mimes:pdf|max:10240',
         ]);
 
         if ($validator->fails()) {
@@ -83,7 +94,11 @@ class SupportingDocumentController extends BaseModuleController
             // Store the file
             $file = $request->file('file');
             $fileName = time() . '_' . $file->getClientOriginalName();
-            $filePath = $file->storeAs('supporting_documents', $fileName, 'public');
+
+            $filePath = $file->storeAs('assdaf/supporting_documents', $fileName, 'tenants');
+            
+            // Generate document number
+            $documentNumber = 'SD-' . date('YmdHis');
             
             // Create the document
             $document = new Document();
@@ -92,13 +107,28 @@ class SupportingDocumentController extends BaseModuleController
             $document->description_ar = $request->input('description_ar');
             $document->description_en = $request->input('description_en');
             $document->category_id = $request->input('category_id');
-            $document->file_path = $filePath;
-            $document->original_filename = $file->getClientOriginalName();
-            $document->mime_type = $file->getMimeType();
-            $document->file_size = $file->getSize();
-            $document->type = 'supporting';
-            $document->status = 1; // Active by default
+            $document->document_number = $documentNumber;
+            $document->document_type = 'supporting';
+            $document->status_id = 1; // Active by default
+            $document->creation_date = now();
+            $document->created_by = auth('tenant')->user()->id;
             $document->save();
+            
+            // Create the initial document version
+            $version = new DocumentVersion();
+            $version->document_id = $document->id;
+            $version->version = '1.0';
+            $version->issue_date = $request->input('issue_date');
+            $version->expiry_date = $request->input('expiry_date');
+            $version->status_id = 1; // Active status
+            $version->file_path = $filePath;
+            $version->storage_path = 'public/' . $filePath;
+            $version->is_active = true;
+            $version->created_by = auth('tenant')->user()->id;
+            $version->save();
+            
+            // Schedule the reminder using the new reminder system
+            $this->scheduleReminder($version, $request->input('reminder_days'));
             
             DB::commit();
             return redirect()->route('tenant.document.supporting-documents.index')
@@ -135,5 +165,38 @@ class SupportingDocumentController extends BaseModuleController
     {
         $document = Document::findOrFail($id);
         return Storage::disk('public')->download($document->file_path, $document->original_filename);
+    }
+
+    /**
+     * Schedule reminder for document expiration using the new reminder system
+     *
+     * @param DocumentVersion $version
+     * @param int $reminderDays
+     * @return void
+     */
+    private function scheduleReminder(DocumentVersion $version, $reminderDays)
+    {
+        try {
+            // Create reminder options
+            $options = [
+                'recipients' => [$version->document->created_by], // Default to document creator
+                'notification_channels' => 'email,system',
+            ];
+            
+            // Create a reminder using the new reminder service
+            $reminder = $this->reminderService->createDocumentExpiryReminder(
+                $version,
+                $reminderDays,
+                $options
+            );
+            
+            if ($reminder) {
+                Log::info("Reminder created for document version ID {$version->id}, reminder ID: {$reminder->id}");
+            } else {
+                Log::warning("Failed to create reminder for document version ID {$version->id}");
+            }
+        } catch (Exception $e) {
+            Log::error("Failed to schedule reminder for document version ID {$version->id}: " . $e->getMessage());
+        }
     }
 }

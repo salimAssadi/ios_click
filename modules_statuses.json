@@ -11,5 +11,6 @@
     "Role": true,
     "Training": true,
     "Complaint": true,
-    "Compliance": true
+    "Compliance": true,
+    "Reminder": true
 }
