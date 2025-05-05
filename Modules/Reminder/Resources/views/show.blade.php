@@ -1,29 +1,18 @@
 @extends('tenant::layouts.app')
 
-@section('title', __('Reminder Details'))
+@section('page-title', __('Reminder Details'))
+@section('breadcrumb')
+<li class="breadcrumb-item"><a href="{{ route('tenant.dashboard') }}">{{ __('Dashboard') }}</a></li>
+<li class="breadcrumb-item"><a href="{{ route('tenant.reminder.index') }}">{{ __('Reminders') }}</a></li>
+<li class="breadcrumb-item">{{ __('Details') }}</li>
 
+@endsection
 @section('content')
-<div class="pc-container">
-    <div class="pc-content">
-        <div class="page-header">
-            <div class="page-block">
-                <div class="row align-items-center">
-                    <div class="col-md-12">
-                        <div class="page-header-title">
-                            <h5 class="m-b-10">{{ __('Reminder Details') }}</h5>
-                        </div>
-                        <ul class="breadcrumb">
-                            <li class="breadcrumb-item"><a href="{{ route('tenant.dashboard') }}">{{ __('Dashboard') }}</a></li>
-                            <li class="breadcrumb-item"><a href="{{ route('tenant.reminder.index') }}">{{ __('Reminders') }}</a></li>
-                            <li class="breadcrumb-item">{{ __('Details') }}</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
+{{-- <div class="pc-container"> --}}
+    {{-- <div class="pc-content"> --}}
+    
         <div class="row">
-            <div class="col-md-8 mx-auto">
+            <div class="col-md-12 mx-auto">
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <div>
@@ -278,8 +267,8 @@
                 </div>
             </div>
         </div>
-    </div>
-</div>
+    {{-- </div> --}}
+{{-- </div> --}}
 @endsection
 
 @push('scripts')
