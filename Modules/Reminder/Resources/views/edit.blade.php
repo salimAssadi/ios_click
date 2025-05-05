@@ -64,7 +64,7 @@
                                         <option value="">{{ __('Select Document') }}</option>
                                         @foreach($documents as $document)
                                             <option value="{{ $document->id }}" {{ old('document_id', $reminder->document_id) == $document->id ? 'selected' : '' }}>
-                                                {{ $document->name }} ({{ $document->expiry_date }})
+                                                {{ $document->title }} ({{ $document->lastversion->expiry_date }})
                                             </option>
                                         @endforeach
                                     </select>
@@ -155,15 +155,15 @@
                             <div class="form-group">
                                 <label class="form-label">{{ __('Notification Channels') }}</label>
                                 @php
-                                    // Get notification channels from related models
-                                    $notificationChannels = $reminder->notifications->pluck('channel')->toArray();
+                                    // Get notification channels from string
+                                    $channelsArray = $reminder->notification_channels ? explode(',', $reminder->notification_channels) : [];
                                 @endphp
                                 <div class="form-check">
-                                    <input type="checkbox" name="notification_channels[]" id="channel_email" class="form-check-input" value="email" {{ in_array('email', old('notification_channels', $notificationChannels)) ? 'checked' : '' }}>
+                                    <input type="checkbox" name="notification_channels[]" id="channel_email" class="form-check-input" value="email" {{ in_array('email', old('notification_channels', $channelsArray)) ? 'checked' : '' }}>
                                     <label class="form-check-label" for="channel_email">{{ __('Email') }}</label>
                                 </div>
                                 <div class="form-check">
-                                    <input type="checkbox" name="notification_channels[]" id="channel_system" class="form-check-input" value="system" {{ in_array('system', old('notification_channels', $notificationChannels)) ? 'checked' : '' }}>
+                                    <input type="checkbox" name="notification_channels[]" id="channel_system" class="form-check-input" value="system" {{ in_array('system', old('notification_channels', $channelsArray)) ? 'checked' : '' }}>
                                     <label class="form-check-label" for="channel_system">{{ __('System Notification') }}</label>
                                 </div>
                                 @error('notification_channels')
@@ -172,7 +172,14 @@
                             </div>
                         </div>
                         
-                        <div class="col-md-12 mb-3 recipients-container" style="display: {{ old('show_recipients', $reminder->recipients->count() > 0) ? 'block' : 'none' }};">
+                        <div class="col-md-12 mb-3">
+                            <div class="form-check form-switch">
+                                <input type="checkbox" name="show_recipients" id="show_recipients" class="form-check-input" {{ old('show_recipients', $reminder->recipients->count() > 0) ? 'checked' : '' }}>
+                                <label class="form-check-label" for="show_recipients">{{ __('Send to Recipients') }}</label>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-12 mb-3 recipients-container" id="recipients_section" style="display: {{ old('show_recipients', $reminder->recipients->count() > 0) ? 'block' : 'none' }};">
                             <div class="form-group">
                                 <label class="form-label">{{ __('Recipients') }}</label>
                                 <p class="text-muted small mb-2">{{ __('Select users who should receive this reminder.') }}</p>
@@ -232,6 +239,8 @@
         const recurrenceFields = document.querySelector('.recurrence-fields');
         const showRecipientsCheckbox = document.getElementById('show_recipients');
         const recipientsSection = document.getElementById('recipients_section');
+        const selectAllRecipients = document.getElementById('select_all_recipients');
+        const recipientCheckboxes = document.querySelectorAll('.recipient-checkbox');
         
         // Función para mostrar/ocultar sección de documentos
         function handleReminderTypeChange() {
@@ -266,6 +275,15 @@
             }
         }
         
+        // Handle select all recipients toggle
+        function handleSelectAllRecipients() {
+            if (selectAllRecipients) {
+                recipientCheckboxes.forEach(function(checkbox) {
+                    checkbox.checked = selectAllRecipients.checked;
+                });
+            }
+        }
+        
         // Asignar event listeners
         if (reminderTypeSelect) {
             reminderTypeSelect.addEventListener('change', handleReminderTypeChange);
@@ -275,10 +293,18 @@
         
         if (isRecurringCheckbox) {
             isRecurringCheckbox.addEventListener('change', handleRecurringChange);
+            // Inicializar al cargar
+            handleRecurringChange();
         }
         
         if (showRecipientsCheckbox) {
             showRecipientsCheckbox.addEventListener('change', handleShowRecipientsChange);
+            // Inicializar al cargar
+            handleShowRecipientsChange();
+        }
+        
+        if (selectAllRecipients) {
+            selectAllRecipients.addEventListener('change', handleSelectAllRecipients);
         }
     });
 </script>

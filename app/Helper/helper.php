@@ -26,6 +26,8 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use PragmaRX\Google2FAQRCode\Google2FA;
 use Spatie\Permission\Models\Role;
+use Modules\Setting\Entities\CompanyProfile;
+
 
 
 if (!function_exists('settingsKeys')) {
@@ -194,6 +196,14 @@ function tenant_can_any(array $permissions): bool
     }
 }
 
+if (!function_exists('getTenantRoot')) {
+    function getTenantRoot()
+    {
+        $tenantRoot = CompanyProfile::first();
+        return $tenantRoot->tenant ?? null;
+    }
+}
+    
 
 if (!function_exists('invoicePaymentSettings')) {
     function invoicePaymentSettings($id)

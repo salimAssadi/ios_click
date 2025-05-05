@@ -17,6 +17,7 @@ use Modules\Setting\Http\Controllers\CompanyProfileController;
 use Modules\Setting\Http\Controllers\OrganizationController;
 use Modules\Setting\Http\Controllers\ConsultantController;
 use Modules\Setting\Http\Controllers\BackupController;
+use Modules\Setting\Http\Controllers\CompanySealController;
 use Modules\Tenant\Http\Middleware\TenantMiddleware;
 use Modules\Tenant\Http\Middleware\XSSMiddleware;
 
@@ -79,7 +80,16 @@ Route::prefix('setting')->name('tenant.setting.')->middleware(['auth:tenant', 'X
     Route::delete('/consultants/{id}', [ConsultantController::class, 'destroy'])->name('consultants.destroy');
     Route::get('/consultants/{id}', [ConsultantController::class, 'show'])->name('consultants.show');
 
-    
+    // Company Seals
+    Route::prefix('company-seals')->name('company-seals.')->group(function() {
+        Route::get('/', [CompanySealController::class, 'index'])->name('index');
+        Route::get('/create', [CompanySealController::class, 'create'])->name('create');
+        Route::post('/', [CompanySealController::class, 'store'])->name('store');
+        Route::get('/{companySeal}', [CompanySealController::class, 'show'])->name('show');
+        Route::get('/{companySeal}/edit', [CompanySealController::class, 'edit'])->name('edit');
+        Route::put('/{companySeal}', [CompanySealController::class, 'update'])->name('update');
+        Route::delete('/{companySeal}', [CompanySealController::class, 'destroy'])->name('destroy');
+    });
 
     // Backup
     Route::get('/backup', [BackupController::class, 'index'])->name('backup');

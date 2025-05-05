@@ -338,6 +338,12 @@
                             </a>
 
                         </li>
+                        <li
+                            class="pc-item {{ Str::startsWith($routeName, 'tenant.setting.company-seals.') ? 'active' : '' }}">
+                            <a href="{{ route('tenant.setting.company-seals.index') }}" class="pc-link">
+                                <span class="pc-mtext">{{ __('Company Seals') }}</span>
+                            </a>
+                        </li>
                         <li class="pc-item {{ $routeName == 'tenant.setting.consultants' ? 'active' : '' }}">
                             <a href="{{ route('tenant.setting.consultants') }}" class="pc-link">
                                 <span class="pc-mtext">{{ __('Consultants') }}</span>

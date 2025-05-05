@@ -26,7 +26,8 @@ class SettingController extends BaseModuleController
         $loginUser = \Auth::user();
         $settings = settings();
         $timezones = config('timezones');
-        return $this->view('index', compact('loginUser', 'settings', 'timezones'));
+        $activeTab ='general_settings';
+        return $this->view('index', compact('loginUser', 'settings', 'timezones', 'activeTab'));
     }
 
     public function accountData(Request $request)

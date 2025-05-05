@@ -20,14 +20,14 @@
                         <div class="col-12 mb-4">
                             <!-- Horizontal Tabs at the top -->
                             <ul class="nav nav-tabs mb-3" id="myTab" role="tablist">
-                                <li class="nav-item">
+                                <li class="nav-item d-none">
                                     <a class="nav-link {{ empty($activeTab) || $activeTab == 'user_profile_settings' ? 'active' : '' }}"
                                         id="profile-tab-1" data-bs-toggle="tab" href="#user_profile_settings"
                                         role="tab" aria-selected="true">
                                         <i class="ti ti-user-check me-2"></i>{{ __('User Profile') }}
                                     </a>
                                 </li>
-                                <li class="nav-item">
+                                <li class="nav-item d-none">
                                     <a class="nav-link {{ !empty($activeTab) && $activeTab == 'password_settings' ? 'active' : '' }}"
                                         id="profile-tab-2" data-bs-toggle="tab" href="#password_settings" role="tab"
                                         aria-selected="false">
@@ -69,7 +69,7 @@
                         </div>
                         <div class="col-12">
                             <div class="tab-content">
-                                <div class="tab-pane {{ empty($activeTab) || $activeTab == 'user_profile_settings' ? ' active show ' : '' }}"
+                                <div class="tab-pane d-none {{ empty($activeTab) || $activeTab == 'user_profile_settings' ? ' active show ' : ''  }}"
                                     id="user_profile_settings" role="tabpanel" aria-labelledby="user_profile_settings">
                                     {{ Form::model($loginUser, ['route' => ['iso_dic.setting.account'], 'method' => 'post', 'enctype' => 'multipart/form-data']) }}
                                     <div class="d-flex align-items-center mb-3">
@@ -112,7 +112,7 @@
                                     </div>
                                     {{ Form::close() }}
                                 </div>
-                                <div class="tab-pane {{ !empty($activeTab) && $activeTab == 'password_settings' ? ' active show ' : '' }}"
+                                <div class="tab-pane d-none {{ !empty($activeTab) && $activeTab == 'password_settings' ? ' active show ' : '' }}"
                                     id="password_settings" role="tabpanel" aria-labelledby="password_settings">
                                     {{ Form::model($loginUser, ['route' => ['iso_dic.setting.password'], 'method' => 'post']) }}
                                     <div class="row">

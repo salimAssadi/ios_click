@@ -76,9 +76,9 @@
                                         <div class="card-body p-3">
                                             <div class="d-flex align-items-center mb-2">
                                                 @if($reminder->reminder_type == 'document_expiry')
-                                                    <span class="avatar avatar-sm bg-light-info me-2"><i class="ti ti-file-certificate"></i></span>
+                                                    <span class="avatar avatar-sm  me-2"><i class="ti ti-file-certificate text-info f-20"></i></span>
                                                 @else
-                                                    <span class="avatar avatar-sm bg-light-primary me-2"><i class="ti ti-bell"></i></span>
+                                                    <span class="avatar avatar-sm me-2"><i class="ti ti-bell text-primary f-20"></i></span>
                                                 @endif
                                                 <h6 class="mb-0 flex-grow-1 text-truncate" title="{{ $reminder->title }}">{{ $reminder->title }}</h6>
                                             </div>
