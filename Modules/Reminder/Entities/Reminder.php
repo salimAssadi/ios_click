@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\BaseModel;
 use Carbon\Carbon;
 use Modules\Tenant\Entities\User;
+use Modules\Reminder\Entities\Recipient;
+use Illuminate\Notifications\DatabaseNotification;
 
 class Reminder extends BaseModel
 {
@@ -20,7 +22,8 @@ class Reminder extends BaseModel
         'is_recurring', 'recurrence_pattern', 'recurrence_interval', 'recurrence_end_date',
         'status', 'last_sent_at', 'created_by', 'recipients',
         'notification_channels', 'is_active', 'remindable_type', 'remindable_id',
-        'metadata'
+        'metadata', 'remind_date', 'remind_time', 'document_id', 'days_before_expiry',
+        'user_id'
     ];
 
     /**
@@ -55,6 +58,49 @@ class Reminder extends BaseModel
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /**
+     * Get the recipients for this reminder
+     */
+    public function recipients()
+    {
+        return $this->hasMany(Recipient::class, 'reminder_id');
+    }
+
+    /**
+     * Get the notifications for this reminder using Laravel's database notifications
+     */
+    public function notificationsRelated()
+    {
+        return $this->morphMany(DatabaseNotification::class, 'notifiable')
+            ->orderBy('created_at', 'desc');
+    }
+
+    /**
+     * Get the notification channels for this reminder
+     * 
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function notifications()
+    {
+        // Return null relationship for Eloquent compatibility
+        return $this->hasMany(Recipient::class, 'reminder_id');
+    }
+    
+    /**
+     * Get the notification channels as an array
+     * 
+     * @return array
+     */
+    public function getNotificationChannels()
+    {
+        // This method returns the notification channels as an array
+        if ($this->notification_channels) {
+            return explode(',', $this->notification_channels);
+        }
+        
+        return ['database']; // Default to database notifications
     }
 
     /**

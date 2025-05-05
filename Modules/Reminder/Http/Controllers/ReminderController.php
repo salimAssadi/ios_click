@@ -5,13 +5,21 @@ namespace Modules\Reminder\Http\Controllers;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use Modules\Reminder\Entities\Reminder;
-use Modules\Reminder\Services\ReminderService;
 use Illuminate\Support\Facades\Validator;
+use Modules\Document\Entities\Document;
+use Illuminate\Notifications\DatabaseNotification;
+use Modules\Reminder\Entities\Recipient;
+use Modules\Reminder\Entities\Reminder;
+use Modules\Reminder\Http\Requests\StoreReminderRequest;
+use Modules\Reminder\Http\Requests\UpdateReminderRequest;
+use Modules\Task\Entities\Task;
+use Modules\Reminder\Services\ReminderService;
 use Carbon\Carbon;
 use Modules\Tenant\Entities\User;
 use Illuminate\Support\Facades\Auth;
-use Modules\Document\Entities\Document;
+use Illuminate\Support\Facades\DB;
+use Modules\Reminder\Notifications\ReminderNotification;
+
 
 class ReminderController extends Controller
 {
@@ -91,91 +99,82 @@ class ReminderController extends Controller
             'email,system' => __('Both Email and System')
         ];
         
-        $users = User::with('employee')->orderBy('id')->get();
+        $users = User::whereHas('employee')->with('employee')->orderBy('id')->get();
         $documents = Document::orderBy('id')->get();
         return view('reminder::create', compact('reminderTypes', 'recurrencePatterns', 'notificationChannels', 'users', 'documents'));
     }
 
     /**
      * Store a newly created reminder in storage.
-     * @param Request $request
+     * @param StoreReminderRequest $request
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function store(Request $request)
+    public function store(StoreReminderRequest $request)
     {
-
-        $validator = Validator::make($request->all(), [
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'reminder_type' => 'required|string',
-            'remind_at' => 'required|date',
-            'is_recurring' => 'boolean',
-            'recurrence_pattern' => 'required_if:is_recurring,1|string',
-            'recurrence_interval' => 'required_if:is_recurring,1|integer|min:1',
-            'recurrence_end_date' => 'nullable|date|after:remind_at',
-            'notification_channels' => 'required|string',
-            'recipients' => 'nullable|array',
-            'recipients.*' => 'exists:users,id'
-        ]);
+        // Get the validated data
+        $validated = $request->validated();
         
-        if ($validator->fails()) {
+        try {
+            // Create the reminder
+            $reminder = new Reminder();
+            $reminder->title = $validated['title'];
+            $reminder->description = $validated['description'] ?? null;
+            $reminder->reminder_type = $validated['reminder_type'];
+            $reminder->user_id = auth()->id();
+            
+            if ($reminder->reminder_type == 'document_expiry') {
+                $reminder->document_id = $validated['document_id'];
+                $reminder->days_before_expiry = $validated['days_before_expiry'];
+            }
+            
+            $reminder->remind_date = $validated['remind_date'];
+            $reminder->remind_time = $validated['remind_time'] ?? null;
+            
+            // Handle recurrence settings
+            if (isset($validated['is_recurring']) && $validated['is_recurring']) {
+                $reminder->recurrence_pattern = $validated['recurrence_pattern'];
+                $reminder->recurrence_interval = $validated['recurrence_interval'];
+                $reminder->recurrence_end_date = $validated['recurrence_end_date'] ?? null;
+            }
+            
+            $reminder->save();
+            
+            // Update notification preferences using Laravel's notification system
+            if (isset($validated['notification_channels']) && is_array($validated['notification_channels'])) {
+                $reminder->notification_channels = implode(',', $validated['notification_channels']);
+                $reminder->save();
+            } else {
+                $reminder->notification_channels = null;
+                $reminder->save();
+            }
+            
+            // First we need to delete the old Notification objects since we're not using them anymore
+            // This is only needed temporarily during the migration to the new notification system
+            DB::table('reminder_notifications')->where('reminder_id', $reminder->id)->delete();
+            
+            // Handle recipients if show_recipients is enabled
+            if (isset($validated['show_recipients']) && $validated['show_recipients'] && isset($validated['recipients'])) {
+                foreach ($validated['recipients'] as $userId) {
+                    $recipient = new Recipient();
+                    $recipient->reminder_id = $reminder->id;
+                    $recipient->user_id = $userId;
+                    $recipient->save();
+                    
+                    // Send notification to this user
+                    $user = User::find($userId);
+                    if ($user) {
+                        $user->notify(new ReminderNotification($reminder, $reminder->getNotificationChannels()));
+                    }
+                }
+            }
+            
+            return redirect()->route('reminders.index')
+                ->with('success', 'Reminder created successfully');
+        } catch (\Exception $e) {
             return redirect()->back()
-                ->withErrors($validator)
+                ->with('error', 'Error creating reminder: ' . $e->getMessage())
                 ->withInput();
         }
-        DB::beginTransaction();
-        try {
-        // Prepare data for ReminderService
-        $remindAt = Carbon::parse($request->remind_at);
-        $options = [
-            'is_recurring' => $request->has('is_recurring'),
-            'recurrence_pattern' => $request->recurrence_pattern,
-            'recurrence_interval' => $request->recurrence_interval,
-            'notification_channels' => $request->notification_channels,
-            'recipients' => $request->recipients
-        ];
-        
-        if ($request->has('recurrence_end_date')) {
-            $options['recurrence_end_date'] = Carbon::parse($request->recurrence_end_date);
-        }
-        
-        // Add remindable if provided
-        if ($request->has('remindable_type') && $request->has('remindable_id')) {
-            $options['remindable_type'] = $request->remindable_type;
-            $options['remindable_id'] = $request->remindable_id;
-        }
-        
-        // Create the reminder
-        $this->reminderService->createPersonalReminder(
-            $request->title,
-            $request->description,
-            $remindAt,
-            $options
-        );
-        DB::commit();
-        
-        return redirect()->route('reminder.index')
-            ->with('success', __('Reminder created successfully'));
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return redirect()->back()
-                ->with('error', __('Failed to create reminder: ' . $e->getMessage()));
-        }
-    }
-
-    /**
-     * Show the specified reminder.
-     * @param int $id
-     * @return Renderable
-     */
-    public function show($id)
-    {
-        $reminder = Reminder::with('creator')->findOrFail($id);
-        
-        // Make sure user can view this reminder
-        // $this->authorize('view', $reminder);
-        
-        return view('reminder::show', compact('reminder'));
     }
 
     /**
@@ -189,7 +188,6 @@ class ReminderController extends Controller
         
         // Make sure user can edit this reminder
         // $this->authorize('update', $reminder);
-        
         $reminderTypes = [
             'personal' => __('Personal Reminder'),
             'document_expiry' => __('Document Expiry Reminder'),
@@ -211,81 +209,124 @@ class ReminderController extends Controller
             'email,system' => __('Both Email and System')
         ];
         
-        $users = User::with('employee')->orderBy('id')->get();
+        $users = User::whereHas('employee')->with('employee')->orderBy('id')->get();
+        $documents = Document::orderBy('id')->get();
         
-        return view('reminder::edit', compact('reminder', 'reminderTypes', 'recurrencePatterns', 'notificationChannels', 'users'));
+        return view('reminder::edit', compact('reminder', 'reminderTypes', 'recurrencePatterns', 'documents', 'notificationChannels', 'users'));
     }
 
     /**
      * Update the specified reminder in storage.
-     * @param Request $request
+     * @param UpdateReminderRequest $request
      * @param int $id
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function update(Request $request, $id)
+    public function update(UpdateReminderRequest $request, $id)
     {
-        $reminder = Reminder::findOrFail($id);
+        // Get the validated data
+        $validated = $request->validated();
         
-        // Make sure user can update this reminder
-        // $this->authorize('update', $reminder);
-        
-        $validator = Validator::make($request->all(), [
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'remind_at' => 'required|date',
-            'is_recurring' => 'boolean',
-            'recurrence_pattern' => 'required_if:is_recurring,1|string',
-            'recurrence_interval' => 'required_if:is_recurring,1|integer|min:1',
-            'recurrence_end_date' => 'nullable|date|after:remind_at',
-            'notification_channels' => 'required|string',
-            'recipients' => 'nullable|array',
-            'recipients.*' => 'exists:users,id',
-            'is_active' => 'boolean'
-        ]);
-        
-        if ($validator->fails()) {
+        try {
+            $reminder = Reminder::findOrFail($id);
+            
+            // Verify ownership or admin permissions
+            if ($reminder->user_id != auth('tenant')->id() && !auth('tenant')->user()->hasRole('super admin')) {
+                return redirect()->route('tenant.reminder.index')
+                    ->with('error', 'You do not have permission to update this reminder');
+            }
+            
+            // Update reminder fields
+            $reminder->title = $validated['title'];
+            $reminder->description = $validated['description'] ?? null;
+            $reminder->reminder_type = $validated['reminder_type'];
+            
+            if ($reminder->reminder_type == 'document_expiry') {
+                $reminder->document_id = $validated['document_id'];
+                $reminder->days_before_expiry = $validated['days_before_expiry'];
+            } else {
+                $reminder->document_id = null;
+                $reminder->days_before_expiry = null;
+            }
+            
+            $reminder->remind_date = $validated['remind_date'];
+            $reminder->remind_time = $validated['remind_time'] ?? null;
+            
+            // Handle recurrence settings
+            if (isset($validated['is_recurring']) && $validated['is_recurring']) {
+                $reminder->recurrence_pattern = $validated['recurrence_pattern'];
+                $reminder->recurrence_interval = $validated['recurrence_interval'];
+                $reminder->recurrence_end_date = $validated['recurrence_end_date'] ?? null;
+            } else {
+                $reminder->recurrence_pattern = null;
+                $reminder->recurrence_interval = null;
+                $reminder->recurrence_end_date = null;
+            }
+            
+            $reminder->save();
+            
+            // Update notification preferences
+            // First delete existing notifications
+            Notification::where('reminder_id', $reminder->id)->delete();
+            
+            // Then add the new ones
+            if (isset($validated['notification_channels']) && is_array($validated['notification_channels'])) {
+                foreach ($validated['notification_channels'] as $channel) {
+                    $notification = new Notification();
+                    $notification->reminder_id = $reminder->id;
+                    $notification->channel = $channel;
+                    $notification->save();
+                }
+            }
+            
+            // First we need to delete the old Notification objects since we're not using them anymore
+            // This is only needed temporarily during the migration to the new notification system
+            DB::table('reminder_notifications')->where('reminder_id', $reminder->id)->delete();
+            
+            // Handle recipients
+            // First delete existing recipients
+            Recipient::where('reminder_id', $reminder->id)->delete();
+            
+            // Then add new ones if show_recipients is enabled
+            if (isset($validated['show_recipients']) && $validated['show_recipients'] && isset($validated['recipients'])) {
+                foreach ($validated['recipients'] as $userId) {
+                    $recipient = new Recipient();
+                    $recipient->reminder_id = $reminder->id;
+                    $recipient->user_id = $userId;
+                    $recipient->save();
+                    
+                    // Send notification to this user
+                    $user = User::find($userId);
+                    if ($user) {
+                        $user->notify(new ReminderNotification($reminder, $reminder->getNotificationChannels()));
+                    }
+                }
+            }
+            
+            return redirect()->route('tenant.reminder.index')
+                ->with('success', 'Reminder updated successfully');
+        } catch (\Exception $e) {
             return redirect()->back()
-                ->withErrors($validator)
+                ->with('error', 'Error updating reminder: ' . $e->getMessage())
                 ->withInput();
         }
+    }
+
+    /**
+     * Show the specified reminder.
+     * @param int $id
+     * @return Renderable
+     */
+    public function show($id)
+    {
+        $reminder = Reminder::with(['notifications', 'recipients', 'recipients.user'])->findOrFail($id);
         
-        // Update reminder
-        $reminder->title = $request->title;
-        $reminder->description = $request->description;
-        $reminder->remind_at = Carbon::parse($request->remind_at);
-        $reminder->is_recurring = $request->has('is_recurring');
-        $reminder->notification_channels = $request->notification_channels;
-        $reminder->is_active = $request->has('is_active');
-        
-        if ($reminder->is_recurring) {
-            $reminder->recurrence_pattern = $request->recurrence_pattern;
-            $reminder->recurrence_interval = $request->recurrence_interval;
-            $reminder->recurrence_end_date = $request->has('recurrence_end_date') 
-                ? Carbon::parse($request->recurrence_end_date) 
-                : null;
-        } else {
-            $reminder->recurrence_pattern = null;
-            $reminder->recurrence_interval = null;
-            $reminder->recurrence_end_date = null;
+        // Verify ownership or admin permissions
+        if ($reminder->user_id != auth('tenant')->id() && !auth('tenant')->user()->hasRole('super admin')) {
+            return redirect()->route('reminders.index')
+                ->with('error', 'You do not have permission to view this reminder');
         }
         
-        if ($request->has('recipients')) {
-            $reminder->recipients = $request->recipients;
-        }
-        
-        // If marked as inactive, cancel the reminder
-        if (!$reminder->is_active && $reminder->status != 'cancelled') {
-            $reminder->status = 'cancelled';
-        }
-        // If reactivating a cancelled reminder, set to pending
-        else if ($reminder->is_active && $reminder->status == 'cancelled') {
-            $reminder->status = 'pending';
-        }
-        
-        $reminder->save();
-        
-        return redirect()->route('reminder.index')
-            ->with('success', __('Reminder updated successfully'));
+        return view('reminder::show', compact('reminder'));
     }
 
     /**
@@ -302,7 +343,7 @@ class ReminderController extends Controller
         
         $reminder->delete();
         
-        return redirect()->route('reminder.index')
+        return redirect()->route('tenant.reminder.index')
             ->with('success', __('Reminder deleted successfully'));
     }
     
@@ -374,23 +415,33 @@ class ReminderController extends Controller
                 ->withInput();
         }
         
-        // Get the document
-        $documentClass = 'Modules\Document\Entities\Document';
-        $document = $documentClass::findOrFail($request->document_id);
-        
-        // Create options array
-        $options = [
-            'recipients' => $request->recipients
-        ];
-        
-        // Create the reminder
-        $this->reminderService->createDocumentExpiryReminder(
-            $document,
-            $request->days_before_expiry,
-            $options
-        );
-        
-        return redirect()->back()
-            ->with('success', __('Document expiry reminder created successfully'));
+        DB::beginTransaction();
+        try {
+            // Get the document
+            $documentClass = 'Modules\Document\Entities\Document';
+            $document = $documentClass::findOrFail($request->document_id);
+            
+            // Create options array
+            $options = [
+                'recipients' => $request->recipients
+            ];
+            
+            // Create the reminder
+            $this->reminderService->createDocumentExpiryReminder(
+                $document,
+                $request->days_before_expiry,
+                $options
+            );
+            
+            DB::commit();
+            
+            return redirect()->back()
+                ->with('success', __('Document expiry reminder created successfully'));
+                
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()
+                ->with('error', __('Failed to create document reminder: ') . $e->getMessage());
+        }
     }
 }

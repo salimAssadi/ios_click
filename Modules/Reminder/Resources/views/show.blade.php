@@ -271,7 +271,7 @@
 {{-- </div> --}}
 @endsection
 
-@push('scripts')
+@push('script-page')
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         // Delete confirmation
