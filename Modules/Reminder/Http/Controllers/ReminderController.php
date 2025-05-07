@@ -54,8 +54,7 @@ class ReminderController extends Controller
             $query->where('status', $request->status);
         }
 
-        // By default, only show reminders created by current user or where they are a recipient
-        // unless they have the 'view_all_reminders' permission
+       
         if (!auth()->user()->can('view_all_reminders')) {
             $query->where(function ($q) {
                 $q->where('created_by', auth()->id())

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class DocumentHistoryLog extends Model
 {
     use HasFactory;
-
+    
     protected $fillable = [
         'document_id',
         'version_id',

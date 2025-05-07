@@ -70,7 +70,15 @@
             {{ __('references') }}
         </button>
     </li>
-    
+    {{-- detials-tab --}}
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="detials-tab" data-bs-toggle="tab" data-bs-target="#detials" type="button"
+            role="tab" aria-controls="detials" aria-selected="false">
+            {{ __('Document Detials') }}
+        </button>
+    </li>
+
+
 </ul>
 <!-- Tabs Content -->
 <div class="tab-content mt-3" id="myTabContent">
@@ -118,10 +126,8 @@
                     </tbody>
                 </table>
             </div>
-            <button type="button" class="btn btn-info col-auto text-start float-end save-and-continue"
-                data-next-tab="scope">حفظ واستمرار</button>
+           
 
-            <button type="submit" class="btn btn-info">حفظ</button>
         </form>
     </div>
 
@@ -167,8 +173,7 @@
                     </tbody>
                 </table>
             </div>
-            <button type="button" class="btn btn-info col-auto text-start float-end  save-and-continue"
-                data-next-tab="responsibility">حفظ واستمرار</button>
+
 
         </form>
     </div>
@@ -205,22 +210,10 @@
                                         class="form-control showsearch">
                                         <option value="">اختر وظيفة</option>
                                         @forelse ($jobRoles as $key => $item)
-                                            @if (is_array($jobRoles))
-                                                <option value="{{ $item }}"
-                                                    {{ $row['value'] == $item ? 'selected' : '' }}>
-                                                    {{ $item }}
-                                                </option>
-                                            @elseif (is_object($item) && property_exists($item, 'name'))
-                                                <option value="{{ $item->id ?? $item->name }}"
-                                                    {{ $row['value'] == ($item->id ?? $item->name) ? 'selected' : '' }}>
+                                                <option value="{{ $item->id }}"
+                                                    {{ $row['value'] == $item->id ? 'selected' : '' }}>
                                                     {{ $item->name }}
                                                 </option>
-                                            @else
-                                                <option value="{{ $key }}"
-                                                    {{ $row['value'] == $key ? 'selected' : '' }}>
-                                                    {{ $item }}
-                                                </option>
-                                            @endif
                                         @empty
                                         @endforelse
                                     </select>
@@ -238,8 +231,7 @@
                     </tbody>
                 </table>
             </div>
-            <button type="button" class="btn btn-info col-auto text-start float-end  save-and-continue"
-                data-next-tab="definitions">حفظ واستمرار</button>
+
         </form>
     </div>
 
@@ -285,8 +277,6 @@
                     </tbody>
                 </table>
             </div>
-            <button type="button" class="btn btn-info col-auto text-start float-end  save-and-continue"
-                data-next-tab="responsibility">حفظ واستمرار</button>
 
         </form>
     </div>
@@ -315,10 +305,12 @@
                         @forelse ($forms as $index => $row)
                             <tr>
                                 <td>
-                                    <select name="content[{{ $index }}][col-0]" class="form-control sample-select" data-index="{{ $index }}">
+                                    <select name="content[{{ $index }}][col-0]"
+                                        class="form-control sample-select" data-index="{{ $index }}">
                                         <option value="">اختر النموذج</option>
-                                        @foreach(App\Models\Sample::all() as $sampleItem)
-                                            <option value="{{ $sampleItem->sample_name }}"  {{ ($row['col-0'] ?? '') == $sampleItem->sample_name ? 'selected' : '' }}>
+                                        @foreach (App\Models\Sample::all() as $sampleItem)
+                                            <option value="{{ $sampleItem->sample_name }}"
+                                                {{ ($row['col-0'] ?? '') == $sampleItem->sample_name ? 'selected' : '' }}>
                                                 {{ $sampleItem->sample_name }}
                                             </option>
                                         @endforeach
@@ -337,9 +329,10 @@
                                 <td>
                                     <select name="content[{{ $index }}][col-3]" class="form-control">
                                         <option value="">اختر مكان الحفظ</option>
-                                        @foreach ($jobRoles as $jobRole)
-                                            <option value="{{ $jobRole }}" {{ isset($row['col-3']) && $row['col-3'] == $jobRole ? 'selected' : '' }}>
-                                                {{ $jobRole }}
+                                        @foreach ($departments as $department)
+                                            <option value="{{ $department->id }}"
+                                                {{ isset($row['col-3']) && $row['col-3'] == $department->id ? 'selected' : '' }}>
+                                                {{ $department->name }}
                                             </option>
                                         @endforeach
                                     </select>
@@ -360,8 +353,6 @@
                 </tbody>
             </table>
 
-            <button type="button" class="btn btn-info col-auto text-start float-end save-and-continue"
-                data-next-tab="procedures">حفظ واستمرار</button>
         </form>
     </div>
 
@@ -378,7 +369,7 @@
                         <tr>
                             <th> الإجراء </th>
                             <th style="width:150px;"> المسؤولية</th>
-                            <th >النموذج المستخدم</th>
+                            <th>النموذج المستخدم</th>
                             <th style="width: 100px;"> التحديث</th>
                             <th style="width:150px;">مسؤولية التحديث </th>
                             <th style="width: 50px;"> <button type="button" id="add-procedure-row"
@@ -391,10 +382,12 @@
                             @forelse ($procedures as $index => $row)
                                 <tr>
                                     <td>
-                                        <select name="content[{{ $index }}][col-0]" class="form-control sample-select" data-index="{{ $index }}">
+                                        <select name="content[{{ $index }}][col-0]"
+                                            class="form-control sample-select" data-index="{{ $index }}">
                                             <option value="">اختر الإجراء</option>
-                                            @foreach(App\Models\Procedure::all() as $procedureItem)
-                                                <option value="{{ $procedureItem->procedure_name }}" {{ ($row['col-0'] ?? '') == $procedureItem->procedure_name ? 'selected' : '' }}>
+                                            @foreach (App\Models\Procedure::all() as $procedureItem)
+                                                <option value="{{ $procedureItem->procedure_name }}"
+                                                    {{ ($row['col-0'] ?? '') == $procedureItem->procedure_name ? 'selected' : '' }}>
                                                     {{ $procedureItem->procedure_name }}
                                                 </option>
                                             @endforeach
@@ -404,9 +397,9 @@
                                         <select name="content[{{ $index }}][col-1]" class="form-control ">
                                             <option value="">اختر وظيفة</option>
                                             @foreach ($jobRoles as $item)
-                                                <option value="{{ $item }}"
-                                                    {{ isset($row['col-1']) && $row['col-1'] == $item ? 'selected' : '' }}>
-                                                    {{ $item }}
+                                                <option value="{{ $item->id }}"
+                                                    {{ isset($row['col-1']) && $row['col-1'] == $item->id ? 'selected' : '' }}>
+                                                    {{ $item->name }}
                                                 </option>
                                             @endforeach
                                         </select>
@@ -425,8 +418,9 @@
                                         <select name="content[{{ $index }}][col-4]" class="form-control">
                                             <option value="">اختر المسؤول</option>
                                             @foreach ($jobRoles as $jobRole)
-                                                <option value="{{ $jobRole }}" {{ isset($row['col-4']) && $row['col-4'] == $jobRole ? 'selected' : '' }}>
-                                                    {{ $jobRole }}
+                                                <option value="{{ $jobRole->id }}"
+                                                    {{ isset($row['col-4']) && $row['col-4'] == $jobRole->id ? 'selected' : '' }}>
+                                                    {{ $jobRole->name }}
                                                 </option>
                                             @endforeach
                                         </select>
@@ -448,8 +442,6 @@
                     </tbody>
                 </table>
 
-                <button type="button" class="btn btn-info col-auto text-start float-end save-and-continue"
-                    data-next-tab="risk-matrix">حفظ واستمرار</button>
             </form>
         </div>
     </div>
@@ -543,8 +535,6 @@
                         @endif
                     </tbody>
                 </table>
-                <button type="button" class="btn btn-info save-and-continue float-end"
-                    data-next-tab="risk-matrix">حفظ واستمرار</button>
             </form>
         </div>
     </div>
@@ -610,8 +600,6 @@
                         @endif
                     </tbody>
                 </table>
-                <button type="button" class="btn btn-info save-and-continue float-end"
-                    data-next-tab="references">{{ __('Save and Continue') }} </button>
             </form>
         </div>
     </div>
@@ -622,7 +610,37 @@
         <p>{{ __('This is the section for references. You can add details here.') }}</p>
     </div>
 
-
+    {{-- detials --}}
+    <div class="tab-pane fade" id="detials" role="tabpanel" aria-labelledby="detials-tab">
+        <form id="document-detials">
+            @csrf
+            <div class="row align-items-center pb-2">
+                {{-- <h3 class="col">{{ __('Detials') }}</h3> --}}
+            </div>
+            <div class="mb-3">
+                
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">{{ __('Department') }} <span
+                            class="text-danger">*</span></label>
+                    <select name="department"
+                        class="form-select @error('department') is-invalid @enderror" required>
+                        <option value="">{{ __('Select Department') }}</option>
+                        @foreach ($departments as $department)
+                            <option value="{{ $department->id }}"
+                                @if (old('department') == $department->id) selected @endif>
+                                {{ __($department->name) }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('department')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+                <button type="button" class="btn btn-info save-and-continue float-end"
+                    data-next-tab="references">{{ __('Save and Continue') }} </button>
+            </div>
+        </form>
+    </div>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -752,7 +770,7 @@
                         <td>
                             <select name="content[${rowCount}][col-0]" class="form-control sample-select" data-index="${rowCount}">
                                 <option value="">اختر النموذج</option>
-                                @foreach(App\Models\Sample::all() as $sampleItem)
+                                @foreach (App\Models\Sample::all() as $sampleItem)
                                     <option value="{{ $sampleItem->sample_name }}">
                                         {{ $sampleItem->sample_name }}
                                     </option>
@@ -823,7 +841,7 @@
                     <tr>
                         <td><select name="content[${rowCount}][col-0]" class="form-control sample-select" data-index="${rowCount}">
                             <option value="">اختر الإجراء</option>
-                            @foreach(App\Models\Procedure::all() as $procedureItem)
+                            @foreach (App\Models\Procedure::all() as $procedureItem)
                                 <option value="{{ $procedureItem->procedure_name }}" {{ ($row['col-0'] ?? '') == $procedureItem->procedure_name ? 'selected' : '' }}>
                                     {{ $procedureItem->procedure_name }}
                                 </option>
@@ -991,10 +1009,10 @@
                 .hasClass('text-center')) {
                 $('#dynamic-table-purpose tbody tr').each(function(index) {
                     const sequence = $(this).find('input[name^="content"][name$="[sequence]"]')
-                    .val() || '';
+                        .val() || '';
                     const content = $(this).find(
                         'textarea[name^="content"][name$="[value]"], select[name^="content"][name$="[value]"]'
-                        ).val() || '';
+                    ).val() || '';
 
                     data.purpose.push({
                         sequence: sequence,
@@ -1008,10 +1026,10 @@
                 .hasClass('text-center')) {
                 $('#dynamic-table-scope tbody tr').each(function(index) {
                     const sequence = $(this).find('input[name^="content"][name$="[sequence]"]')
-                    .val() || '';
+                        .val() || '';
                     const content = $(this).find(
                         'textarea[name^="content"][name$="[value]"], select[name^="content"][name$="[value]"]'
-                        ).val() || '';
+                    ).val() || '';
 
                     data.scope.push({
                         sequence: sequence,
@@ -1025,10 +1043,10 @@
                     '#dynamic-table-responsibility tbody tr td').hasClass('text-center')) {
                 $('#dynamic-table-responsibility tbody tr').each(function(index) {
                     const sequence = $(this).find('input[name^="content"][name$="[sequence]"]')
-                    .val() || '';
+                        .val() || '';
                     const content = $(this).find(
                         'textarea[name^="content"][name$="[value]"], select[name^="content"][name$="[value]"]'
-                        ).val() || '';
+                    ).val() || '';
 
                     data.responsibility.push({
                         sequence: sequence,
@@ -1042,10 +1060,10 @@
                     '#dynamic-table-definitions tbody tr td').hasClass('text-center')) {
                 $('#dynamic-table-definitions tbody tr').each(function(index) {
                     const sequence = $(this).find('input[name^="content"][name$="[sequence]"]')
-                    .val() || '';
+                        .val() || '';
                     const definition = $(this).find(
                         'textarea[name^="content"][name$="[value]"], select[name^="content"][name$="[value]"]'
-                        ).val() || '';
+                    ).val() || '';
 
                     data.definitions.push({
                         sequence: sequence,
@@ -1118,6 +1136,7 @@
                 try {
                     const allProcedureData = window.collectAllFormData();
                     formData.append('procedure_setup_data', JSON.stringify(allProcedureData));
+                    formData.append('category_id', {{ $procedure->category_id }});
                     console.log('Added procedure setup data:', allProcedureData);
                 } catch (error) {
                     console.error('Error collecting procedure setup data:', error);
@@ -1127,7 +1146,7 @@
             }
 
             $.ajax({
-                url: '{{ route('iso_dic.procedures.saveConfigure', $procedure->id) }}',
+                url: '{{ route('tenant.document.procedures.saveConfigure', $procedure->id) }}',
                 method: 'POST',
                 data: formData,
                 processData: false,
@@ -1155,12 +1174,9 @@
         $(document).on('change', '.sample-select', function() {
             const selectedOption = $(this).find('option:selected');
             const rowIndex = $(this).data('index');
-            
+
         });
     });
-
-
-
 </script>
 
 <script>
@@ -1170,9 +1186,9 @@
             companyName: 'أسdaf',
             isoSystemAndCodeAndVersion: 'ISO 9001:2015',
             companyFirstName: 'محمد',
-            companyShortCode:"ASDF"
+            companyShortCode: "ASDF"
         };
-        
+
         // وظيفة استبدال البليسهولدر
         function replacePlaceholders(text, vars) {
             if (typeof text !== 'string') return text;
@@ -1181,10 +1197,10 @@
                 return typeof vars[key] !== 'undefined' ? vars[key] : match;
             });
         }
-        
+
         // Replace placeholder
         $('#replacePlaceholdersBtn').on('click', function() {
-            
+
             // Replace placeholders in all text fields or textareas
             $('input[type="text"], textarea').each(function() {
                 const currentValue = $(this).val();
@@ -1192,6 +1208,6 @@
                 $(this).val(newValue);
             });
         });
-       
+
     });
 </script>

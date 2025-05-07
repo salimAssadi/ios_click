@@ -5,7 +5,7 @@
     <title>{{$pageTitle}}</title>
     <meta charset='utf-8'>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    @include('template.partials.procedure.pdf-styles-advance')
+    @include('template.partials.form.pdf-styles-advance')
     {{-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" integrity="sha384-dpuaG1suU0eT09tx5plTaGMLBsfDLzUCCUXOY2j/LSvXYuG6Bqs43ALlhIqAJVRb" crossorigin="anonymous"> --}}
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,11 +13,12 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&family=Noto+Kufi+Arabic:wght@100..900&display=swap"
         rel="stylesheet">
+
 </head>
 
 <body>
     {{--    Note we include header once time , outside loop --}}
-    @include('template.partials.procedure.header')
+    @include('template.partials.form.header')
 
     <main>
         {{-- <h1 >الاعتمادات</h1> --}}
@@ -171,7 +172,7 @@
     </main>
 
 
-    @include('template.partials.procedure.footer')
+    @include('template.partials.form.footer')
 
     <div style="page-break-before: always;"></div>
 
@@ -185,7 +186,7 @@
                             الغرض
                         </td>
                     </tr>
-                    @forelse ($purposes as $index => $row)
+                    @forelse ($purposes->content as $index => $row)
                         <tr>
                             <td class="number"></td>
                             <td class="sub-number">{{ $row['sequence'] }}</td>
@@ -198,7 +199,7 @@
                             مجال التطبيق
                         </td>
                     </tr>
-                    @forelse ($scopes as $index => $row)
+                    @forelse ($scopes->content as $index => $row)
                         <tr>
                             <td class="number"></td>
                             <td class="sub-number">{{ $row['sequence'] }}</td>
@@ -212,7 +213,7 @@
                         </td>
 
                     </tr>
-                    @forelse ($responsibilities as $index => $row)
+                    @forelse ($responsibilities->content as $index => $row)
                         <tr>
                             <td class="number"></td>
                             <td class="sub-number">{{ $row['sequence'] }}</td>
@@ -225,7 +226,7 @@
                             التعريفات
                         </td>
                     </tr>
-                    @forelse ($definitions as $index => $row)
+                    @forelse ($definitions->content as $index => $row)
                         <tr>
                             <td class="number"></td>
                             <td class="sub-number">{{ $row['sequence'] }}</td>
@@ -259,7 +260,7 @@
                 </thead>
                 <tbody>
                     @if ($forms)
-                        @forelse ($forms as $index => $row)
+                        @forelse ($forms->content as $index => $row)
                             <tr>
                                 <td>{{ $index +1 }}</td>
                                 <td>{{ $row['col-0'] ?? '' }}</td>
@@ -294,7 +295,7 @@
                 </thead>
                 <tbody>
                     @if ($procedures)
-                        @forelse ($procedures as $index => $row)
+                        @forelse ($procedures->content as $index => $row)
                             <tr>
                                 
                                 <td>{{ $index +1 }}</td>
@@ -319,7 +320,7 @@
 
 
 
-    @include('template.partials.procedure.footer')
+    @include('template.partials.form.footer')
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous">

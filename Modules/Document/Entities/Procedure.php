@@ -40,6 +40,10 @@ class Procedure extends BaseModel
     {
         return $this->getLocalizedAttribute('procedure_name');
     }
+    public function getDescriptionAttribute()
+    {
+        return $this->getLocalizedAttribute('description');
+    }
 
     public function document()
     {

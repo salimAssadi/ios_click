@@ -11,10 +11,19 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Mpdf\Mpdf;
 use Modules\Document\Entities\Category;
 use Modules\Document\Entities\IsoSystem;
 use Modules\Document\Entities\Procedure;
+use Modules\Document\Entities\Document;
+use Modules\Document\Entities\DocumentVersion;
+use Modules\Document\Entities\IsoSystemProcedure;
 use Modules\Document\Entities\ProcedureAttachment;
+use Modules\Setting\Entities\Department;
+use Modules\Setting\Entities\Position;
+use Meneses\LaravelMpdf\Facades\LaravelMpdf;
+
+
 
 class ProcedureController extends BaseModuleController
 {
@@ -28,6 +37,7 @@ class ProcedureController extends BaseModuleController
         $this->routePrefix = 'document.procedures';
         $this->moduleName = 'Procedures';
     }
+    
     public function index()
     {
         // $procedures = Procedure::searchable(['name'])->with(['form', 'attachments', 'document.category'])->paginate(10);
@@ -36,8 +46,10 @@ class ProcedureController extends BaseModuleController
 
     public function mainProcedures()
     {
-        $procedures = Procedure::where('category_id', '1')->paginate(20);
-        return view($this->viewPath . '.main', compact('procedures'));
+        $orginal_procedures = Procedure::where('category_id', '1')->paginate(20);
+        $system_id = getSettingsValByName('current_iso_system');
+        $used_procedures = IsoSystemProcedure::where('iso_system_id',$system_id)->where('data','<>',null)->with(['isoSystem','procedure'])->get();
+        return view($this->viewPath . '.main', compact('used_procedures','orginal_procedures'));
     }
 
     public function publicProcedures()
@@ -51,9 +63,11 @@ class ProcedureController extends BaseModuleController
         $procedures = Procedure::where('category_id', '3')->paginate(20);
         return view($this->viewPath . '.private', compact('procedures'));
     }
+
     /**
      * Show the form for creating a new resource.
      */
+
     public function create()
     {
         // $isoSystems = IsoSystem::where('status', STATUS::ENABLE)->get()->pluck('name', 'id');
@@ -62,6 +76,7 @@ class ProcedureController extends BaseModuleController
         $categories->prepend(__('Select Category'), '');
         return view($this->viewPath . '.create', compact('categories'));
     }
+
 
     /**
      * Store a newly created resource in storage.
@@ -313,21 +328,9 @@ class ProcedureController extends BaseModuleController
     {
 
         $procedure = Procedure::findOrFail($id);
-
-        // $jobRoles = Position::all()->pluck('name_ar', 'id');
-        $jobRoles = [
-            1 => 'Department Manager',
-            2 => 'Quality Committee Head',
-            3 => 'Quality Officer',
-            4 => 'Section Supervisor',
-            5 => 'Project Manager',
-            6 => 'Training Specialist',
-            7 => 'HR Officer',
-            8 => 'Quality Engineer',
-            9 => 'Maintenance Technician',
-            10 => 'Legal Advisor',
-        ];
-
+        $jobRoles = Position::get();
+        $departments = Department::get();
+            
         $contentData = $procedure->content;
         $pageTitle = __('Configure') . ' ' . $procedure->procedure_name;
         // dd($contentData);
@@ -335,6 +338,7 @@ class ProcedureController extends BaseModuleController
             'pageTitle' => $pageTitle,
             'procedure' => $procedure,
             'jobRoles' => $jobRoles,
+            'departments' => $departments,
             'purposes' => ($contentData['purpose'] ?? []),
             'scopes' => ($contentData['scope'] ?? []),
             'responsibilities' => ($contentData['responsibility'] ?? []),
@@ -361,24 +365,130 @@ class ProcedureController extends BaseModuleController
             $request->validate([
                 'procedure_setup_data' => 'required',
             ]);
-
-            // تحويل البيانات من JSON إلى كائن PHP
-            $procedureData = json_decode($request->procedure_setup_data, true);
-
-            // التأكد من صحة البيانات
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                return response()->json(['message' => 'خطأ في تنسيق بيانات الإجراء: ' . json_last_error_msg()], 422);
-            }
-
-            $procedure = Procedure::findOrFail($id);
-            $procedure->content = $procedureData;
-            $procedure->save();
-
+            $this->SaveMainProcedure($request,$id);
+           
+           
             return response()->json(['message' => 'تم حفظ بيانات الإجراء بنجاح']);
         } catch (\Exception $e) {
             return response()->json(['message' => 'حدث خطأ أثناء حفظ البيانات: ' . $e->getMessage()], 500);
         }
     }
+
+    public function SaveMainProcedure($request,$id)
+    {
+        try {
+            $system_id = getSettingsValByName('current_iso_system');
+            $procedureData = json_decode($request->procedure_setup_data, true);
+            $procedCofig= IsoSystemProcedure::where('procedure_id', $id)->where('iso_system_id', $system_id)->first();
+            if($procedCofig){
+                $procedCofig->data = $procedureData;
+                $procedCofig->save();
+            }else{
+                return response()->json(['message' => __('Error while saving data')], 500);
+            }
+                
+            $docucment_number = 'MP-'.date('YmdHis');
+            
+            // Generate and save PDF
+            $pdfPath = $this->generatePDF($procedCofig, $docucment_number);
+            $document = new Document();
+            $document->title_ar = $procedCofig->procedure->procedure_name_ar;
+            $document->title_en = $procedCofig->procedure->procedure_name_en;
+            $document->description_ar = $procedCofig->procedure->description_ar;
+            $document->description_en = $procedCofig->procedure->description_en;
+            $document->category_id = $request->category_id;
+            $document->document_number = $docucment_number;
+            $document->document_type = 'procedure';
+            $document->status_id = 1; // Active by default
+            $document->creation_date = now();
+            $document->created_by = auth('tenant')->user()->id;
+            $document->save();
+            
+            // Create the initial document version
+            $version = new DocumentVersion();
+            $version->document_id = $document->id;
+            $version->version = '1.0';
+            $version->issue_date = null;
+            $version->expiry_date = null;
+            $version->status_id = 1; // Active status
+            $version->file_path = $pdfPath;
+            $version->storage_path = $pdfPath;
+            $version->is_active = true;
+            $version->created_by = auth('tenant')->user()->id;
+            $version->save();
+            
+            return response()->json([
+                'status' => 'success'
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'حدث خطأ أثناء حفظ البيانات: ' . $e->getMessage()], 500);
+        }
+    }
+    
+    /**
+     * Generate PDF from procedure data
+     *
+     * @param IsoSystemProcedure $procedure
+     * @param string $documentNumber
+     * @return string The path to the saved PDF
+     */
+    private function generatePDF($procedure, $documentNumber)
+    {
+        try {
+            $jobRoles = Position::get();
+            $departments = Department::get();
+            // Prepare data for the view
+            $contentData = $procedure->data;
+            $viewData = [
+                'pageTitle' => $procedure->procedure->procedure_name,
+                'procedure' => $procedure,
+                'document_number' => $documentNumber,
+                'jobRoles' => $jobRoles,
+                'departments' => $departments,
+                'purposes' => ($contentData['purpose'] ?? []),
+                'scopes' => ($contentData['scope'] ?? []),
+                'responsibilities' => ($contentData['responsibility'] ?? []),
+                'definitions' => ($contentData['definitions'] ?? []),
+                'forms' => ($contentData['forms'] ?? []),
+                'procedures' => ($contentData['procedures'] ?? []),
+                'risk_matrix' => ($contentData['risk_matrix'] ?? []),
+                'kpis' => ($contentData['kpis'] ?? []),
+            ];
+            
+            // Generate PDF using LaravelMpdf
+            $pdf = LaravelMpdf::loadView('template.procedures.procedure_template', $viewData);
+            
+            // Generate a unique filename
+            $fileName = 'procedure_' . $procedure->procedure_coding . '-' . date('YmdHis') . '.pdf';
+            $yearMonth = date('Y/m');
+
+            $directoryPath = storage_path('app/public/procedures/' . $yearMonth);
+            
+            // Ensure the directory exists
+            if (!file_exists($directoryPath)) {
+                mkdir($directoryPath, 0755, true);
+            }
+            
+            $filePath = 'public/procedures/' . $yearMonth . '/' . $fileName;
+            $fullPath = storage_path('app/' . $filePath);
+            
+            $pdf->save($fullPath);
+          
+            return $filePath;
+            
+        } catch (\Exception $e) {
+            \Log::error('PDF Generation Error: ' . $e->getMessage());
+            if ($e->getMessage() == 'TCPDF ERROR: Some data has already been output, can\'t send PDF file') {
+                \Log::error('PDF Output Buffer Error: ' . ob_get_contents());
+            }
+            if ($e instanceof \ErrorException && strpos($e->getMessage(), 'Undefined index') !== false) {
+                \Log::error('PDF Data Error: ' . json_encode($viewData));
+            }
+            throw $e;
+        }
+    }
+
     // public function saveConfigure($id)
     // {
     //     $procedure          = Procedure::findOrFail($id);

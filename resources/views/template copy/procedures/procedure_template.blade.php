@@ -185,7 +185,7 @@
                             الغرض
                         </td>
                     </tr>
-                    @forelse ($purposes as $index => $row)
+                    @forelse ($purposes->content as $index => $row)
                         <tr>
                             <td class="number"></td>
                             <td class="sub-number">{{ $row['sequence'] }}</td>
@@ -198,7 +198,7 @@
                             مجال التطبيق
                         </td>
                     </tr>
-                    @forelse ($scopes as $index => $row)
+                    @forelse ($scopes->content as $index => $row)
                         <tr>
                             <td class="number"></td>
                             <td class="sub-number">{{ $row['sequence'] }}</td>
@@ -212,7 +212,7 @@
                         </td>
 
                     </tr>
-                    @forelse ($responsibilities as $index => $row)
+                    @forelse ($responsibilities->content as $index => $row)
                         <tr>
                             <td class="number"></td>
                             <td class="sub-number">{{ $row['sequence'] }}</td>
@@ -225,7 +225,7 @@
                             التعريفات
                         </td>
                     </tr>
-                    @forelse ($definitions as $index => $row)
+                    @forelse ($definitions->content as $index => $row)
                         <tr>
                             <td class="number"></td>
                             <td class="sub-number">{{ $row['sequence'] }}</td>
@@ -259,7 +259,7 @@
                 </thead>
                 <tbody>
                     @if ($forms)
-                        @forelse ($forms as $index => $row)
+                        @forelse ($forms->content as $index => $row)
                             <tr>
                                 <td>{{ $index +1 }}</td>
                                 <td>{{ $row['col-0'] ?? '' }}</td>
@@ -294,7 +294,7 @@
                 </thead>
                 <tbody>
                     @if ($procedures)
-                        @forelse ($procedures as $index => $row)
+                        @forelse ($procedures->content as $index => $row)
                             <tr>
                                 
                                 <td>{{ $index +1 }}</td>

@@ -28,16 +28,18 @@ class IsoSystemProcedure extends BaseModel
      * @var array
      */
     protected $fillable = [
-        'name',
         'category_id',
         'iso_system_id',
         'procedure_id',
         'procedure_coding',
-        'description',
+        'data',
         'created_by',
         'parent_id',
     ];
 
+    protected $cast =[
+        'data' =>'object'
+    ];
     /**
      * Get the ISO system associated with this procedure.
      */
@@ -63,7 +65,7 @@ class IsoSystemProcedure extends BaseModel
         return $this->hasMany(IsoSystemForm::class, 'iso_system_procedure_id');
     }
 
-   
+    
    
     /**
      * Get the user who created this procedure.
