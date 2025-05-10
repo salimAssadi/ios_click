@@ -37,12 +37,31 @@ class SupportingDocumentController extends BaseModuleController
      */
     public function index()
     {
-        $supportingDocuments = Document::where('document_type', 'supporting')
-            ->with(['category'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
-
-        return view($this->viewPath . '.index', compact('supportingDocuments'));
+        $categories = Category::where('type','supporting')
+            ->whereNotNull('parent_id')
+            ->withCount('documents')
+            ->get();
+            
+        // Check if it's an AJAX request for refresh without page reload
+        if (request()->ajax()) {
+            return view($this->viewPath . '.partials.categories-list', compact('categories'))->render();
+        }
+        
+        return view($this->viewPath . '.main', compact('categories'));
+    }
+    
+    public function categoryDetail($id)
+    {
+        // $supportingDocuments = Document::where('document_type', 'supporting')
+        //     ->where('category_id', $id)
+        //     ->with(['category'])
+        //     ->orderBy('created_at', 'desc')
+        //     ->paginate(10);
+       $category = Category::where('id',$id)->first();
+       if($category->type != 'supporting') {
+           return redirect()->back()->with('error', __('Category type is not supporting'));
+       }
+        return view($this->viewPath . '.index', compact('category'));
     }
 
     /**
@@ -109,7 +128,7 @@ class SupportingDocumentController extends BaseModuleController
             $document->category_id = $request->input('category_id');
             $document->document_number = $documentNumber;
             $document->document_type = 'supporting';
-            $document->status_id = 1; // Active by default
+            $document->status_id = 11; // Active by default
             $document->creation_date = now();
             $document->created_by = auth('tenant')->user()->id;
             $document->save();
@@ -120,7 +139,7 @@ class SupportingDocumentController extends BaseModuleController
             $version->version = '1.0';
             $version->issue_date = $request->input('issue_date');
             $version->expiry_date = $request->input('expiry_date');
-            $version->status_id = 1; // Active status
+            $version->status_id = 17; // Active status
             $version->file_path = $filePath;
             $version->storage_path = 'public/' . $filePath;
             $version->is_active = true;

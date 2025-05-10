@@ -179,7 +179,7 @@
                 
                 // Send AJAX request
                 $.ajax({
-                    url: "{{ route('tenant.document.categories.store.ajax') }}",
+                    url: "{{ route('tenant.document.categories.ajax-store') }}",
                     type: "POST",
                     data: {
                         _token: "{{ csrf_token() }}",

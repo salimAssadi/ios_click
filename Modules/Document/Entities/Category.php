@@ -22,6 +22,16 @@ class Category extends BaseModel
         return $this->belongsTo(Category::class, 'parent_id');
     }
 
+    public function scopeSupportingDocuments($query)
+    {
+        return $query->where('type', 'supporting');
+    }
+    
+    public function documents()
+    {
+        return $this->hasMany(Document::class, 'category_id');
+    }
+    
     public function children()
     {
         return $this->hasMany(Category::class, 'parent_id');

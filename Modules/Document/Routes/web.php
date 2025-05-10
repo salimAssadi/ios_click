@@ -22,6 +22,7 @@ use Modules\Tenant\Http\Middleware\XSSMiddleware;
 use Modules\Document\Http\Controllers\CategoryController;
 use Modules\Document\Http\Controllers\ProcedureController;
 use Modules\Document\Http\Controllers\SupportingDocumentController;
+use Modules\Document\Http\Controllers\DocumentDatatableController;
 
 Route::prefix('document')->name('tenant.document.')->middleware(['auth:tenant','XSS', 'tenant'])->group(function() {
     Route::get('/', [DocumentController::class, 'index'])->name('index');
@@ -51,9 +52,13 @@ Route::prefix('document')->name('tenant.document.')->middleware(['auth:tenant','
         Route::post('/', 'store')->name('store');
         Route::get('/download/{id}', 'download')->name('download');
         Route::get('/{id}', 'show')->name('show');
+        Route::get('/category/{id}', 'categoryDetail')->name('category-detail');
     });
 
    
+
+    // Document DataTable Route - MUST be placed BEFORE the catch-all route
+    Route::get('/datatable', [DocumentDatatableController::class, 'index'])->name('datatable');
 
     // Catch-all route for documents - must be placed AFTER specific routes
     Route::get('/{document}', [DocumentController::class, 'show'])->name('show');
@@ -89,21 +94,26 @@ Route::prefix('document')->name('tenant.document.')->middleware(['auth:tenant','
     Route::get('/history/show', [HistoryLogController::class, 'index'])->name('history.index');
     Route::get('/history/data', [HistoryLogController::class, 'data'])->name('history.data');
 
+    // Document DataTable Route - MUST be placed BEFORE the catch-all route
+
     // Document Workflow Routes
     Route::get('/workflow/all', [WorkflowController::class, 'index'])->name('workflow.index');
     Route::get('/workflow/data', [WorkflowController::class, 'data'])->name('workflow.data');
     Route::put('/workflow/{document}/status', [WorkflowController::class, 'updateStatus'])->name('workflow.status');
 
     // Main route group already includes prefix 'document' and name 'tenant.document.'
-    Route::group(['prefix' => 'categories'], function () {
-        Route::get('/', [CategoryController::class, 'index'])->name('categories.index');
-        Route::get('/create', [CategoryController::class, 'create'])->name('categories.create');
-        Route::post('/', [CategoryController::class, 'store'])->name('categories.store');
-        Route::post('/ajax-store', [CategoryController::class, 'storeAjax'])->name('categories.store.ajax');
-        Route::get('/{category}', [CategoryController::class, 'show'])->name('categories.show');
-        Route::get('/{category}/edit', [CategoryController::class, 'edit'])->name('categories.edit');
-        Route::put('/{category}', [CategoryController::class, 'update'])->name('categories.update');
-        Route::delete('/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
+    Route::group(['prefix' => 'categories', 'as' => 'categories.'], function () {
+        Route::get('/', [CategoryController::class, 'index'])->name('index');
+        Route::get('/create', [CategoryController::class, 'create'])->name('create');
+        Route::post('/', [CategoryController::class, 'store'])->name('store');
+        Route::get('/{category}/edit', [CategoryController::class, 'edit'])->name('edit');
+        Route::put('/{category}', [CategoryController::class, 'update'])->name('update');
+        Route::delete('/{category}', [CategoryController::class, 'destroy'])->name('destroy');
+        Route::get('/get-subcategory/{category_id}', [CategoryController::class, 'getSubcategory'])->name('get-subcategory');
+        
+        // AJAX routes for category management
+        Route::post('/ajax-store', [CategoryController::class, 'storeAjax'])->name('ajax-store');
+        Route::put('/ajax-update/{id}', [CategoryController::class, 'updateAjax'])->name('ajax-update');
     });
 
     // Document Versions Routes

@@ -15,17 +15,15 @@ class Document extends BaseModel
 {
     use Localizable;
     protected $fillable = [
-        'title_ar', 'title_en', 'document_number', 'document_type', 'related_process', 'department',
+        'title_ar', 'title_en', 'document_number', 'document_type', 'documentable_type', 'documentable_id', 'department',
         'description_ar', 'description_en', 'category_id', 'file_path', 'original_filename', 'mime_type', 
-        'file_size', 'owner', 'created_by', 'creation_date', 'issue_date', 'expiry_date', 
+        'file_size', 'owner', 'created_by', 'creation_date',
         'status_id', 'obsoleted_date', 'notes'
     ];
 
     protected $casts = [
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
-        'issue_date' => 'date',
-        'expiry_date' => 'date',
     ];
 
     public function getTitleAttribute(){
@@ -74,9 +72,32 @@ class Document extends BaseModel
     {
         return $this->hasMany(DocumentRequest::class);
     }
-
+    
     public function category()
     {
         return $this->belongsTo(Category::class);
+    }
+    
+    /**
+     * Get the parent documentable model (Procedure, Policy, etc).
+     * This is a polymorphic relationship.
+     */
+    public function documentable()
+    {
+        return $this->morphTo();
+    }
+    
+    /**
+     * Get the related process class name and ID as a formatted string.
+     * 
+     * @return string|null
+     */
+    public function getRelatedProcessAttribute()
+    {
+        if (!$this->documentable_type || !$this->documentable_id) {
+            return null;
+        }
+        
+        return $this->documentable_type . ':' . $this->documentable_id;
     }
 }

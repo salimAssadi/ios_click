@@ -48,6 +48,15 @@ class IsoSystemProcedure extends BaseModel
         return $this->belongsTo(IsoSystem::class, 'iso_system_id');
     }
 
+    public function document()
+    {
+        return $this->morphOne(Document::class, 'documentable')->latest();
+    }
+
+    public function documents()
+    {
+        return $this->morphMany(Document::class, 'documentable');
+    }
     public function procedure()
     {
         return $this->belongsTo(Procedure::class, 'procedure_id');

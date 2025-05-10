@@ -399,18 +399,20 @@ class ProcedureController extends BaseModuleController
             $document->category_id = $request->category_id;
             $document->document_number = $docucment_number;
             $document->document_type = 'procedure';
-            $document->status_id = 1; // Active by default
+            $document->status_id = 11; // Active by default
             $document->creation_date = now();
             $document->created_by = auth('tenant')->user()->id;
             $document->save();
             
+            $procedCofig->document()->save($document);
+
             // Create the initial document version
             $version = new DocumentVersion();
             $version->document_id = $document->id;
             $version->version = '1.0';
             $version->issue_date = null;
             $version->expiry_date = null;
-            $version->status_id = 1; // Active status
+            $version->status_id = 17; // Active status
             $version->file_path = $pdfPath;
             $version->storage_path = $pdfPath;
             $version->is_active = true;

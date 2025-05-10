@@ -37,6 +37,7 @@ class DocumentServiceProvider extends BaseModuleServiceProvider
         $this->registerViews();
         $this->registerAssets();
         $this->registerLivewireComponents();
+        $this->registerComponents();
         $this->loadMigrationsFrom(module_path($this->moduleName, 'Database/Migrations'));
     }
 
@@ -122,6 +123,24 @@ class DocumentServiceProvider extends BaseModuleServiceProvider
     protected function registerLivewireComponents()
     {
         Livewire::component('document::create-document', CreateDocument::class);
+    }
+
+    /**
+     * Register Blade components.
+     *
+     * @return void
+     */
+    protected function registerComponents()
+    {
+        // Register the documents-table component
+        $this->loadViewComponentsAs('document', [
+            // Add more components here if needed
+        ]);
+
+        // This allows using <x-document::component-name /> syntax
+        $this->app->afterResolving('blade.compiler', function () {
+            $this->app['view']->addNamespace('document', module_path($this->moduleName, 'Resources/views/components'));
+        });
     }
 
     /**

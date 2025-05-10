@@ -45,9 +45,20 @@ class Procedure extends BaseModel
         return $this->getLocalizedAttribute('description');
     }
 
+    /**
+     * Get all documents related to this procedure via polymorphic relationship
+     */
+    public function documents()
+    {
+        return $this->morphMany(Document::class, 'documentable');
+    }
+    
+    /**
+     * Get the main document for this procedure (for backward compatibility)
+     */
     public function document()
     {
-        return $this->hasOne(Document::class, 'reference_id')->where('remark', 'procedure');
+        return $this->morphOne(Document::class, 'documentable')->latest();
     }
 
     public function attachments()

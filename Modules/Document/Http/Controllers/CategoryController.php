@@ -124,6 +124,7 @@ class CategoryController extends Controller
                 $request->all(), [
                 'name_ar' => 'required|string|max:255',
                 'name_en' => 'required|string|max:255',
+                'type' => 'required|string|max:255',
             ]);
             
             if ($validator->fails()) {
@@ -137,13 +138,57 @@ class CategoryController extends Controller
             $category = new Category();
             $category->title_ar = $request->name_ar;
             $category->title_en = $request->name_en;
-            $category->type = 'supporting';
+            $category->type = $request->type;  
             $category->parent_id = $parentCategory->id;
             $category->save();
 
             return response()->json([
                 'success' => true,
                 'message' => __('Category successfully created!'),
+                'category' => [
+                    'id' => $category->id,
+                    'name' => $category->title, 
+                ],
+            ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => __('Permission Denied!'),
+            ], 403);
+        }
+    }
+    
+    /**
+     * Update a category via AJAX request.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateAjax(Request $request, $id)
+    {
+        if (!Auth::user()->can('edit category')) {
+            $validator = \Validator::make(
+                $request->all(), [
+                'name_ar' => 'required|string|max:255',
+                'name_en' => 'required|string|max:255',
+            ]);
+            
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $validator->errors()->first(),
+                ], 422);
+            }
+
+            $category = Category::findOrFail($id);
+            $category->title_ar = $request->name_ar;
+            $category->title_en = $request->name_en;
+            $category->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => __('Category successfully updated!'),
                 'category' => [
                     'id' => $category->id,
                     'name' => $category->title, 

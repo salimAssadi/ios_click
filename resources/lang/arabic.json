@@ -934,7 +934,7 @@
   "This option is disabled in Main or Public procedure.": "هذا الخيار غير مفعل في الإجراءات الرئيسية أو العامة.",
   "Create Private Procedure": "إنشاء إجراء خاص",
   "Supporting Documents": "الوثائق الداعمة",
-  "Create Supporting Document": "إنشاء وثيقة داعمة",
+  "Create Supporting Document": "أضافة وثيقة داعمة",
   "Add New Category": "إضافة تصنيف جديد",
   "Supporting Document Category": "تصنيف الوثيقة الداعمة",
   "Document Title (Arabic)": "عنوان الوثيقة (عربية)",
@@ -999,5 +999,12 @@
   "Add New Seal": "إضافة ختم جديد",
   "Edit Seal": "تعديل ختم",
   "Delete Seal": "حذف ختم",
-  "Document Detials": "تفاصيل الوثيقة"
+  "Document Detials": "تفاصيل الوثيقة",
+  "Used Copy":"المستخدمة",
+  "Original Copy":"المصادر",
+  "Updating...":"جاري التحديث...",
+  "Saving...":"جاري الحفظ...",
+  "Click to add a new supporting document category":"قم بالضغط لاضافة تصنيف جديد",
+  "Show Documents":"عرض الوثائق",
+  "Supporting Document Categories":"تصنيفات الوثائق الداعمة"
 }
