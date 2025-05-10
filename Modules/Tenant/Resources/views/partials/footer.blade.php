@@ -3,7 +3,7 @@
     $admin_logo = getSettingsValByName('company_logo');
     $lightLogo = getSettingsValByName('light_logo');
     $currentISO = getSettingsValByName('current_iso_system');
-    $ISOSystem = \Modules\Document\Entities\ISOSystem::where('status',true)->get();
+    $ISOSystem = Modules\Document\Entities\ISOSystem::where('status',true)->get();
 @endphp
 <footer class="pc-footer">
     <div class="footer-wrapper container-fluid">
