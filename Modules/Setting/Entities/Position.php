@@ -4,7 +4,7 @@ namespace Modules\Setting\Entities;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use \App\Models\BaseModel;
+use App\Models\BaseModel;
 use App\Traits\Localizable;
 
 class Position extends BaseModel
@@ -20,10 +20,11 @@ class Position extends BaseModel
         'description'
     ];
 
-    public function getNameAttribute()
+    public function getTitleAttribute()
     {
         return $this->getLocalizedAttribute('title');
     }
+    
     public function department()
     {
         return $this->belongsTo(Department::class);

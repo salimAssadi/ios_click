@@ -9,11 +9,8 @@
                     <div class="col-lg-6 mb-5 mb-lg-0">
                         <h5 class="my-5 display-3 fw-bold ls-tight">
                             {{ __('Welcome to ISO Click') }} <br />
-                            <span class="text-primary">{{ __('Document Management System') }}</span>
                         </h5>
-                        <p style="color: hsl(217, 10%, 50.8%)">
-                            {{ __('Streamline your ISO documentation') }}
-                        </p>
+                        
                     </div>
 
                     <div class="col-lg-6 mb-5 mb-lg-0">

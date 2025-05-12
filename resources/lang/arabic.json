@@ -572,7 +572,7 @@
   "Enter Email": "أدخل البريد الإلكتروني",
   "Enter Phone Number": "أدخل رقم الهاتف",
   "Customer Details": "تفاصيل العميل",
-  "Customer": "عميل",
+  "Customer": "العميل",
   "Transactions History": "تاريخ المعاملات",
   "Phone": "هاتف",
   "Are you sure want to Change Package?": "هل أنت متأكد من تغيير الحزمة؟",
@@ -828,10 +828,12 @@
   "Allowed file types: PDF, DOC, DOCX, XLS, XLSX. Max size: 10MB": "الملفات المسموح بها: PDF, DOC, DOCX, XLS, XLSX. الحجم الأقصى: 10MB",
   "Policy Name": "اسم السياسة",
   "Document Management System": "نظام إدارة المستندات",
-  "Welcome to ISO Click": "مرحباً بك في ايوز كليك",
+  "Welcome to ISO Click": "مرحبا بك في آيزو كليلك - المنصة العربية الأولى لـأتمتة أنظمة الآيزو",
   "Streamline your ISO documentation": "",
   "Company Name": "اسم الشركة",
   "Good Morning,": "،صباح الخير",
+  "Good Afternoon,": "،مساء الخير",
+  "Good Evening,": "،مساء الخير",
   "we guide you through preparing your required documentation, quality manual, and documented processes.": "نحن نرشدك خلال تجهيز المستندات المطلوبة، المطابقة، و المستندات الموثقة.",
   "Document Control": "إدارة الوثائق",
   "Audit Management": "إدارة التدقيقات",
@@ -1006,5 +1008,7 @@
   "Saving...":"جاري الحفظ...",
   "Click to add a new supporting document category":"قم بالضغط لاضافة تصنيف جديد",
   "Show Documents":"عرض الوثائق",
-  "Supporting Document Categories":"تصنيفات الوثائق الداعمة"
+  "Supporting Document Categories":"تصنيفات الوثائق الداعمة",
+  "Supplier":"المورد",
+  "Create Public Procedure":"إنشاء إجراء عام"
 }

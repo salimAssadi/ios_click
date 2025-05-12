@@ -16,10 +16,10 @@
                       
                     </div>
                     <div class="col-auto">
-                        <a href="{{ route('tenant.document.procedures.private.create') }}" class="btn btn-primary">
-                            <i class="ti ti-plus me-1"></i>
-                            {{ __('Create Private Procedure') }}
-                        </a>
+                        {{ Form::open(['route' => 'tenant.document.procedures.create', 'method' => 'post']) }}
+                        {{ Form::hidden('category_id', $category_id) }}
+                        {{ Form::submit(__('Create Private Procedure'), ['class' => 'btn btn-primary']) }}
+                        {{ Form::close() }}
                     </div>
                 </div>
                 <div class="card-body">

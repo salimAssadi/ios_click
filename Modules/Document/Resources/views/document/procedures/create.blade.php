@@ -24,7 +24,7 @@
                     <h5>{{ __('Create New Procedure') }}</h5>
                 </div>
                 <div class="card-body">
-                    {{ Form::open(['route' => 'tenant.document.procedures.private.store', 'method' => 'post', 'files' => true]) }}
+                    {{ Form::open(['route' => 'tenant.document.procedures.store', 'method' => 'post', 'files' => true, 'id' => 'procedure-form']) }}
                     <div class="form-group col-md-12">
                         {{ Form::label('category_id', __('Category'), ['class' => 'form-label']) }}
                         {{ Form::select('category_id', $categories, old('category_id'), ['class' => 'form-control hidesearch' , 'required' => 'required' ]) }}
@@ -82,7 +82,7 @@
                             {{ Form::label('status_inactive', __('Inactive'), ['class' => 'form-check-label']) }}
                         </div>
                     </div>
-
+                    
                     <div class="form-group col-md-12" style="display: none;">   
                         <div class="form-check form-check-inline">
                             {!! Form::checkbox('enable_upload_file', 1, null, ['class' => 'form-check-input', 'id' => 'enable_upload_file']) !!}
@@ -100,10 +100,7 @@
                         </div>
                     </div>
 
-                    <div class="form-group col-md-12" id="blade-view-field" style="display: none;">
-                        {!! Form::label('blade_view', __('Blade View')) !!}
-                        {!! Form::text('blade_view', null, ['class' => 'form-control', 'id' => 'blade_view']) !!}
-                    </div>
+                   
 
                     <div class="form-group col-md-12 text-end">
                         <a href="{{ route('iso_dic.procedures.index') }}"
@@ -112,29 +109,137 @@
                     </div>
                 </div>
                 {{ Form::close() }}
+
+                {{-- Config section that will be loaded via AJAX --}}
+                <div id="procedure-config-container" style="display: none;">
+                    <div class="text-center py-3" id="config-loading">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">{{ __('Loading configuration options...') }}</p>
+                    </div>
+                    <div id="config-content" class="card-body"></div>
+                </div>
             </div>
+            
         </div>
     </div>
     </div>
 @endsection
 
-@push('scripts')
+@push('script-page')
     <script>
         $(document).ready(function() {
-            function toggleBladeViewField() {
-                if ($('#has_menual_config').is(':checked')) {
-                    $('#blade-view-field').show();
-                } else {
-                    $('#blade-view-field').hide();
-                    $('#blade_view').val('');
-                }
-            }
+           
+            // Handle AJAX form submission
+            $('#procedure-form').on('submit', function(e) {
+                e.preventDefault();
+                
+                // Show submit button loader
+                const submitBtn = $(this).find('input[type="submit"]');
+                const originalBtnText = submitBtn.val();
+                submitBtn.prop('disabled', true).val('{{ __('Processing...') }}');
+                
+                // Get form data
+                const formData = new FormData(this);
+                
+                // Make AJAX request
+                $.ajax({
+                    url: $(this).attr('action'),
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            // Show success message
+                            toastrs('success',response.message, 'success');
+                        
+                            // Show config container
+                            $('#procedure-config-container').show();
+                            
+                            // Add procedure ID as data attribute for future API calls
+                            $('#procedure-config-container').attr('data-procedure-id', response.procedure_id);
+                            
+                            // Hide loading indicator and show config content
+                            $('#config-loading').hide();
+                            $('#config-content').html(response.config_html);
+                           
+                            // Hide the form
+                            $('#procedure-form').hide();
+                            
+                            // Initialize any scripts needed for the config form
+                            // initConfigScripts();
+                        } else {
+                            // Show error message
+                            toastrs('Error', response.message || 'An error occurred. Please try again.', 'error');
+                        }
+                    },
+                    error: function(xhr) {
+                        let errorMessage = 'An error occurred. Please try again.';
+                        
+                        if (xhr.responseJSON && xhr.responseJSON.errors) {
+                            const errors = xhr.responseJSON.errors;
+                            let errorList = '';
+                            
+                            // Compile error messages
+                            for (const field in errors) {
+                                errorList += `<li>${errors[field][0]}</li>`;
+                            }
+                            
+                            errorMessage = `<ul>${errorList}</ul>`;
+                        } else if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMessage = xhr.responseJSON.message;
+                        }
+                        
+                        // Show error message
+                        toastrs('Error', errorMessage, 'error');
+                        
+                        // Append error message above the form
 
-            toggleBladeViewField();
-
-            $('#has_menual_config').on('change', function() {
-                toggleBladeViewField();
+                    },
+                    complete: function() {
+                        // Reset submit button
+                        submitBtn.prop('disabled', false).val(originalBtnText);
+                    }
+                });
             });
+            
+            // Function to initialize scripts for the config form
+            function initConfigScripts() {
+                // This function will be called after the config form is loaded
+                // Any initialization for the config form can be added here
+                
+                // Add row to dynamic tables
+                $(document).on('click', '.add-row', function() {
+                    const tabId = $(this).data('tab');
+                    const tbody = $(`#dynamic-table-${tabId} tbody`);
+                    const index = tbody.find('tr').length;
+                    
+                    const newRow = `
+                        <tr>
+                            <td style="width: 50px;">
+                                <input type="number" name="${tabId}[${index}][order]" class="form-control" value="${index + 1}">
+                            </td>
+                            <td>
+                                <textarea name="${tabId}[${index}][content]" class="form-control" rows="2"></textarea>
+                            </td>
+                            <td style="width: 50px;">
+                                <button type="button" class="btn btn-sm btn-danger remove-row px-3">-</button>
+                            </td>
+                        </tr>`;
+                    
+                    tbody.append(newRow);
+                });
+                
+                // Remove row from dynamic tables
+                $(document).on('click', '.remove-row', function() {
+                    $(this).closest('tr').remove();
+                });
+            }
         });
     </script>
 @endpush

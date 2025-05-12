@@ -48,32 +48,33 @@ class ProcedureController extends BaseModuleController
     {
         $orginal_procedures = Procedure::where('category_id', '1')->paginate(20);
         $system_id = getSettingsValByName('current_iso_system');
+        $category_id = '1';
         $used_procedures = IsoSystemProcedure::where('iso_system_id',$system_id)->where('data','<>',null)->with(['isoSystem','procedure'])->get();
-        return view($this->viewPath . '.main', compact('used_procedures','orginal_procedures'));
+        return view($this->viewPath . '.main', compact('used_procedures','orginal_procedures','category_id'));
     }
 
     public function publicProcedures()
     {
         $procedures = Procedure::where('category_id', '2')->paginate(20);
-        return view($this->viewPath . '.public', compact('procedures'));
+        $category_id = '2';
+        return view($this->viewPath . '.public', compact('procedures','category_id'));
     }
 
     public function privateProcedures()
     {
         $procedures = Procedure::where('category_id', '3')->paginate(20);
-        return view($this->viewPath . '.private', compact('procedures'));
+        $category_id = '3';
+        return view($this->viewPath . '.private', compact('procedures','category_id'));
     }
 
     /**
      * Show the form for creating a new resource.
      */
 
-    public function create()
+    public function create(Request $request)
     {
-        // $isoSystems = IsoSystem::where('status', STATUS::ENABLE)->get()->pluck('name', 'id');
-        // $isoSystems->prepend(__('Select ISO System'), '');
-        $categories = Category::where('type','tenant')->get()->pluck('title', 'id');
-        $categories->prepend(__('Select Category'), '');
+        $category_id = $request->category_id;
+        $categories = Category::where('id',$category_id)->get()->pluck('title', 'id');
         return view($this->viewPath . '.create', compact('categories'));
     }
 
@@ -93,12 +94,15 @@ class ProcedureController extends BaseModuleController
             'is_optional' => 'nullable|boolean',
             'status' => 'required|boolean',
             'attachments.*' => 'file|mimes:pdf,doc,docx,xls,xlsx|max:10240',
-
         ]);
 
         if ($validator->fails()) {
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
+            }
             return redirect()->route('tenant.document.procedures.private')->withInput()->with('error', $validator->errors());
         }
+        
         DB::beginTransaction();
         try {
             $procedure = new Procedure();
@@ -113,7 +117,7 @@ class ProcedureController extends BaseModuleController
             $procedure->has_menual_config = $request->has('has_menual_config') ? 1 : 0;
             $procedure->enable_upload_file = $request->has('enable_upload_file') ? 1 : 0;
             $procedure->enable_editor = $request->has('enable_editor') ? 1 : 0;
-            $procedure->blade_view = $request->input('blade_view', '');
+            $procedure->blade_view = '';
             $procedure->save();
 
             // Handle file uploads
@@ -134,10 +138,47 @@ class ProcedureController extends BaseModuleController
             }
 
             DB::commit();
-            return redirect()->route('tenant.document.procedures.private')->with('success', __('Procedure created successfully!'));
+            
+            // If it's an AJAX request, return JSON
+            if ($request->ajax()) {
+                // Prepare config data for the view
+                $jobRoles = Position::get();
+                $departments = Department::get();
+                $contentData = $procedure->content ?? [];
+                
+                // Render the config view as HTML
+                $configView = view($this->viewPath . '.config.procedure', [
+                    'procedure' => $procedure,
+                    'jobRoles' => $jobRoles,
+                    'departments' => $departments,
+                    'purposes' => ($contentData['purpose'] ?? []),
+                    'scopes' => ($contentData['scope'] ?? []),
+                    'responsibilities' => ($contentData['responsibility'] ?? []),
+                    'definitions' => ($contentData['definitions'] ?? []),
+                    'forms' => ($contentData['forms'] ?? []),
+                    'procedures' => ($contentData['procedures'] ?? []),
+                    'risk_matrix' => ($contentData['risk_matrix'] ?? []),
+                    'kpis' => ($contentData['kpis'] ?? []),
+                ])->render();
+                
+                return response()->json([
+                    'success' => true, 
+                    'message' => __('Procedure created successfully!'),
+                    'procedure_id' => $procedure->id,
+                    'config_html' => $configView
+                ]);
+            }
+            
+            // For regular requests, redirect
+            return redirect()->route('tenant.document.procedures.configure', $procedure->id)
+                ->with('success', __('Procedure created successfully! Now you can configure it.'));
         } catch (Exception $e) {
             DB::rollBack();
             Log::error('Error creating procedure: ' . $e->getMessage());
+            
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            }
             return redirect()->route('tenant.document.procedures.private')->with('error', 'error');
         }
     }
@@ -324,14 +365,14 @@ class ProcedureController extends BaseModuleController
         }
     }
 
+    
     public function configure($id)
     {
 
         $procedure = Procedure::findOrFail($id);
         $jobRoles = Position::get();
         $departments = Department::get();
-            
-        $contentData = $procedure->content;
+        $contentData = $procedure->content??[];
         $pageTitle = __('Configure') . ' ' . $procedure->procedure_name;
         // dd($contentData);
         return view('document::document.procedures.configure', [
@@ -365,7 +406,14 @@ class ProcedureController extends BaseModuleController
             $request->validate([
                 'procedure_setup_data' => 'required',
             ]);
-            $this->SaveMainProcedure($request,$id);
+            $category_id = $request->category_id;
+            if($category_id == 1){
+                $this->SaveMainProcedure($request,$id);
+            }elseif($category_id == 2){
+                $this->SavePublicPrivateProcedure($request,$id,'public');
+            }elseif($category_id == 3){
+                $this->SavePublicPrivateProcedure($request,$id,'private');
+            }
            
            
             return response()->json(['message' => 'تم حفظ بيانات الإجراء بنجاح']);
@@ -390,7 +438,7 @@ class ProcedureController extends BaseModuleController
             $docucment_number = 'MP-'.date('YmdHis');
             
             // Generate and save PDF
-            $pdfPath = $this->generatePDF($procedCofig, $docucment_number);
+            $pdfPath = $this->generatePDF($procedCofig->procedure,$procedCofig->data,'main', $docucment_number);
             $document = new Document();
             $document->title_ar = $procedCofig->procedure->procedure_name_ar;
             $document->title_en = $procedCofig->procedure->procedure_name_en;
@@ -398,6 +446,8 @@ class ProcedureController extends BaseModuleController
             $document->description_en = $procedCofig->procedure->description_en;
             $document->category_id = $request->category_id;
             $document->document_number = $docucment_number;
+            $document->documentable_type = 'Modules\Document\Entities\IsoSystemProcedure';
+            $document->documentable_id = $procedCofig->id;
             $document->document_type = 'procedure';
             $document->status_id = 11; // Active by default
             $document->creation_date = now();
@@ -428,6 +478,68 @@ class ProcedureController extends BaseModuleController
         }
     }
     
+    public function SavePublicPrivateProcedure($request,$id,$type)
+    {
+        try {
+            $system_id = getSettingsValByName('current_iso_system');
+            $procedureData = json_decode($request->procedure_setup_data, true);
+            $procedure= Procedure::where('id', $id)->first();
+            if($procedure){
+                $procedure->content = $procedureData;
+                $procedure->save();
+            }else{
+                return response()->json(['message' => __('Error while saving data')], 500);
+            }
+            
+            if($type == 'public'){
+                $docucment_number = 'PP-'.date('YmdHis');
+            }else{
+                $docucment_number = 'PRP-'.date('YmdHis');
+            }
+            
+            
+            
+            // Generate and save PDF
+            $pdfPath = $this->generatePDF($procedure,$procedureData, $type,$docucment_number);
+            $document = new Document();
+            $document->title_ar = $procedure->procedure_name_ar;
+            $document->title_en = $procedure->procedure_name_en;
+            $document->description_ar = $procedure->description_ar;
+            $document->description_en = $procedure->description_en;
+            $document->category_id = $request->category_id;
+            $document->document_number = $docucment_number;
+            $document->documentable_type = 'Modules\Document\Entities\Procedure';
+            $document->documentable_id = $id;
+            $document->document_type = 'procedure';
+            $document->status_id = 11; // Active by default
+            $document->creation_date = now();
+            $document->created_by = auth('tenant')->user()->id;
+            $document->save();
+            
+            $procedure->document()->save($document);
+
+            // Create the initial document version
+            $version = new DocumentVersion();
+            $version->document_id = $document->id;
+            $version->version = '1';
+            $version->issue_date = null;
+            $version->expiry_date = null;
+            $version->status_id = 17; // Active status
+            $version->file_path = $pdfPath;
+            $version->storage_path = $pdfPath;
+            $version->is_active = true;
+            $version->created_by = auth('tenant')->user()->id;
+            $version->save();
+            
+            return response()->json([
+                'status' => 'success'
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'حدث خطأ أثناء حفظ البيانات: ' . $e->getMessage()], 500);
+        }
+    }
+    
     /**
      * Generate PDF from procedure data
      *
@@ -435,15 +547,14 @@ class ProcedureController extends BaseModuleController
      * @param string $documentNumber
      * @return string The path to the saved PDF
      */
-    private function generatePDF($procedure, $documentNumber)
+    private function generatePDF($procedure,$contentData, $type, $documentNumber)
     {
         try {
             $jobRoles = Position::get();
             $departments = Department::get();
             // Prepare data for the view
-            $contentData = $procedure->data;
             $viewData = [
-                'pageTitle' => $procedure->procedure->procedure_name,
+                'pageTitle' => $procedure->procedure_name,
                 'procedure' => $procedure,
                 'document_number' => $documentNumber,
                 'jobRoles' => $jobRoles,
@@ -464,20 +575,11 @@ class ProcedureController extends BaseModuleController
             // Generate a unique filename
             $fileName = 'procedure_' . $procedure->procedure_coding . '-' . date('YmdHis') . '.pdf';
             $yearMonth = date('Y/m');
-
-            $directoryPath = storage_path('app/public/procedures/' . $yearMonth);
-            
-            // Ensure the directory exists
-            if (!file_exists($directoryPath)) {
-                mkdir($directoryPath, 0755, true);
-            }
-            
-            $filePath = 'public/procedures/' . $yearMonth . '/' . $fileName;
-            $fullPath = storage_path('app/' . $filePath);
+            $fullPath = Storage::disk('tenants')->put(getTenantRoot() . '/procedures/' . $type . '/' . $fileName, $pdf->output());
             
             $pdf->save($fullPath);
           
-            return $filePath;
+            return $fullPath;
             
         } catch (\Exception $e) {
             \Log::error('PDF Generation Error: ' . $e->getMessage());

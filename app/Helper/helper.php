@@ -203,6 +203,13 @@ if (!function_exists('getTenantRoot')) {
         return $tenantRoot->tenant ?? null;
     }
 }
+
+if (!function_exists('CurrentISOSystem')) {
+    function currentISOSystem()
+    {
+        return  getSettingsValByName('current_iso_system');
+    }
+}
     
 
 if (!function_exists('invoicePaymentSettings')) {

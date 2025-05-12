@@ -40,8 +40,8 @@ class HomeController extends Controller
             if (auth('tenant')->user()->type == 'super admin') {
               
                 $result['totalUser'] = User::where('parent_id', parentId())->count();
-                $result['totalISOSystem'] = IsoSystem::count();
-                $result['totalSpecificationItem'] = IsoSpecificationItem::count();
+                $result['totalISOSystem'] = IsoSystem::where('status', '1')->count();
+                $result['totalSpecificationItem'] = IsoSpecificationItem::where('iso_system_id', currentISOSystem())->count();
                 $result['totalProcedures'] = Procedure::count();
                 $result['totalSamples'] = Sample::count();
                 $result['totalReferences'] = IsoReference::count();

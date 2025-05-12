@@ -114,7 +114,7 @@ class SupportingDocumentController extends BaseModuleController
             $file = $request->file('file');
             $fileName = time() . '_' . $file->getClientOriginalName();
 
-            $filePath = $file->storeAs('assdaf/supporting_documents', $fileName, 'tenants');
+            $filePath = $file->storeAs(getTenantRoot() . '/supporting_documents', $fileName, 'tenants');
             
             // Generate document number
             $documentNumber = 'SD-' . date('YmdHis');

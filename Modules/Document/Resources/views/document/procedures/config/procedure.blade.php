@@ -126,7 +126,8 @@
                     </tbody>
                 </table>
             </div>
-           
+            
+
 
         </form>
     </div>
@@ -209,10 +210,10 @@
                                     <select name="content[{{ $index }}][value]"
                                         class="form-control showsearch">
                                         <option value="">اختر وظيفة</option>
-                                        @forelse ($jobRoles as $key => $item)
+                                        @forelse ($jobRoles as $item)
                                                 <option value="{{ $item->id }}"
                                                     {{ $row['value'] == $item->id ? 'selected' : '' }}>
-                                                    {{ $item->name }}
+                                                    {{ $item->title }}
                                                 </option>
                                         @empty
                                         @endforelse
@@ -305,16 +306,9 @@
                         @forelse ($forms as $index => $row)
                             <tr>
                                 <td>
-                                    <select name="content[{{ $index }}][col-0]"
-                                        class="form-control sample-select" data-index="{{ $index }}">
-                                        <option value="">اختر النموذج</option>
-                                        @foreach (App\Models\Sample::all() as $sampleItem)
-                                            <option value="{{ $sampleItem->sample_name }}"
-                                                {{ ($row['col-0'] ?? '') == $sampleItem->sample_name ? 'selected' : '' }}>
-                                                {{ $sampleItem->sample_name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
+                                    <input type="text" name="content[{{ $index }}][col-0]"
+                                        class="form-control" placeholder="أدخل اسم النموذج"
+                                        value="{{ $row['col-0'] ?? '' }}">
                                 </td>
                                 <td>
                                     <input type="text" name="content[{{ $index }}][col-1]"
@@ -382,26 +376,13 @@
                             @forelse ($procedures as $index => $row)
                                 <tr>
                                     <td>
-                                        <select name="content[{{ $index }}][col-0]"
-                                            class="form-control sample-select" data-index="{{ $index }}">
-                                            <option value="">اختر الإجراء</option>
-                                            @foreach (App\Models\Procedure::all() as $procedureItem)
-                                                <option value="{{ $procedureItem->procedure_name }}"
-                                                    {{ ($row['col-0'] ?? '') == $procedureItem->procedure_name ? 'selected' : '' }}>
-                                                    {{ $procedureItem->procedure_name }}
-                                                </option>
-                                            @endforeach
-                                        </select>
+                                        <input type="text" name="content[{{ $index }}][col-0]"
+                                            class="form-control" placeholder="الإجراءات">
                                     </td>
                                     <td>
                                         <select name="content[{{ $index }}][col-1]" class="form-control ">
-                                            <option value="">اختر وظيفة</option>
-                                            @foreach ($jobRoles as $item)
-                                                <option value="{{ $item->id }}"
-                                                    {{ isset($row['col-1']) && $row['col-1'] == $item->id ? 'selected' : '' }}>
-                                                    {{ $item->name }}
-                                                </option>
-                                            @endforeach
+                                            <option value="Customer" {{ isset($row['col-1']) && $row['col-1'] == 'Customer' ? 'selected' : '' }}>{{ __('Customer') }}</option>
+                                            <option value="Supplier" {{ isset($row['col-1']) && $row['col-1'] == 'Supplier' ? 'selected' : '' }}>{{ __('Supplier') }}</option>
                                         </select>
                                     </td>
                                     <td>
@@ -701,36 +682,12 @@
 
                 if (inputType === 'select') {
                     let optionsHtml = '';
-
-                    if (Array.isArray(options)) {
-                        optionsHtml = options.map(option =>
-                            `<option value="${option}">${option}</option>`).join('');
-                    } else if (typeof options === 'object' && options !== null) {
-                        if (Array.isArray(Object.values(options))) {
-                            optionsHtml = Object.values(options).map(position => {
-                                if (typeof position === 'object' && position !== null &&
-                                    position.hasOwnProperty('name')) {
-                                    const name = position.name;
-                                    const id = position.hasOwnProperty('id') ? position.id :
-                                        name;
-                                    return `<option value="${id}">${name}</option>`;
-                                } else {
-                                    return `<option value="${position}">${position}</option>`;
-                                }
-                            }).join('');
-                        } else {
-                            // إذا كان كائن بسيط
-                            optionsHtml = Object.keys(options).map(key => {
-                                const value = options[key];
-                                return `<option value="${key}">${value}</option>`;
-                            }).join('');
-                        }
-                    }
-
                     inputField = `
                         <select name="content[${rowCount}][value]" class="form-control showsearch">
                             <option value="">اختر وظيفة</option>
-                            ${optionsHtml}
+                            @foreach ($jobRoles as $option)
+                                <option value="{{ $option->id }}">{{ $option->title }}</option>
+                            @endforeach
                         </select>
                     `;
                 } else {
@@ -768,23 +725,16 @@
             const newRow = `
                     <tr>
                         <td>
-                            <select name="content[${rowCount}][col-0]" class="form-control sample-select" data-index="${rowCount}">
-                                <option value="">اختر النموذج</option>
-                                @foreach (App\Models\Sample::all() as $sampleItem)
-                                    <option value="{{ $sampleItem->sample_name }}">
-                                        {{ $sampleItem->sample_name }}
-                                    </option>
-                                @endforeach
-                            </select>
+                            <input type="text" name="content[${rowCount}][col-0]" class="form-control" placeholder="أدخل اسم النموذج">
                         </td>
                         <td><input type="text" name="content[${rowCount}][col-1]" class="form-control" placeholder="أدخل رقم النموذج"></td>
                         <td><input type="text" name="content[${rowCount}][col-2]" class="form-control" placeholder="أدخل فترة الحفظ" value="3 سنوات" readonly></td>
                         <td>
                             <select name="content[${rowCount}][col-3]" class="form-control">
                                 <option value="">اختر مكان الحفظ</option>
-                                @foreach ($jobRoles as $jobRole)
-                                    <option value="{{ $jobRole }}" {{ isset($row['col-3']) && $row['col-3'] == $jobRole ? 'selected' : '' }}>
-                                        {{ $jobRole }}
+                                @foreach ($departments as $department)
+                                    <option value="{{ $department->id }}" {{ isset($row['col-3']) && $row['col-3'] == $department->id ? 'selected' : '' }}>
+                                        {{ $department->name }}
                                     </option>
                                 @endforeach
                             </select>
@@ -806,49 +756,20 @@
 
         $('#add-procedure-row').on('click', function() {
             const rowCount = $('#procedures-table tbody tr').length;
-            let jobRolesOptions = '';
 
-            if (Array.isArray(jobRoles)) {
-                jobRolesOptions = jobRoles.map(option => `<option value="${option}">${option}</option>`)
-                    .join('');
-            } else if (typeof jobRoles === 'object' && jobRoles !== null) {
-                if (Array.isArray(Object.values(jobRoles))) {
-                    jobRolesOptions = Object.values(jobRoles).map(position => {
-                        if (typeof position === 'object' && position !== null && position
-                            .hasOwnProperty('name')) {
-                            const name = position.name;
-                            const id = position.hasOwnProperty('id') ? position.id : name;
-                            return `<option value="${id}">${name}</option>`;
-                        } else {
-                            return `<option value="${position}">${position}</option>`;
-                        }
-                    }).join('');
-                } else {
-                    jobRolesOptions = Object.keys(jobRoles).map(key => {
-                        const value = jobRoles[key];
-                        return `<option value="${key}">${value}</option>`;
-                    }).join('');
-                }
-            }
-
-            jobRolesSelect = `
+            reposabilitySelect = `
                         <select name="content[${rowCount}][col-1]" class="form-control showsearch">
-                            <option value="">اختر وظيفة</option>
-                            ${jobRolesOptions}
+                            <option value="Customer">{{ __('Customer') }}</option>
+                            <option value="Supplier">{{ __('Supplier') }}</option>
                         </select>
                     `;
             const newRow = `
                     <tr>
-                        <td><select name="content[${rowCount}][col-0]" class="form-control sample-select" data-index="${rowCount}">
-                            <option value="">اختر الإجراء</option>
-                            @foreach (App\Models\Procedure::all() as $procedureItem)
-                                <option value="{{ $procedureItem->procedure_name }}" {{ ($row['col-0'] ?? '') == $procedureItem->procedure_name ? 'selected' : '' }}>
-                                    {{ $procedureItem->procedure_name }}
-                                </option>
-                            @endforeach
-                        </select></td>
+                        <td>
+                           <input type="text" name="content[${rowCount}][col-0]" class="form-control" placeholder="أدخل الإجراء">
+                        </td>
                          <td>
-                            ${jobRolesSelect}
+                            ${reposabilitySelect}
                         </td>
                         <td><input type="text" name="content[${rowCount}][col-2]" class="form-control" placeholder="النموذج المستخدم"></td>
                         <td><input type="text" name="content[${rowCount}][col-3]" class="form-control" placeholder="التحديث"></td>
@@ -856,8 +777,8 @@
                             <select name="content[${rowCount}][col-4]" class="form-control">
                                 <option value="">اختر المسؤولية</option>
                                 @foreach ($jobRoles as $item)
-                                    <option value="{{ $item }}" {{ isset($row['col-4']) && $row['col-4'] == $item ? 'selected' : '' }}>
-                                        {{ $item }}
+                                    <option value="{{ $item->id }}" {{ isset($row['col-4']) && $row['col-4'] == $item->id ? 'selected' : '' }}>
+                                        {{ $item->title }}
                                     </option>
                                 @endforeach
                             </select>
