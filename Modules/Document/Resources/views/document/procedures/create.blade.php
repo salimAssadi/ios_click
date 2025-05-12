@@ -167,12 +167,11 @@
                             // Hide loading indicator and show config content
                             $('#config-loading').hide();
                             $('#config-content').html(response.config_html);
-                           
+                            
                             // Hide the form
                             $('#procedure-form').hide();
                             
                             // Initialize any scripts needed for the config form
-                            // initConfigScripts();
                         } else {
                             // Show error message
                             toastrs('Error', response.message || 'An error occurred. Please try again.', 'error');
@@ -214,30 +213,9 @@
                 // Any initialization for the config form can be added here
                 
                 // Add row to dynamic tables
-                $(document).on('click', '.add-row', function() {
-                    const tabId = $(this).data('tab');
-                    const tbody = $(`#dynamic-table-${tabId} tbody`);
-                    const index = tbody.find('tr').length;
-                    
-                    const newRow = `
-                        <tr>
-                            <td style="width: 50px;">
-                                <input type="number" name="${tabId}[${index}][order]" class="form-control" value="${index + 1}">
-                            </td>
-                            <td>
-                                <textarea name="${tabId}[${index}][content]" class="form-control" rows="2"></textarea>
-                            </td>
-                            <td style="width: 50px;">
-                                <button type="button" class="btn btn-sm btn-danger remove-row px-3">-</button>
-                            </td>
-                        </tr>`;
-                    
-                    tbody.append(newRow);
-                });
-                
-                // Remove row from dynamic tables
-                $(document).on('click', '.remove-row', function() {
-                    $(this).closest('tr').remove();
+                $('.save-and-continue').on('click', function(event) {
+                    event.preventDefault();
+                    sendAllFormData();
                 });
             }
         });

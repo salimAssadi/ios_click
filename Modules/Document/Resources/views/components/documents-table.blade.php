@@ -6,7 +6,6 @@
                 <thead class="thead-light">
                     <tr>
                         <th>{{ __('N') }}</th>
-                        <th>{{ __('Document Number') }}</th>
                         <th>{{ __('Title') }}</th>
                         <th>{{ __('Category') }}</th>
                         <th>{{ __('Status') }}</th>
@@ -39,7 +38,6 @@
             },
             columns: [
                 {data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false},
-                {data: 'document_number', name: 'document_number'},
                 {data: 'title', name: 'title_en'},
                 {data: 'category', name: 'category.title_en'},
                 {data: 'status_badge', name: 'status.name', orderable: false, searchable: false},

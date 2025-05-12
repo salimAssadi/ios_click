@@ -191,8 +191,6 @@
                             <td class="sub-number">{{ $row['sequence'] }}</td>
                             <td class="description">{{ $row['value'] }}</td>
                         </tr>
-                    @empty
-                        
                     @endforelse
                     <tr>
                         <td class="number">2</td>
@@ -207,7 +205,9 @@
                             <td class="description">{{ $row['value'] }}</td>
                         </tr>
                     @empty
-                        
+                        <tr>
+                            <td colspan="4" class="text-center">لا توجد بيانات</td>
+                        </tr>
                     @endforelse
                     <tr>
                         <td class="number">3</td>
@@ -223,7 +223,9 @@
                             <td class="description">{{ $row['value'] }}</td>
                         </tr>
                     @empty
-                        
+                        <tr>
+                            <td colspan="4" class="text-center">لا توجد بيانات</td>
+                        </tr>
                     @endforelse
                     <tr>
                         <td class="number">4</td>
@@ -238,7 +240,9 @@
                             <td class="description">{{ $row['value'] }}</td>
                         </tr>
                     @empty
-                        
+                        <tr>
+                            <td colspan="4" class="text-center">لا توجد بيانات</td>
+                        </tr>
                     @endforelse
 
                 </tbody>
