@@ -581,12 +581,12 @@ class DocumentController extends Controller
             }
 
             if (!$version) {
-                return response()->json(['error' => 'No version found'], 404);
+                return redirect()->back()->with('error', 'Version not found');
             }
 
             // 3. Security checks
             if (!auth('tenant')->check()) {
-                return response()->json(['error' => 'Unauthorized'], 403);
+                return redirect()->back()->with('error', 'Unauthorized');
             }
 
             // 4. Check tenant access
@@ -598,12 +598,12 @@ class DocumentController extends Controller
                     'document_id' => $document->id,
                     'document_tenant' => $document->tenant_id,
                 ]);
-                return response()->json(['error' => 'Access denied'], 403);
+                return redirect()->back()->with('error', 'Access denied');
             }
 
             // 5. Rate limiting
             if (!RateLimiter::remaining('file-downloads:' . $user->id, 60)) {
-                return response()->json(['error' => 'Too many download attempts. Please try again later.'], 429);
+                return redirect()->back()->with('error', 'Too many download attempts. Please try again later.');
             }
             RateLimiter::hit('file-downloads:' . $user->id);
 
@@ -692,28 +692,77 @@ class DocumentController extends Controller
 
     public function history(Document $document)
     {
-
         $history = DocumentHistoryLog::with(['performer', 'version'])
             ->where('document_id', $document->id)
             ->orderBy('created_at', 'desc')
             ->paginate(20);
-
+            
         return view('document::document.history', compact('document', 'history'));
     }
-
+    
+    /**
+     * Delete a document with all its associated data
+     * 
+     * @param string $id Encrypted document ID
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function destroy($id)
     {
-        // TODO: Delete document implementation
-    }
-
-    public function createWithLivewire()
-    {
-        if (tenant_can('Create Documents')) {
-            return view('document::document.create-with-livewire');
-        } else {
-            return redirect()->back()->with('error', __('You do not have permission to create documents'));
+        try {
+            // Decode encrypted ID
+            $decryptedId = decrypt($id);
+            
+            // Find document or throw 404
+            $document = Document::findOrFail($decryptedId);
+            
+            // Start a database transaction to ensure data integrity
+            DB::beginTransaction();
+             // Check if documentable exists and category_id is not 1, then delete documentable
+             if ($document->documentable_type && $document->documentable_id && $document->category_id != 1) {
+                if ($documentable = $document->documentable) {
+                    $documentable->delete();
+                }
+            }
+            // Delete all document versions and their files
+            foreach ($document->versions as $version) {
+                // Delete the physical file if it exists
+                if ($version->file_path && Storage::disk('tenants')->exists($version->file_path)) {
+                    Storage::disk('tenants')->delete($version->file_path);
+                }
+                $version->delete();
+            }
+            
+            // Delete all review requests associated with the document
+            foreach ($document->reviewRequests as $request) {
+                $request->delete();
+            }
+            
+            // Delete document history logs
+            DocumentHistoryLog::where('document_id', $document->id)->delete();
+            
+            // Delete the main document file if it exists
+            if ($document->file_path && Storage::disk('tenants')->exists($document->file_path)) {
+                Storage::disk('tenants')->delete($document->file_path);
+            }
+            
+            // Finally delete the document itself
+            $document->delete();
+            
+            // Commit the transaction
+            DB::commit();
+            
+           return redirect()->back()->with('success', __('Document deleted successfully'));
+        } catch (\Exception $e) {
+            // Rollback in case of error
+            DB::rollBack();
+            
+            \Log::error('Document deletion error', [
+                'document_id' => $id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return redirect()->back()->with('error', __('Error deleting document') . ': ' . $e->getMessage());
         }
     }
-
-    
 }

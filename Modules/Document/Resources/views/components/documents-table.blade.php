@@ -9,7 +9,7 @@
                         <th>{{ __('Title') }}</th>
                         <th>{{ __('Category') }}</th>
                         <th>{{ __('Status') }}</th>
-
+                        <th>{{ __('Version') }}</th>
                         <th class="w-15 text-end">{{ __('Action') }}</th>
                     </tr>
                 </thead>
@@ -41,6 +41,7 @@
                 {data: 'title', name: 'title_en'},
                 {data: 'category', name: 'category.title_en'},
                 {data: 'status_badge', name: 'status.name', orderable: false, searchable: false},
+                {data: 'version', name: 'version', orderable: false, searchable: false},
                 {
                     data: 'action', 
                     name: 'action', 

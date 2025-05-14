@@ -57,7 +57,7 @@
                 headers: {
                     'X-CSRF-TOKEN': '{{ csrf_token() }}'
                 }
-            }
+            } 
         });
 
         const userId = {{ auth()->id() }};

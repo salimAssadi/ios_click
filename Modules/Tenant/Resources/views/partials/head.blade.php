@@ -4,9 +4,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
-    <meta name="author" content="{{ !empty($settings['app_name']) ? $settings['app_name'] : env('APP_NAME') }}">
+    <meta name="author" content="{{ !empty($settings['application_name']) ? $settings['application_name'] : ''}}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ !empty($settings['app_name']) ? $settings['app_name'] : env('APP_NAME') }} - @yield('page-title') </title>
+    <title>{{ !empty($settings['application_name']) ? $settings['application_name'] : '' }} - @yield('page-title') </title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
 
@@ -19,18 +19,18 @@
     <meta property="og:url" content="{{ env('APP_URL') }}">
     <meta property="og:title" content="{{ $settings['meta_seo_title'] }}">
     <meta property="og:description" content="{{ $settings['meta_seo_description'] }}">
-    <meta property="og:image" content="{{ asset(Storage::url('upload/seo')) . '/' . $settings['meta_seo_image'] }}">
+    <meta property="og:image" content="{{ route('tenant.setting.file',$settings['meta_seo_image']??'') }}">
 
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="{{ env('APP_URL') }}">
     <meta property="twitter:title" content="{{ $settings['meta_seo_title'] }}">
     <meta property="twitter:description" content="{{ $settings['meta_seo_description'] }}">
-    <meta property="twitter:image" content="{{ asset(Storage::url('upload/seo')) . '/' . $settings['meta_seo_image'] }}">
+    <meta property="twitter:image" content="{{ route('tenant.setting.file',$settings['meta_seo_image']??'') }}">
 
     <!-- shortcut icon-->
-    <link rel="icon" href="{{ asset(Storage::url('upload/logo')) . '/' . $settings['company_favicon'] }}"
+    <link rel="icon" href="{{ route('tenant.setting.file', $settings['company_favicon']??'') }}"
         type="image/x-icon">
-    <link rel="shortcut icon" href="{{ asset(Storage::url('upload/logo')) . '/' . $settings['company_favicon'] }}"
+    <link rel="shortcut icon" href="{{ route('tenant.setting.file', $settings['company_favicon']??'') }}"
         type="image/x-icon">
 
         <link rel="stylesheet" href="{{ asset('assets/css/plugins/notifier.css') }}" />

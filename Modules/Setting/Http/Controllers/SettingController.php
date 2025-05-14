@@ -142,35 +142,28 @@ class SettingController extends BaseModuleController
         if ($validator->fails()) {
             return redirect()->back()->with('error', $validator->errors()->first());
         }
+           // Save all request data into settings
+        $excludedKeys = ['_token', 'tenant'];
+        $settings = $request->except($excludedKeys);
         
-        $tenant = 'assdaf';
-        // Store uploaded files
+        $tenant = getTenantRoot();
         if ($request->hasFile('company_logo')) {
             $request->file('company_logo')->storeAs($tenant.'/logo', 'logo.png' ,'tenants');
             $company_logo = $tenant.'/logo/logo.png';
             $settings['company_logo'] = $company_logo;
-
         }
-    
-       
     
         if ($request->hasFile('company_favicon')) {
             $request->file('company_favicon')->storeAs($tenant.'/logo', 'favicon.png' ,'tenants');
             $company_favicon = $tenant.'/logo/favicon.png';
             $settings['company_favicon'] = $company_favicon;
-
         }
     
         if ($request->hasFile('light_logo')) {
             $request->file('light_logo')->storeAs($tenant.'/logo', 'light_logo.png' ,'tenants');
             $light_logo = $tenant.'/logo/light_logo.png';
             $settings['light_logo'] = $light_logo;
-
         }
-    
-        // Save all request data into settings
-        $excludedKeys = ['_token', 'tenant'];
-        $settings = $request->except($excludedKeys);
     
         foreach ($settings as $key => $value) {
             if (!empty($value)) {

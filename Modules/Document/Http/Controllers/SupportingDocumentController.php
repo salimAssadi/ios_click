@@ -162,6 +162,107 @@ class SupportingDocumentController extends BaseModuleController
         }
     }
 
+    public function edit($id)
+    {
+        $document = Document::with(['lastVersion'])->findOrFail($id);
+        
+        // Check if this is a supporting document
+        if ($document->document_type !== 'supporting') {
+            return redirect()->route('tenant.document.supporting-documents.index')
+                ->with('error', __('This is not a supporting document'));
+        }
+        
+        // Get categories appropriate for supporting documents
+        $categories = Category::where('type', 'supporting')
+            ->whereNotNull('parent_id')
+            ->get()
+            ->pluck('title', 'id');
+        $categories->prepend(__('Select Category'), '');
+        
+        return view($this->viewPath . '.edit', compact('document', 'categories'));
+    }
+
+
+    public function update(Request $request, $id)
+    {
+        // Validate the request
+        $validator = Validator::make($request->all(), [
+            'title_ar' => 'required|string|max:255',
+            'title_en' => 'required|string|max:255',
+            'description_ar' => 'nullable|string',
+            'description_en' => 'nullable|string',
+            'category_id' => 'required|exists:categories,id',
+            'issue_date' => 'required|date',
+            'expiry_date' => 'required|date|after:issue_date',
+            'reminder_days' => 'required|integer|min:1|max:365',
+            'file' => 'nullable|file|mimes:pdf|max:10240', // Optional for update
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        $document = Document::with(['lastVersion'])->findOrFail($id);
+
+        // Check if this is a supporting document
+        if ($document->document_type !== 'supporting') {
+            return redirect()->route('tenant.document.supporting-documents.index')
+                ->with('error', __('This is not a supporting document'));
+        }
+
+        DB::beginTransaction();
+        try {
+            // Update the document
+            $document->title_ar = $request->input('title_ar');
+            $document->title_en = $request->input('title_en');
+            $document->description_ar = $request->input('description_ar');
+            $document->description_en = $request->input('description_en');
+            $document->category_id = $request->input('category_id');
+            $document->save();
+            
+            $version = $document->lastVersion;
+            
+            // Handle file upload if new file is provided
+            if ($request->hasFile('file')) {
+                $file = $request->file('file');
+                $fileName = time() . '_' . $file->getClientOriginalName();
+                
+                // Store the new file
+                $filePath = $file->storeAs(getTenantRoot() . '/supporting_documents', $fileName, 'tenants');
+                
+                // Delete the old file if it exists
+                if ($version->file_path && Storage::disk('tenants')->exists($version->file_path)) {
+                    Storage::disk('tenants')->delete($version->file_path);
+                }
+                
+                // Update file path
+                $version->file_path = $filePath;
+                $version->storage_path = 'public/' . $filePath;
+            }
+            
+            // Update version dates
+            $version->issue_date = $request->input('issue_date');
+            $version->expiry_date = $request->input('expiry_date');
+            $version->save();
+            
+            // Update or create reminder
+            $this->scheduleReminder($version, $request->input('reminder_days'));
+            
+            DB::commit();
+            return redirect()->route('tenant.document.supporting-documents.index')
+                ->with('success', __('Supporting document updated successfully!'));
+                
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error('Error updating supporting document: ' . $e->getMessage());
+            return redirect()->back()
+                ->with('error', __('An error occurred while updating the supporting document.'))
+                ->withInput();
+        }
+    }
+
     /**
      * Display the specified resource.
      *
@@ -173,6 +274,7 @@ class SupportingDocumentController extends BaseModuleController
         $document = Document::findOrFail($id);
         return view($this->viewPath . '.show', compact('document'));
     }
+
 
     /**
      * Download the specified document.

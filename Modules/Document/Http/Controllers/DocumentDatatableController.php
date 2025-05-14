@@ -17,9 +17,58 @@ class DocumentDatatableController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
+    /**
+     * Get the appropriate edit URL for a document based on its type
+     *
+     * @param Document $document The document model
+     * @param string $defaultUrl The default URL to use if no specific match is found
+     * @return string The URL for editing this document
+     */
+    protected function getDocumentEditUrl($document, $defaultUrl)
+    {
+        $editRoutes = [
+            'Modules\Document\Entities\IsoSystemProcedure' => 'tenant.document.procedures.configure',
+            'Modules\Document\Entities\SupportingDocument' => 'tenant.document.supporting.edit',
+            'Modules\Document\Entities\Procedure' => 'tenant.document.procedures.edit',
+            // 'Modules\Document\Entities\Form' => 'tenant.document.forms.edit',
+        ];
+
+        if($document->document_type === 'supporting') {
+            return route('tenant.document.supporting-documents.edit', $document->id);
+        }
+
+        if ($document->documentable_type && $document->documentable_id) {
+            $category_id = $document->category_id;
+            
+            if ($category_id && strpos($document->documentable_type, 'Procedure') !== false) {
+                if (isset($category_id)) {
+                    switch ($category_id) {
+                        case 1:
+                            return route('tenant.document.procedures.configure', [$document->documentable_id]);
+                        case 2:
+                            return route('tenant.document.procedures.edit', [$document->documentable_id,$document->category_id]);
+                        case 3:
+                            return route('tenant.document.procedures.edit', [$document->documentable_id,$document->category_id]);
+                    }
+                }
+            }
+            
+            if (isset($editRoutes[$document->documentable_type])) {
+                return route($editRoutes[$document->documentable_type], $document->documentable_id);
+            }
+            
+            foreach ($editRoutes as $type => $routeName) {
+                if (strpos($document->documentable_type, basename(str_replace('\\', '\\', $type))) !== false) {
+                    return route($routeName, $document->documentable_id);
+                }
+            }
+        }
+        
+        return $defaultUrl;
+    }
+
     public function index(Request $request)
     {
-        // Validate request parameters
         $validator = Validator::make($request->all(), [
             'document_type' => 'nullable|string',
             'related_process' => 'nullable|string',
@@ -84,6 +133,9 @@ class DocumentDatatableController extends Controller
             ->addColumn('status_badge', function ($document) {
                 return $document->status_badge;
             })
+            ->addColumn('version', function ($document) {
+                return $document->lastVersion?->version ;
+            })
             ->addColumn('action', function ($document) {
                 $encryptedId = encrypt($document->id);
                 $actions = '';
@@ -101,7 +153,11 @@ class DocumentDatatableController extends Controller
                 
                 // Edit action
                 if (tenant_can('Edit Documents')) {
-                    $actions .= '<a href="' . route('tenant.document.edit', $encryptedId) . '" 
+                    // Get the appropriate edit URL using our helper method
+                    $defaultUrl = route('tenant.document.edit', $encryptedId);
+                    $editUrl = $this->getDocumentEditUrl($document, $defaultUrl);
+                    
+                    $actions .= '<a href="' . $editUrl . '" 
                                 class="btn btn-sm btn-icon btn-light-primary ms-1" 
                                 data-bs-toggle="tooltip" 
                                 data-bs-placement="top" 
@@ -111,26 +167,44 @@ class DocumentDatatableController extends Controller
                 }
                 
                 // Download action
-                if (tenant_can('Download Documents') && $document->lastVersion) {
-                    $actions .= '<a href="' . route('tenant.document.download', $encryptedId) . '" 
+                // if (tenant_can('Download Document') && $document->lastVersion) {
+                    $actions .= '<a href="' . route('tenant.document.serve', $encryptedId) . '" 
                                 class="btn btn-sm btn-icon btn-light-success ms-1" 
                                 data-bs-toggle="tooltip" 
                                 data-bs-placement="top" 
                                 title="' . __('Download') . '">
                                 <i class="ti ti-download"></i>
                             </a>';
-                }
+                // }
+
+                // print action
+                // if (tenant_can('Download Document') && $document->lastVersion) {
+                    $actions .= '<a href="' . route('tenant.document.serve', $encryptedId) . '?preview=1" 
+                                class="btn btn-sm btn-icon btn-light-success ms-1" 
+                                data-bs-toggle="tooltip" 
+                                data-bs-placement="top" 
+                                title="' . __('Print') . '">
+                                <i class="ti ti-printer"></i>
+                            </a>';
+                // }
                 
+
                 // Delete action
                 if (tenant_can('Delete Documents')) {
-                    $actions .= '<button type="button" 
-                                class="btn btn-sm btn-icon btn-light-danger ms-1 delete-document" 
+                   $actions .= '<form class="d-inline" action="' . route('tenant.document.destroy', $encryptedId) . '" method="POST">
+                            ' . csrf_field() . '
+                            ' . method_field('DELETE') . '
+                            <button type="button" 
+                                class="btn btn-sm btn-icon btn-light-danger ms-1 confirm_dialog" 
                                 data-id="' . $encryptedId . '" 
+                                data-title="' . __('Delete Document') . '" 
+                                data-message="' . __('Are you sure you want to delete this document?') . '" 
                                 data-bs-toggle="tooltip" 
                                 data-bs-placement="top" 
                                 title="' . __('Delete') . '">
                                 <i class="ti ti-trash"></i>
-                            </button>';
+                            </button>
+                            </form>';
                 }
                 
                 return $actions;
@@ -138,4 +212,6 @@ class DocumentDatatableController extends Controller
             ->rawColumns(['status_badge', 'action'])
             ->make(true);
     }
+
+    
 }

@@ -39,8 +39,10 @@ Route::prefix('document')->name('tenant.document.')->middleware(['auth:tenant','
         Route::get('main', 'mainProcedures')->name('main');
         Route::get('public', 'publicProcedures')->name('public');
         Route::get('private', 'privateProcedures')->name('private');
+        Route::get('edit/{id}/{category_id}', 'edit')->name('edit');
         Route::post('create', 'create')->name('create');
         Route::post('store', 'store')->name('store');
+        Route::post('update/{id}', 'update')->name('update');
         Route::get('configure/{id}', 'configure')->name('configure');
         Route::post('configure/{id}/save', 'saveConfigure')->name('saveConfigure');;
     });
@@ -52,6 +54,8 @@ Route::prefix('document')->name('tenant.document.')->middleware(['auth:tenant','
         Route::post('/', 'store')->name('store');
         Route::get('/download/{id}', 'download')->name('download');
         Route::get('/{id}', 'show')->name('show');
+        Route::get('/edit/{id}', 'edit')->name('edit');
+        Route::post('/update/{id}', 'update')->name('update');  
         Route::get('/category/{id}', 'categoryDetail')->name('category-detail');
     });
 

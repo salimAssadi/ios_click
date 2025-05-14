@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factory;
 use App\Providers\BaseModuleServiceProvider;
 use Livewire\Livewire;
 use Modules\Document\Http\Livewire\CreateDocument;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 /**
  * Class DocumentServiceProvider
@@ -39,6 +40,7 @@ class DocumentServiceProvider extends BaseModuleServiceProvider
         $this->registerLivewireComponents();
         $this->registerComponents();
         $this->loadMigrationsFrom(module_path($this->moduleName, 'Database/Migrations'));
+       
     }
 
     /**

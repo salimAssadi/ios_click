@@ -22,7 +22,7 @@ use Modules\Document\Entities\ProcedureAttachment;
 use Modules\Setting\Entities\Department;
 use Modules\Setting\Entities\Position;
 use Meneses\LaravelMpdf\Facades\LaravelMpdf;
-
+use Illuminate\Support\Facades\File;
 
 
 class ProcedureController extends BaseModuleController
@@ -78,6 +78,38 @@ class ProcedureController extends BaseModuleController
         return view($this->viewPath . '.create', compact('categories'));
     }
 
+    
+    public function previewPDF($procedure, $contentData, $documentNumber , $department_name_ar, $department_name_en)
+    {
+        $jobRoles = Position::get();
+        $departments = Department::get();
+
+        $viewData = [
+            'department_name_ar' => $department_name_ar,
+            'department_name_en' => $department_name_en,
+            'procedure_name' => $procedure->procedure_name_ar,
+            'procedure_coding' => $procedure->procedure_coding,
+            'pageTitle' => $procedure->procedure_name,
+            'procedure' => $procedure,
+            'document_number' => $documentNumber,
+            'jobRoles' => $jobRoles,
+            'departments' => $departments,
+            'purposes' => ($contentData['purpose'] ?? []),
+            'scopes' => ($contentData['scope'] ?? []),
+            'responsibilities' => ($contentData['responsibility'] ?? []),
+            'definitions' => ($contentData['definitions'] ?? []),
+            'forms' => ($contentData['forms'] ?? []),
+            'procedures' => ($contentData['procedures'] ?? []),
+            'risk_matrix' => ($contentData['risk_matrix'] ?? []),
+            'kpis' => ($contentData['kpis'] ?? []),
+        ];
+
+        // إنشاء الـ PDF
+        $pdf = LaravelMpdf::loadView('template.procedures.procedure_template', $viewData);
+
+        // عرض الـ PDF في المتصفح بدون تحميل
+        return $pdf->stream('preview-procedure.pdf');
+    }
 
     /**
      * Store a newly created resource in storage.
@@ -206,19 +238,31 @@ class ProcedureController extends BaseModuleController
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
-    {
-        $procedure = Procedure::with('document.category')->findOrFail($id);
-        $categories = Category::pluck('title', 'id');
-        $categories->prepend(__('Select Category'), '');
-        $isoSystems = IsoSystem::pluck('name_ar', 'id');
-        $isoSystems->prepend(__('Select ISO System'), '');
-        return view($this->iso_dic_path . '.procedures.edit', [
+    public function edit(string $id , $category_id =null)
+    {   
+
+        $procedure = Procedure::where(['id'=> $id,'category_id'=>$category_id])->first();
+        if (!$procedure) {
+            return redirect()->back()->with('error', __('Not Found'));
+        }
+        $jobRoles = Position::get();
+        $departments = Department::get();
+        $contentData = $procedure->content ?? [];
+        $categories = Category::where('id', $category_id)->get()->pluck('title', 'id');
+        return view($this->viewPath . '.edit', [
             'procedure' => $procedure,
             'categories' => $categories,
-            'isoSystems' => $isoSystems,
-            'selectedCategoryId' => $procedure->document?->category_id, // Selected category ID
-            'selectedIsoSystemId' => $procedure->document?->iso_system_id, // Selected ISO system ID
+            'selectedCategoryId' => $procedure->category_id,
+            'jobRoles' => $jobRoles,
+            'departments' => $departments,
+            'purposes' => ($contentData['purpose'] ?? []),
+            'scopes' => ($contentData['scope'] ?? []),
+            'responsibilities' => ($contentData['responsibility'] ?? []),
+            'definitions' => ($contentData['definitions'] ?? []),
+            'forms' => ($contentData['forms'] ?? []),
+            'procedures' => ($contentData['procedures'] ?? []),
+            'risk_matrix' => ($contentData['risk_matrix'] ?? []),
+            'kpis' => ($contentData['kpis'] ?? []),
         ]);
     }
 
@@ -477,7 +521,7 @@ class ProcedureController extends BaseModuleController
             return response()->json(['message' => 'حدث خطأ أثناء حفظ البيانات: ' . $e->getMessage()], 500);
         }
     }
-    
+
     public function SavePublicPrivateProcedure($request,$id,$type)
     {
         try {
@@ -547,12 +591,12 @@ class ProcedureController extends BaseModuleController
      * @param string $documentNumber
      * @return string The path to the saved PDF
      */
-    private function generatePDF($procedure,$contentData, $type, $documentNumber)
+    private function generatePDF($procedure, $contentData, $type, $documentNumber)
     {
         try {
             $jobRoles = Position::get();
             $departments = Department::get();
-            // Prepare data for the view
+    
             $viewData = [
                 'pageTitle' => $procedure->procedure_name,
                 'procedure' => $procedure,
@@ -568,22 +612,29 @@ class ProcedureController extends BaseModuleController
                 'risk_matrix' => ($contentData['risk_matrix'] ?? []),
                 'kpis' => ($contentData['kpis'] ?? []),
             ];
-            
-            // Generate PDF using LaravelMpdf
+    
+            // Generate PDF
             $pdf = LaravelMpdf::loadView('template.procedures.procedure_template', $viewData);
-            
-            // Generate a unique filename
+    
+            // Prepare file name and path
             $fileName = 'procedure_' . $procedure->procedure_coding . '-' . date('YmdHis') . '.pdf';
-            $yearMonth = date('Y/m');
-            $fullPath = Storage::disk('tenants')->put(getTenantRoot() . '/procedures/' . $type . '/' . $fileName, $pdf->output());
-            
-            $pdf->save($fullPath);
-          
-            return $fullPath;
-            
+            $relativePath = getTenantRoot() . '/procedures/' . $type . '/' . $fileName;
+    
+            // Get full path to save
+            $fullDiskPath = Storage::disk('tenants')->path($relativePath);
+    
+            // Ensure directory exists
+            File::ensureDirectoryExists(dirname($fullDiskPath));
+    
+            // Save PDF to full path
+            $pdf->save($fullDiskPath);
+    
+            // Return relative path (or full path if needed)
+            return $relativePath;
+    
         } catch (\Exception $e) {
             \Log::error('PDF Generation Error: ' . $e->getMessage());
-            if ($e->getMessage() == 'TCPDF ERROR: Some data has already been output, can\'t send PDF file') {
+            if ($e->getMessage() === 'TCPDF ERROR: Some data has already been output, can\'t send PDF file') {
                 \Log::error('PDF Output Buffer Error: ' . ob_get_contents());
             }
             if ($e instanceof \ErrorException && strpos($e->getMessage(), 'Undefined index') !== false) {
@@ -592,6 +643,7 @@ class ProcedureController extends BaseModuleController
             throw $e;
         }
     }
+    
 
     // public function saveConfigure($id)
     // {

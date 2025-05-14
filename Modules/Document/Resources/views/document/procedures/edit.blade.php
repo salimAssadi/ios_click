@@ -9,7 +9,13 @@
         <a href="">{{ __('Dashboard') }}</a>
     </li>
     <li class="breadcrumb-item">
-        <a href="{{ route('tenant.document.procedures.private') }}">{{ __('Private Procedures') }}</a>
+        @if($procedure->category_id == 1)
+            <a href="{{ route('tenant.document.procedures.main') }}">{{ __('Main Procedures') }}</a>
+        @elseif($procedure->category_id == 2)
+            <a href="{{ route('tenant.document.procedures.public') }}">{{ __('Public Procedures') }}</a>
+        @elseif($procedure->category_id == 3)
+            <a href="{{ route('tenant.document.procedures.private') }}">{{ __('Private Procedures') }}</a>
+        @endif
     </li>
     <li class="breadcrumb-item" aria-current="page">
         {{ __('Edit Procedure') }}
@@ -17,19 +23,32 @@
 @endsection
 
 @section('content')
-    <div class="row">
-        <div class="col-sm-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5>{{ __('Edit Procedure') }}</h5>
-                </div>
-                <div class="card-body">
-                    {{ Form::model($procedure, ['route' => ['tenant.document.procedures.private.update', $procedure->id], 'method' => 'PUT', 'files' => true]) }}
-                        <div class="form-group col-md-12">
-                            {{ Form::label('category_id', __('Category'), ['class' => 'form-label']) }}
-                            {{ Form::select('category_id', $categories, old('category_id', $procedure->category_id), ['class' => 'form-control hidesearch']) }}
-                        </div>
-                        <div class="row">
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between">
+                <h5>{{ __('Edit') }}: {{ $procedure->procedure_name_ar }}</h5>
+                <a href="#" id="save-procedure" class="btn btn-sm btn-primary">{{ __('Save Changes') }}</a>
+            </div>
+
+            <div class="card-body">
+                <div class="accordion" id="procedureAccordion">
+                    
+                    <!-- Basic Info Section -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingBasic">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBasic" aria-expanded="true" aria-controls="collapseBasic">
+                                {{ __('Basic Information') }}
+                            </button>
+                        </h2>
+                        <div id="collapseBasic" class="accordion-collapse collapse show" aria-labelledby="headingBasic" data-bs-parent="#procedureAccordion">
+                            <div class="accordion-body">
+                                {{ Form::model($procedure, ['id' => 'basicInfoForm', 'files' => true]) }}
+                                <div class="form-group col-md-12">
+                                    {{ Form::label('category_id', __('Category'), ['class' => 'form-label']) }}
+                                    {{ Form::select('category_id', $categories, old('category_id', $procedure->category_id), ['class' => 'form-control hidesearch']) }}
+                                </div>
+                                <div class="row">
                             <div class="form-group col-md-6">
                                 {{ Form::label('procedure_name_ar', __('Procedure Name (arabic)') . ' <span class="text-danger">*</span>', ['class' => 'form-label'], false) }}
                                 {{ Form::text('procedure_name_ar', old('procedure_name_ar', $procedure->procedure_name_ar), ['class' => 'form-control', 'placeholder' => __('Enter Procedure Name (arabic)'), 'required' => 'required']) }}
@@ -50,54 +69,9 @@
                                 {{ Form::textarea('procedure_description_en', old('procedure_description_en', $procedure->description_en), ['class' => 'form-control', 'placeholder' => __('Enter Procedure Description (english)'), 'rows' => 2]) }}
                             </div>
 
-                            @if ($procedure->attachments->count() > 0)
-                                <div class="col-12 mt-3">
-                                    <label class="form-label">{{ __('Current Attachments') }}</label>
-                                    <div class="table-responsive">
-                                        <table class="table table-bordered">
-                                            <thead>
-                                                <tr>
-                                                    <th>{{ __('File Name') }}</th>
-                                                    <th class="text-end">{{ __('Action') }}</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @foreach ($procedure->attachments as $attachment)
-                                                    <tr>
-                                                        <td>
-                                                            <a href="{{ route('iso_dic.procedures.attachments.download', $attachment->id) }}"
-                                                                class="text-primary">
-                                                                {{ $attachment->original_name }}
-                                                            </a>
-                                                        </td>
-                                                        <td class="text-end">
-                                                            <form action=""
-                                                                method="POST" class="d-inline">
-                                                                @csrf
-                                                                {{-- @method('DELETE') --}}
-                                                                <a href="#" class="text-danger delete-attachment"
-                                                                    onclick="event.preventDefault(); this.closest('form').submit();">
-                                                                    <i class="ti ti-trash fs-2"></i>
-                                                                </a>
-                                                            </form>
-                                                        </td>
-                                                    </tr>
-                                                @endforeach
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            @endif
+                            
 
-                            <div class="form-group col-md-12 mt-3">
-                                <label class="form-label" for="attachments">{{ __('New Attachments') }}</label>
-                                <input type="file" name="attachments[]" id="attachments" class="form-control" multiple>
-                                <small class="text-muted">{{ __('Supported formats: PDF, DOC, DOCX, XLS, XLSX. Max size: 10MB') }}</small>
-                                @error('attachments.*')
-                                    <span class="invalid-feedback" role="alert">{{ $message }}</span>
-                                @enderror
-                            </div>
-
+                           
                             <div class="form-group col-md-6 " style="display: none;">
                                 {{ Form::label('is_optional', __('Is Required'), ['class' => 'form-label d-block']) }}
                                 <div class="form-check form-check-inline">
@@ -122,57 +96,126 @@
                                 </div>
                             </div>
 
-                            <div class="form-group col-md-12" style="display: none;">
-                                <div class="form-check form-check-inline">
-                                    {!! Form::checkbox('enable_upload_file', 1, $procedure->enable_upload_file, ['class' => 'form-check-input', 'id' => 'enable_upload_file']) !!}
-                                    {!! Form::label('enable_upload_file', __('Enable Upload File'), ['class' => 'form-check-label']) !!}
-                                </div>
-
-                                <div class="form-check form-check-inline">
-                                    {!! Form::checkbox('enable_editor', 1, $procedure->enable_editor, ['class' => 'form-check-input', 'id' => 'enable_editor']) !!}
-                                    {!! Form::label('enable_editor', __('Enable Editor'), ['class' => 'form-check-label']) !!}
-                                </div>
-
-                                <div class="form-check form-check-inline">
-                                    {!! Form::checkbox('has_menual_config', 1, $procedure->has_menual_config, ['class' => 'form-check-input', 'id' => 'has_menual_config']) !!}
-                                    {!! Form::label('has_menual_config', __('Has Manual Config'), ['class' => 'form-check-label']) !!}
-                                </div>
-                            </div>
-
-                            <div class="form-group col-md-12" id="blade-view-field" style="display: none;">
-                                {!! Form::label('blade_view', __('Blade View')) !!}
-                                {!! Form::text('blade_view', $procedure->blade_view, ['class' => 'form-control', 'id' => 'blade_view']) !!}
-                            </div>
+                            
+                            
+                            
 
                             <div class="form-group col-md-12 text-end mt-3">
-                                <a href="{{ route('iso_dic.procedures.index') }}" class="btn btn-secondary">{{ __('Cancel') }}</a>
-                                {{ Form::submit(__('Update'), ['class' => 'btn btn-primary']) }}
+                                <button type="button" class="btn btn-secondary" onclick="window.history.back()">{{ __('Cancel') }}</button>
+                                <button type="button" id="update-basic-info" class="btn btn-primary">{{ __('Update Basic Info') }}</button>
+                            </div>
+                            {{ Form::close() }}
+                         </div>
                             </div>
                         </div>
-                    {{ Form::close() }}
-                </div>
+                    </div>
+
+                    <!-- Configuration Section -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingConfig">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseConfig" aria-expanded="false" aria-controls="collapseConfig">
+                                {{ __('Configuration') }}
+                            </button>
+                        </h2>
+                        <div id="collapseConfig" class="accordion-collapse collapse" aria-labelledby="headingConfig" data-bs-parent="#procedureAccordion">
+                            <div class="accordion-body">
+                                @include('document::document.procedures.config.procedure', [
+                                    'purposes' => $purposes,
+                                    'scopes' => $scopes,
+                                    'responsibilities' => $responsibilities,
+                                    'definitions' => $definitions,
+                                    'forms' => $forms,
+                                    'procedures' => $procedures,
+                                    'risk_matrix' => $risk_matrix,
+                                    'kpis' => $kpis,
+                                ])
+
+                                <div class="text-end mt-3">
+                                    <button type="button" class="btn btn-secondary" onclick="window.history.back()">{{ __('Cancel') }}</button>
+                                    <button type="button" id="save-configuration" class="btn btn-primary">{{ __('Save Configuration') }}</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div> <!-- End Accordion -->
             </div>
         </div>
     </div>
+</div>
+
 @endsection
 
-@push('scripts')
+@push('script-page')
 <script>
     $(document).ready(function() {
-        function toggleBladeViewField() {
-            if ($('#has_menual_config').is(':checked')) {
-                $('#blade-view-field').show();
-            } else {
-                $('#blade-view-field').hide();
-                $('#blade_view').val('');
-            }
-        }
-
-        toggleBladeViewField();
-
-        $('#has_menual_config').on('change', function() {
-            toggleBladeViewField();
+       
+        // Handle Basic Info Update via AJAX
+        $('#update-basic-info').on('click', function() {
+            let formData = new FormData($('#basicInfoForm')[0]);
+            formData.append('_method', 'PUT'); // Laravel method spoofing for PUT
+            
+            $.ajax({
+                url: '{{ route("tenant.document.procedures.update", $procedure->id) }}',
+                method: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    showNotification('success', '{{ __('Procedure updated successfully') }}');
+                },
+                error: function(xhr) {
+                    let errors = xhr.responseJSON.errors;
+                    let errorMessage = '{{ __('Error updating procedure') }}';
+                    if (errors) {
+                        errorMessage = Object.values(errors).flat().join('<br>');
+                    }
+                    showNotification('error', errorMessage);
+                }
+            });
         });
+
+        // Handle Configuration Save via AJAX
+        $('#save-configuration').on('click', function() {
+            // Collect all form data using the function from procedure.blade.php
+            const configData = collectAllFormData();
+            
+            $.ajax({
+                url: '{{ route("tenant.document.procedures.saveConfigure", $procedure->id) }}',
+                method: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    procedure_setup_data: JSON.stringify(configData),
+                    category_id: '{{ $procedure->category_id }}'
+                },
+                success: function(response) {
+                    showNotification('success', response.message || '{{ __('Configuration saved successfully') }}');
+                },
+                error: function(xhr) {
+                    let errorMessage = '{{ __('Error saving configuration') }}';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMessage = xhr.responseJSON.message;
+                    }
+                    showNotification('error', errorMessage);
+                }
+            });
+        });
+
+        // Handle main form save button
+        $('#save-procedure').on('click', function() {
+            // Determine which tab is active and trigger its save button
+            if ($('#basic-info').hasClass('active')) {
+                $('#update-basic-info').click();
+            } else if ($('#configuration').hasClass('active')) {
+                $('#save-configuration').click();
+            }
+        });
+
+        // Helper function to show notifications
+        function showNotification(type, message) {
+           
+            toastrs(type,message)
+        }
     });
 </script>
 @endpush
