@@ -106,7 +106,7 @@
 
                             <div class="form-group col-md-6 mt-3">
                                 {{ Form::label('prepared_by', __('Preparer Name') . ' <span class="text-danger">*</span>', ['class' => 'form-label'], false) }}
-                                <select name="prepared_by" id="prepared_by" class="form-control">
+                                <select name="prepared_by" id="prepared_by" class="form-control hidesearch">
                                     <option value="">{{ __('Select Preparer') }}</option>
                                     @foreach ($users as $user)
                                         <option value="{{ $user->user_id }}" {{ old('prepared_by', $procedure->prepared_by) == $user->user_id ? 'selected' : '' }}>
@@ -118,7 +118,7 @@
                             
                             <div class="form-group col-md-6 mt-3">
                                 {{ Form::label('approved_by', __('Approver Name') . ' <span class="text-danger">*</span>', ['class' => 'form-label'], false) }}
-                                <select name="approved_by" id="approved_by" class="form-control">
+                                <select name="approved_by" id="approved_by" class="form-control hidesearch">
                                     <option value="">{{ __('Select Approver') }}</option>
                                     @foreach ($users as $user)
                                         <option value="{{ $user->user_id }}" {{ old('approved_by', $procedure->approved_by) == $user->user_id ? 'selected' : '' }}>
@@ -130,7 +130,7 @@
                             
                             <div class="form-group col-md-12 mt-3">
                                 {{ Form::label('reviewers', __('Reviewer Name'), ['class' => 'form-label']) }}
-                                <select name="reviewers[]" id="reviewers" class="form-control" multiple>
+                                <select name="reviewers[]" id="reviewers" class="form-control hidesearch" multiple>
                                     <option value="">{{ __('Select Reviewers') }}</option>
                                     @foreach ($users as $user)
                                         <option value="{{ $user->user_id }}" {{ in_array($user->user_id, old('reviewers', $procedure->reviewers ? json_decode($procedure->reviewers) : [])) ? 'selected' : '' }}>
