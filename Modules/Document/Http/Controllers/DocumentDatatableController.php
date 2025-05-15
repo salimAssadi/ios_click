@@ -258,7 +258,6 @@ class DocumentDatatableController extends Controller
         // تحديد الأعمدة التي تحتوي على HTML
         $rawColumns = ['status_badge', 'action'];
         
-        // إضافة أي أعمدة مخصصة تحتوي على HTML
         if ($request->filled('custom_columns') && is_array($request->custom_columns)) {
             foreach ($request->custom_columns as $column) {
                 if (isset($column['raw']) && $column['raw'] === true && isset($column['data'])) {

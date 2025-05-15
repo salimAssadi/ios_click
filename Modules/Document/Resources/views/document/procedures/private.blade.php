@@ -27,7 +27,7 @@
                        <x-document::documents-table 
                        documentType="procedure" 
                        title="{{ __('Private Procedure List') }}" 
-                       relatedProcess="Modules\Document\Entities\Procedure" 
+                       relatedProcess="Modules\Document\Entities\IsoSystemProcedure" 
                        :categoryId=$category_id
                        :customColumns="$customColumns"
                      />

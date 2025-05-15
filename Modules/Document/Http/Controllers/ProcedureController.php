@@ -587,9 +587,14 @@ class ProcedureController extends BaseModuleController
             }
            
            
-            return response()->json(['message' => 'تم حفظ بيانات الإجراء بنجاح']);
+            return response()->json([
+                'status' => 'success',
+                'message' => 'تم حفظ بيانات الإجراء بنجاح']);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'حدث خطأ أثناء حفظ البيانات: ' . $e->getMessage()], 500);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'حدث خطأ أثناء حفظ البيانات: ' . $e->getMessage()
+            ], 500);
         }
     }
 
@@ -739,9 +744,9 @@ class ProcedureController extends BaseModuleController
                 $version = new DocumentVersion();
                 $version->document_id = $existingDocument->id;
                 $version->version = (string)$newVersionNumber;
-                $version->issue_date = $documentdata['issue_date']??null;
-                $version->expiry_date = $documentdata['expiry_date']??null;
-                $version->reminder_days = $documentdata['reminder_days']??null;
+                $version->issue_date = $documentdata['issue_date']?? $version->issue_date;
+                $version->expiry_date = $documentdata['expiry_date']?? $version->expiry_date;
+                $version->reminder_days = $documentdata['reminder_days']?? $version->reminder_days;
                 $version->status_id = 17; // Active status
                 $version->file_path = $pdfPath;
                 $version->storage_path = $pdfPath;
@@ -780,9 +785,10 @@ class ProcedureController extends BaseModuleController
                 $version = new DocumentVersion();
                 $version->document_id = $document->id;
                 $version->version = '1.0';
-                $version->issue_date = $documentdata['issue_date']??null;
-                $version->expiry_date = $documentdata['expiry_date']??null;
-                $version->reminder_days = $documentdata['reminder_days']??null;
+
+                $version->issue_date = $documentdata['issue_date']?? $version->issue_date;
+                $version->expiry_date = $documentdata['expiry_date']?? $version->expiry_date;
+                $version->reminder_days = $documentdata['reminder_days']?? $version->reminder_days;
                 $version->status_id = 17; // Active status
                 $version->file_path = $pdfPath;
                 $version->storage_path = $pdfPath;
