@@ -21,6 +21,7 @@ class CreateDocumentVersionsTable extends Migration
                 $table->date('issue_date');
                 $table->date('expiry_date');
                 $table->date('review_due_date')->nullable();
+                $table->integer('reminder_days')->nullable();
                 $table->foreignId('status_id')->constrained('statuses')->default(1);
                 $table->date('approval_date')->nullable();
                 $table->foreignId('approved_by')->nullable()->constrained('users');

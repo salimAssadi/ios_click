@@ -23,6 +23,7 @@ use Modules\Setting\Entities\Department;
 use Modules\Setting\Entities\Position;
 use Meneses\LaravelMpdf\Facades\LaravelMpdf;
 use Illuminate\Support\Facades\File;
+use Modules\Tenant\Entities\User;
 
 
 class ProcedureController extends BaseModuleController
@@ -240,11 +241,15 @@ class ProcedureController extends BaseModuleController
      */
     public function edit(string $id , $category_id =null)
     {   
-
+        $id = Crypt::decrypt($id);
+        $category_id = Crypt::decrypt($category_id);
         $procedure = Procedure::where(['id'=> $id,'category_id'=>$category_id])->first();
+        $document = Document::where('documentable_id', $id)->with('documentable','lastVersion')->first();
         if (!$procedure) {
             return redirect()->back()->with('error', __('Not Found'));
         }
+        $procedureCodeing =getSettingsValByName('company_symbol').'-'.generateProcedureCoding(getIsoSystemSymbol(currentISOSystem()), $procedure->id);
+        $users = User::whereHas('employee')->get()->pluck('name', 'id');
         $jobRoles = Position::get();
         $departments = Department::get();
         $contentData = $procedure->content ?? [];
@@ -252,6 +257,7 @@ class ProcedureController extends BaseModuleController
         return view($this->viewPath . '.edit', [
             'procedure' => $procedure,
             'categories' => $categories,
+            'procedureCodeing' => $procedureCodeing,
             'selectedCategoryId' => $procedure->category_id,
             'jobRoles' => $jobRoles,
             'departments' => $departments,
@@ -263,6 +269,8 @@ class ProcedureController extends BaseModuleController
             'procedures' => ($contentData['procedures'] ?? []),
             'risk_matrix' => ($contentData['risk_matrix'] ?? []),
             'kpis' => ($contentData['kpis'] ?? []),
+            'document' => $document,
+            'users' => $users,
         ]);
     }
 
@@ -280,15 +288,28 @@ class ProcedureController extends BaseModuleController
             'is_optional' => 'required|boolean',
             'category_id' => 'required',
             'status' => 'required|boolean',
+            'procedure_code' => 'required|string|max:50',
+            'prepared_by' => 'required|exists:users,id',
+            'approved_by' => 'required|exists:users,id',
+            'reviewers' => 'nullable|array',
+            'issue_date' => 'required|date',
+            'expiry_date' => 'required|date|after:issue_date',
+            'reminder_days' => 'required|integer|min:1|max:365',
             'attachments.*' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx|max:10240',
         ]);
 
         if ($validator->fails()) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'errors' => $validator->errors()
+                ], 422);
+            }
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
         DB::beginTransaction();
         try {
+
             $procedure = Procedure::findOrFail($id);
 
             // Update the procedure data
@@ -299,36 +320,42 @@ class ProcedureController extends BaseModuleController
             $procedure->description_en = $request->input('procedure_description_en');
             $procedure->is_optional = $request->input('is_optional');
             $procedure->status = $request->input('status');
-            $procedure->has_menual_config = $request->has('has_menual_config') ? 1 : 0;
-            $procedure->enable_upload_file = $request->has('enable_upload_file') ? 1 : 0;
-            $procedure->enable_editor = $request->has('enable_editor') ? 1 : 0;
-            $procedure->blade_view = $request->input('blade_view', '');
+            // $procedure->procedure_code = $request->input('procedure_code');
             $procedure->save();
 
-            // Handle file uploads
-            if ($request->hasFile('attachments')) {
-                foreach ($request->file('attachments') as $file) {
-                    $fileName = time() . '_' . $file->getClientOriginalName();
-                    $filePath = $file->storeAs('procedure_attachments', $fileName, 'public');
-
-                    // Create new attachment without triggering the procedure's deleting event
-                    ProcedureAttachment::create([
-                        'procedure_id' => $procedure->id,
-                        'file_name' => $fileName,
-                        'original_name' => $file->getClientOriginalName(),
-                        'file_path' => $filePath,
-                        'mime_type' => $file->getMimeType(),
-                        'file_size' => $file->getSize(),
-                    ]);
-                }
+            // Update document version if exists
+            $document = Document::where('documentable_id', $id)->where('documentable_type', Procedure::class)->first();
+            
+            if ($document && $document->lastVersion) {
+                $document->update([
+                    'reviewer_ids' => $request->has('reviewers') ? json_encode($request->input('reviewers')) : null,
+                    'approver_id' => $request->input('approved_by'),
+                    'preparer_id' => $request->input('prepared_by'),
+                ]);
+                
+                $version = $document->lastVersion;
+                $version->issue_date = $request->input('issue_date');
+                $version->expiry_date = $request->input('expiry_date');
+                $version->reminder_days = $request->input('reminder_days');
+                $version->save();
             }
 
+            // Handle file uploads
+           
+
             DB::commit();
-            return redirect()->back()->with('success', __('Procedure updated successfully'));
+            return response()->json([
+                'success' => true,
+                'message' => __('Procedure updated successfully'),
+            ]);
+            
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error updating procedure: ' . $e->getMessage());
-            return redirect()->back()->with('error', $e->getMessage());
+            \Log::error('Error updating procedure: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ]);
         }
     }
 

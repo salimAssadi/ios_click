@@ -2021,6 +2021,14 @@ if (!function_exists('authPage')) {
         }
     }
 
+    if (!function_exists('getIsoSystem')) {
+        function getIsoSystem($id)
+        {
+            $system = \Modules\Document\Entities\IsoSystem::where('id', $id)->first();
+            return $system ?? null;
+        }
+    }
+
 
 
     if (!function_exists('generateProcedureCoding')) {

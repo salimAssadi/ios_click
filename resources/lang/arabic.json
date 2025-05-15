@@ -1010,5 +1010,17 @@
   "Show Documents":"عرض الوثائق",
   "Supporting Document Categories":"تصنيفات الوثائق الداعمة",
   "Supplier":"المورد",
-  "Create Public Procedure":"إنشاء إجراء عام"
+  "Create Public Procedure":"إنشاء إجراء عام",
+  "Default value is 3 years from issue date":"القيمة الافتراضية هي 3 سنوات من تاريخ الإصدار",
+  "Version Number":"رقم الاصدار",
+  "Review Number":"رقم المراجعة",
+  "Basic Information":"المعلومات الأساسية",
+  "Procedure Code":"كود الإجراء",
+  "Enter Procedure Code":"أدخل كود الإجراء",
+  "Procedure Content":"محتوى الإجراء",
+  "Preparer Name":"اسم المعد",
+  "Approver Name":"اسم المشرف",
+  "Reviewer Name":"اسم المراجع",
+  "Procedure Number":"رقم الإجراء",
+  "This action will be applied to the system you have specified":"🔔 تنبيه: سيتم تطبيق هذا الإجراء على النظام المحدد لديك"
 }

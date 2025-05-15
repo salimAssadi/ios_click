@@ -46,9 +46,9 @@ class DocumentDatatableController extends Controller
                         case 1:
                             return route('tenant.document.procedures.configure', [$document->documentable_id]);
                         case 2:
-                            return route('tenant.document.procedures.edit', [$document->documentable_id,$document->category_id]);
+                            return route('tenant.document.procedures.edit', [encrypt($document->documentable_id),encrypt($document->category_id)]);
                         case 3:
-                            return route('tenant.document.procedures.edit', [$document->documentable_id,$document->category_id]);
+                            return route('tenant.document.procedures.edit', [encrypt($document->documentable_id),encrypt($document->category_id)]);
                     }
                 }
             }

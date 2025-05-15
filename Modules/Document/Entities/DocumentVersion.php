@@ -15,7 +15,7 @@ class DocumentVersion extends BaseModel
     protected $table = 'document_versions';
     
     protected $fillable = [
-        'document_id', 'version', 'issue_date', 'expiry_date', 'review_due_date',
+        'document_id', 'version', 'issue_date', 'expiry_date','reminder_days', 'review_due_date',
         'status_id', 'approval_date', 'approved_by', 'storage_path', 'file_path', 
         'change_notes', 'is_active', 'created_by', 'updated_by'
     ];
@@ -28,6 +28,7 @@ class DocumentVersion extends BaseModel
     protected $casts = [
         'issue_date' => 'datetime',
         'expiry_date' => 'datetime',
+        'reminder_days' => 'integer',
         'review_due_date' => 'datetime',
         'approval_date' => 'datetime',
         'is_active' => 'boolean',
@@ -67,6 +68,13 @@ class DocumentVersion extends BaseModel
         return $this->belongsTo(\Modules\Tenant\Entities\User::class, 'created_by');
     }
 
+    public function getStatusBadgeAttribute()
+    {
+        if (!$this->status) {
+            return null;
+        }
+        return '<span class="badge ' . $this->status->badge . '">' . __($this->status->name) . '</span>';
+    }
     /**
      * Get all reminders associated with this document version through the remindable relationship
      */
@@ -94,8 +102,13 @@ class DocumentVersion extends BaseModel
         return $now->diffInDays($this->expiry_date);
     }
     
-    protected static function newFactory()
+    public function revisions()
     {
-        return \Modules\Document\Database\factories\DocumentVersionFactory::new();
+        return $this->hasMany(DocumentRevision::class , 'version_id');
+    }
+
+    public function getLatestRevisionAttribute()
+    {
+        return $this->revisions()->latest()->first();
     }
 }

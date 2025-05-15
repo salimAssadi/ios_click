@@ -18,12 +18,15 @@ class Document extends BaseModel
         'title_ar', 'title_en', 'document_number', 'document_type', 'documentable_type', 'documentable_id', 'department',
         'description_ar', 'description_en', 'category_id', 'file_path', 'original_filename', 'mime_type', 
         'file_size', 'owner', 'created_by', 'creation_date',
-        'status_id', 'obsoleted_date', 'notes'
+        'status_id', 'obsoleted_date', 'notes','reviewer_ids','approver_id','preparer_id'
     ];
 
     protected $casts = [
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'reviewer_ids' => 'array',
+        'approver_id' => 'integer',
+        'preparer_id' => 'integer',
     ];
 
     public function getTitleAttribute(){
@@ -76,6 +79,16 @@ class Document extends BaseModel
     public function category()
     {
         return $this->belongsTo(Category::class);
+    }
+    
+    public function approver()
+    {
+        return $this->belongsTo(User::class, 'approver_id');
+    }
+    
+    public function preparer()
+    {
+        return $this->belongsTo(User::class, 'preparer_id');
     }
     
     /**

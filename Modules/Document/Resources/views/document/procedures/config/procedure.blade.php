@@ -71,14 +71,12 @@
         </button>
     </li>
     {{-- detials-tab --}}
-    <li class="nav-item" role="presentation">
+    {{-- <li class="nav-item" role="presentation">
         <button class="nav-link" id="detials-tab" data-bs-toggle="tab" data-bs-target="#detials" type="button"
             role="tab" aria-controls="detials" aria-selected="false">
             {{ __('Document Detials') }}
         </button>
-    </li>
-
-
+    </li> --}}
 </ul>
 <!-- Tabs Content -->
 <div class="tab-content mt-3" id="myTabContent">
@@ -617,8 +615,7 @@
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
-                <button type="button" class="btn btn-info save-and-continue float-end"
-                    data-next-tab="references">{{ __('Save and Continue') }} </button>
+                
             </div>
         </form>
     </div>
