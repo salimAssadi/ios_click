@@ -358,6 +358,9 @@
                     button.html(originalText);
                     button.prop('disabled', false);
                     $('#save-procedure').prop('disabled', false);
+                    setTimeout(() => {
+                        window.history.back();
+                    }, 2000);
                 },
                 error: function(xhr) {
                     Swal.close();

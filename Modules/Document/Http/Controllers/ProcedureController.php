@@ -274,21 +274,21 @@ class ProcedureController extends BaseModuleController
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
-    {
-        $id = Crypt::decrypt($id);
-        $procedure = Procedure::find($id);
-        $categories = Category::get()->pluck('title', 'id');
+    // public function show(string $id)
+    // {
+    //     $id = Crypt::decrypt($id);
+    //     $procedure = Procedure::find($id);
+    //     $categories = Category::get()->pluck('title', 'id');
 
-        if ($procedure) {
-            $procedure->load('attachments');
-            $form = $procedure->form()->where('act', 'procedure_' . $id)->first();
-            $pageTitle = $procedure->procedure_name;
-            $identifier = 'procedure_' . $id;
-            return view($this->iso_dic_path . '.procedure_view', compact('pageTitle', 'form', 'categories', 'identifier'));
-        }
-        return redirect()->back()->with('error', __('Not Found'));
-    }
+    //     if ($procedure) {
+    //         $procedure->load('attachments');
+    //         $form = $procedure->form()->where('act', 'procedure_' . $id)->first();
+    //         $pageTitle = $procedure->procedure_name;
+    //         $identifier = 'procedure_' . $id;
+    //         return view($this->iso_dic_path . '.procedure_view', compact('pageTitle', 'form', 'categories', 'identifier'));
+    //     }
+    //     return redirect()->back()->with('error', __('Not Found'));
+    // }
 
     /**
      * Show the form for editing the specified resource.
@@ -301,7 +301,7 @@ class ProcedureController extends BaseModuleController
             
             // Get the IsoSystemProcedure with its related procedure
             $iso_system_Procedure = IsoSystemProcedure::where([
-                'procedure_id' => $id,
+                'id' => $id,
                 'category_id' => $category_id,
                 'iso_system_id' => currentISOSystem()
             ])->with('procedure')->first();

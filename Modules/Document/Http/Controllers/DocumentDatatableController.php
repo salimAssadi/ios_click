@@ -40,7 +40,7 @@ class DocumentDatatableController extends Controller
         if ($document->documentable_type && $document->documentable_id) {
             $category_id = $document->category_id;
             
-            if ($category_id && strpos($document->documentable_type, 'Procedure') !== false) {
+            if ($category_id && strpos($document->documentable_type, 'IsoSystemProcedure') !== false) {
                 if (isset($category_id)) {
                     return route('tenant.document.procedures.edit', [encrypt($document->documentable_id),encrypt($document->category_id)]);
                 }
