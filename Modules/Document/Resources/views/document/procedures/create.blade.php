@@ -118,7 +118,16 @@
                         </div>
                         <p class="mt-2">{{ __('Loading configuration options...') }}</p>
                     </div>
-                    <div id="config-content" class="card-body"></div>
+                    <div class="card-body">
+                        <div id="config-content">
+
+                        </div>
+                        <div class="text-end mt-3">
+                            <button type="button" class="btn btn-secondary" onclick="window.history.back()">{{ __('Cancel') }}</button>
+                            <button type="button" id="save-configuration" class="btn btn-primary">{{ __('Save Configuration') }}</button>
+                        </div>
+                    </div>
+                    
                 </div>
             </div>
             
@@ -213,7 +222,7 @@
                 // Any initialization for the config form can be added here
                 
                 // Add row to dynamic tables
-                $('.save-and-continue').on('click', function(event) {
+                $('.save-configuration').on('click', function(event) {
                     event.preventDefault();
                     sendAllFormData();
                 });
