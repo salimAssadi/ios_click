@@ -123,7 +123,7 @@
                             <div class="form-group col-md-6 mt-3">
                                 {{ Form::label('issue_date', __('Issue Date') . ' <span class="text-danger">*</span>', ['class' => 'form-label'], false) }}
                                 <div class="input-group date">
-                                    {{ Form::text('issue_date', old('issue_date', $document?->lastVersion->issue_date), ['class' => 'form-control' . ($errors->has('issue_date') ? ' is-invalid' : ''), 'required' => 'required', 'id' => 'issue_date', 'placeholder' => 'YYYY-MM-DD', 'autocomplete' => 'off']) }}
+                                    {{ Form::text('issue_date', old('issue_date', $document?->lastVersion->issue_date??null), ['class' => 'form-control' . ($errors->has('issue_date') ? ' is-invalid' : ''), 'required' => 'required', 'id' => 'issue_date', 'placeholder' => 'YYYY-MM-DD', 'autocomplete' => 'off']) }}
                                     <span class="input-group-text bg-primary">
                                         <i class="ti ti-calendar text-white"></i>
                                     </span>
@@ -135,7 +135,7 @@
                                 {{ Form::label('expiry_date', __('Expiry Date') . ' <span class="text-danger">*</span>', ['class' => 'form-label'], false) }}
                                 <span class="text-red-200">{{ __('Default value is 3 years from issue date') }}</span>
                                 <div class="input-group date">
-                                    {{ Form::text('expiry_date', old('expiry_date', $document?->lastVersion->expiry_date), ['class' => 'form-control' . ($errors->has('expiry_date') ? ' is-invalid' : ''), 'required' => 'required', 'id' => 'expiry_date', 'placeholder' => 'YYYY-MM-DD', 'autocomplete' => 'off']) }}
+                                    {{ Form::text('expiry_date', old('expiry_date', $document?->lastVersion->expiry_date ?? null), ['class' => 'form-control' . ($errors->has('expiry_date') ? ' is-invalid' : ''), 'required' => 'required', 'id' => 'expiry_date', 'placeholder' => 'YYYY-MM-DD', 'autocomplete' => 'off']) }}
                                     <span class="input-group-text bg-primary">
                                         <i class="ti ti-calendar text-white"></i>
                                     </span>
