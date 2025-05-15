@@ -145,7 +145,7 @@
                             <div class="form-group col-md-6 mt-3">
                                 {{ Form::label('reminder_days', __('Reminder Before Expiry') . ' <span class="text-danger">*</span>', ['class' => 'form-label'], false) }}
                                 <div class="input-group">
-                                    {{ Form::number('reminder_days', old('reminder_days', $document?->lastVersion->reminder_days), ['class' => 'form-control' . ($errors->has('reminder_days') ? ' is-invalid' : ''), 'required' => 'required', 'min' => '1', 'max' => '365', 'id' => 'reminder_days']) }}
+                                    {{ Form::number('reminder_days', old('reminder_days', $document?->lastVersion->reminder_days ?? null), ['class' => 'form-control' . ($errors->has('reminder_days') ? ' is-invalid' : ''), 'required' => 'required', 'min' => '1', 'max' => '365', 'id' => 'reminder_days']) }}
                                     <span class="input-group-text bg-info">
                                         <i class="ti ti-bell text-white"></i>
                                     </span>
