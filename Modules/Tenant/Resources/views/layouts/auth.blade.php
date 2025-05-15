@@ -37,7 +37,11 @@
     <meta property="twitter:image"
         content="{{ asset(Storage::url('upload/seo')) . '/' . $settings['meta_seo_image'] }}">
 
-    <link rel="icon" href="{{ asset(Storage::url('upload/logo')) . '/favicon.png' }}" type="image/x-icon" />
+    <!-- shortcut icon-->
+    <link rel="icon" href="{{ route('tenant.setting.file', $settings['company_favicon']??'') }}"
+        type="image/x-icon">
+    <link rel="shortcut icon" href="{{ route('tenant.setting.file', $settings['company_favicon']??'') }}"
+        type="image/x-icon">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
         id="main-font-link" />
     <link rel="stylesheet" href="{{ asset('assets/fonts/phosphor/duotone/style.css') }}" />
