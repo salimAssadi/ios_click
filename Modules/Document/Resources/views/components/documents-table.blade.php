@@ -1,4 +1,10 @@
-@props(['documentType' => null, 'title' => 'Documents List', 'relatedProcess' => null, 'categoryId' => null])
+@props([
+    'documentType' => null, 
+    'title' => 'Documents List', 
+    'relatedProcess' => null, 
+    'categoryId' => null,
+    'customColumns' => []
+])
 
     <div class="card-body">
         <div class="table-responsive">
@@ -7,6 +13,10 @@
                     <tr>
                         <th>{{ __('N') }}</th>
                         <th>{{ __('Title') }}</th>
+                        {{-- إضافة الأعمدة المخصصة إذا وجدت --}}
+                        @foreach($customColumns as $column)
+                            <th>{{ __($column['title']) }}</th>
+                        @endforeach
                         <th>{{ __('Category') }}</th>
                         <th>{{ __('Status') }}</th>
                         <th>{{ __('Version') }}</th>
@@ -34,11 +44,22 @@
                     d.document_type = "{{ $documentType }}";
                     d.related_process = "{{ $relatedProcess }}";
                     d.category_id = "{{ $categoryId }}";
+                    
+                    // إضافة الأعمدة المخصصة للطلب AJAX
+                    @if(count($customColumns) > 0)
+                        d.custom_columns = @json($customColumns);
+                    @endif
                 }
             },
             columns: [
                 {data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false},
                 {data: 'title', name: 'title_en'},
+                
+                @foreach($customColumns as $column)
+                // إضافة تعريف كل عمود مخصص
+                {data: '{{ $column["data"] }}', name: '{{ $column["name"] ?? $column["data"] }}', orderable: {{ $column["orderable"] ?? 'true' }}, searchable: {{ $column["searchable"] ?? 'true' }}},
+                @endforeach
+                
                 {data: 'category', name: 'category.title_en'},
                 {data: 'status_badge', name: 'status.name', orderable: false, searchable: false},
                 {data: 'version', name: 'version', orderable: false, searchable: false},

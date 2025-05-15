@@ -24,20 +24,27 @@
                     <h5>{{ __('Create New Procedure') }}</h5>
                 </div>
                 <div class="card-body">
+                    <div class="alert alert-warning">
+                        {{ __('This action will be applied to the system you have specified') }}
+                        <span class="text-danger">{{ getIsoSystem(currentISOSystem())->name }}</span>
+                    </div>
                     {{ Form::open(['route' => 'tenant.document.procedures.store', 'method' => 'post', 'files' => true, 'id' => 'procedure-form']) }}
                     <div class="form-group col-md-12">
                         {{ Form::label('category_id', __('Category'), ['class' => 'form-label']) }}
-                        {{ Form::select('category_id', $categories, old('category_id'), ['class' => 'form-control hidesearch' , 'required' => 'required' ]) }}
+                        {{ Form::select('category_id', $categories, old('category_id'), ['class' => 'form-control hidesearch'  ]) }}
                     </div>
                     <div class="row">
                         <div class="form-group col-md-6">
                             {{ Form::label('procedure_name_ar', __('Procedure Name (arabic)') . ' <span class="text-danger">*</span>', ['class' => 'form-label'], false) }}
-                            {{ Form::text('procedure_name_ar', old('procedure_name_ar',''), ['class' => 'form-control', 'placeholder' => __('Enter Procedure Name (arabic)'), 'required' => 'required']) }}
+                            {{ Form::text('procedure_name_ar', old('procedure_name_ar',''), ['class' => 'form-control', 'placeholder' => __('Enter Procedure Name (arabic)')]) }}
                         </div>
-
+                        <div class="form-group col-md-6">
+                            {{ Form::label('procedure_code', __('Procedure Code') . ' <span class="text-danger">*</span>', ['class' => 'form-label'], false) }}
+                            {{ Form::text('procedure_code', old('procedure_code', $procedureCodeing), ['class' => 'form-control', 'placeholder' => __('Enter Procedure Code')]) }}
+                        </div>
                         <div class="form-group col-md-6">
                             {{ Form::label('procedure_name_en', __('Procedure Name (english)') . ' <span class="text-danger">*</span>', ['class' => 'form-label'], false) }}
-                            {{ Form::text('procedure_name_en', old('procedure_name_en',''), ['class' => 'form-control', 'placeholder' => __('Enter Procedure Name (english)'), 'required' => 'required']) }}
+                            {{ Form::text('procedure_name_en', old('procedure_name_en',''), ['class' => 'form-control', 'placeholder' => __('Enter Procedure Name (english)')]) }}
                         </div>
                         <div class="form-group col-md-6">
                             {{ Form::label('procedure_description_ar', __('Procedure Description (arabic)'), ['class' => 'form-label']) }}
@@ -49,16 +56,60 @@
                             {{ Form::textarea('procedure_description_en', old('procedure_description_en',''), ['class' => 'form-control', 'placeholder' => __('Enter Procedure Description (english)'), 'rows' => 2]) }}
                         </div>
 
+                        <div class="form-group col-md-6 mt-3">
+                            {{ Form::label('prepared_by', __('Preparer Name') . ' <span class="text-danger">*</span>', ['class' => 'form-label'], false) }}
+                            {{ Form::select('prepared_by', $users ?? [], old('prepared_by'), ['class' => 'form-control hidesearch']) }}
+                        </div>
+                        
+                        <div class="form-group col-md-6 mt-3">
+                            {{ Form::label('approved_by', __('Approver Name') . ' <span class="text-danger">*</span>', ['class' => 'form-label'], false) }}
+                            {{ Form::select('approved_by', $users ?? [], old('approved_by'), ['class' => 'form-control hidesearch']) }}
+                        </div>
+                        
+                        <div class="form-group col-md-6 mt-3">
+                            {{ Form::label('reviewers', __('Reviewer Name'), ['class' => 'form-label']) }}
+                            {{ Form::select('reviewers[]', $users ?? [], old('reviewers'), ['class' => 'form-control hidesearch', 'multiple' => 'multiple']) }}
+                            <small class="text-muted">{{ __('You can select multiple reviewers') }}</small>
+                        </div>
+    
+                        <div class="form-group col-md-6 mt-3">
+                            {{ Form::label('issue_date', __('Issue Date') . ' <span class="text-danger">*</span>', ['class' => 'form-label'], false) }}
+                            <div class="input-group date">
+                                {{ Form::text('issue_date', old('issue_date'), ['class' => 'form-control' . ($errors->has('issue_date') ? ' is-invalid' : ''), 'id' => 'issue_date', 'placeholder' => 'YYYY-MM-DD', 'autocomplete' => 'off']) }}
+                                <span class="input-group-text bg-primary">
+                                    <i class="ti ti-calendar text-white"></i>
+                                </span>
+                            </div>
+                            
+                        </div>
+    
+                        <div class="form-group col-md-6 mt-3">
+                            {{ Form::label('expiry_date', __('Expiry Date') . ' <span class="text-danger">*</span>', ['class' => 'form-label'], false) }}
+                            <span class="text-red-200">{{ __('Default value is 3 years from issue date') }}</span>
+                            <div class="input-group date">
+                                {{ Form::text('expiry_date', old('expiry_date'), ['class' => 'form-control' . ($errors->has('expiry_date') ? ' is-invalid' : ''), 'id' => 'expiry_date', 'placeholder' => 'YYYY-MM-DD', 'autocomplete' => 'off']) }}
+                                <span class="input-group-text bg-primary">
+                                    <i class="ti ti-calendar text-white"></i>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="form-group col-md-6 mt-3">
+                            {{ Form::label('reminder_days', __('Reminder Before Expiry') . ' <span class="text-danger">*</span>', ['class' => 'form-label'], false) }}
+                            <div class="input-group">
+                                {{ Form::number('reminder_days', old('reminder_days'), ['class' => 'form-control' . ($errors->has('reminder_days') ? ' is-invalid' : ''), 'min' => '1', 'max' => '365', 'id' => 'reminder_days']) }}
+                                <span class="input-group-text bg-info">
+                                    <i class="ti ti-bell text-white"></i>
+                                </span>
+                            </div>
+                            <small class="text-muted">{{ __('Number of days before expiry to send reminder') }}</small>
+                        </div>
+
                     </div>
 
 
 
-                    <div class="form-group col-md-12"  style="display: none;">
-                        <label for="attachments" class="form-label">{{ __('Attachments') }}</label>
-                        <input type="file" name="attachments[]" id="attachments" class="form-control" multiple value="{{ old('attachments') }}">
-                        <small class="text-muted">{{ __('You can select multiple files') }}</small>
-                    </div>
-
+                   
                     <div class="form-group col-md-6" style="display: none;">
                         {{ Form::label('is_optional', __('Required Procedure'), ['class' => 'form-label d-block']) }}
                         <div class="form-check form-check-inline">
@@ -70,6 +121,12 @@
                             {{ Form::label('Required', __('Required'), ['class' => 'form-check-label']) }}
                         </div>
                     </div>
+
+                   
+
+                   
+
+
 
                     <div class="form-group col-md-6">
                         {{ Form::label('status', __('Status'), ['class' => 'form-label d-block']) }}
@@ -124,7 +181,7 @@
                         </div>
                         <div class="text-end mt-3">
                             <button type="button" class="btn btn-secondary" onclick="window.history.back()">{{ __('Cancel') }}</button>
-                            <button type="button" id="save-configuration" class="btn btn-primary">{{ __('Save Configuration') }}</button>
+                            <button type="button" id="save-configuration" class="btn btn-primary">{{ __('Save') }}</button>
                         </div>
                     </div>
                     
@@ -181,6 +238,7 @@
                             $('#procedure-form').hide();
                             
                             // Initialize any scripts needed for the config form
+                            initConfigScripts();
                         } else {
                             // Show error message
                             toastrs('Error', response.message || 'An error occurred. Please try again.', 'error');
@@ -218,15 +276,77 @@
             
             // Function to initialize scripts for the config form
             function initConfigScripts() {
-                // This function will be called after the config form is loaded
-                // Any initialization for the config form can be added here
-                
-                // Add row to dynamic tables
-                $('.save-configuration').on('click', function(event) {
+               
+                $('#save-configuration').on('click', function(event) {
                     event.preventDefault();
+                    
                     sendAllFormData();
                 });
             }
+            
+            // Function to collect and send all form data
+            function sendAllFormData() {
+                // جمع البيانات من جميع الحقول في النموذج
+                var formData = new FormData();
+                
+                // جمع البيانات من النموذج الرئيسي
+                var procedureId = $('#procedure-config-container').attr('data-procedure-id');
+                // إضافة بيانات الإجراء المجمعة من الواجهة
+                var procedureSetupData = {};
+                
+                // استدعاء دالة collectAllFormData() لجمع البيانات
+                if (typeof collectAllFormData === 'function') {
+                    procedureSetupData = collectAllFormData();
+                } else {
+                    console.error('collectAllFormData الدالة غير موجودة');
+                }
+                
+                // إضافة البيانات إلى FormData
+                formData.append('procedure_id', procedureId);
+                formData.append('procedure_setup_data', JSON.stringify(procedureSetupData));
+                formData.append('category_id', $('#category_id').val());
+                
+                // عرض رسالة تحميل
+                Swal.fire({
+                    title: '{{ __('Saving...') }}',
+                    text: '{{ __('Please wait while saving the data') }}',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    showConfirmButton: false,
+                    willOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                
+                // إرسال البيانات إلى الخادم
+                $.ajax({
+                    url: '{{ route("tenant.document.procedures.saveConfigure", "__PLACEHOLDER__") }}'.replace('__PLACEHOLDER__', procedureId),
+                    method: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function(response) {
+                        Swal.close();
+                        if (response.status === 'success') {
+                            notifier.show('Success','{{ __('Data saved successfully') }}', 'success',successImg, 4000);
+                            window.location.href = '{{ $redirectUrl }}';
+                        } else {
+                            notifier.show('Error',response.message || '{{ __('An error occurred while saving the data') }}', 'error',errorImg, 4000);
+                        }
+                    },
+                    error: function(xhr) {
+                        Swal.close();
+                        notifier.show('Error!', '{{ __("An unexpected error occurred.") }}', 'error', errorImg, 4000);
+                        console.error(xhr.responseText);
+                    }
+                });
+            }
+            
+            // ملاحظة: تم استبدال هذه الدالة بدالة collectAllFormData التي تم تعريفها في ملف procedure.blade.php
         });
     </script>
 @endpush
+

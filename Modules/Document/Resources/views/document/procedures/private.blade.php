@@ -29,6 +29,7 @@
                        title="{{ __('Private Procedure List') }}" 
                        relatedProcess="Modules\Document\Entities\Procedure" 
                        :categoryId=$category_id
+                       :customColumns="$customColumns"
                      />
                     </div>
     

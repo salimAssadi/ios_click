@@ -396,10 +396,10 @@
                                     <td>
                                         <select name="procedures[{{ $index }}][col-4]" class="form-control">
                                             <option value="">اختر المسؤول</option>
-                                            @foreach ($jobRoles as $jobRole)
-                                                <option value="{{ $jobRole->id }}"
-                                                    {{ isset($row['col-4']) && $row['col-4'] == $jobRole->id ? 'selected' : '' }}>
-                                                    {{ $jobRole->name }}
+                                            @foreach ($users as $user)
+                                                <option value="{{ $user->user_id }}"
+                                                    {{ isset($row['col-4']) && $row['col-4'] == $user->user_id ? 'selected' : '' }}>
+                                                    {{ $user->name }}
                                                 </option>
                                             @endforeach
                                         </select>
@@ -883,9 +883,9 @@
                         <td>
                             <select name="procedures[${rowCount}][col-4]" class="form-control">
                                 <option value="">اختر المسؤولية</option>
-                                @foreach ($jobRoles as $item)
-                                    <option value="{{ $item->id }}" {{ isset($row['col-4']) && $row['col-4'] == $item->id ? 'selected' : '' }}>
-                                        {{ $item->title }}
+                                @foreach ($users as $user)
+                                    <option value="{{ $user->user_id }}" {{ isset($row['col-4']) && $row['col-4'] == $user->user_id ? 'selected' : '' }}>
+                                        {{ $user->name }}
                                     </option>
                                 @endforeach
                             </select>
@@ -1208,10 +1208,10 @@
     $(document).ready(function() {
         //placeholder variables
         const variables = {
-            companyName: 'أسdaf',
-            isoSystemAndCodeAndVersion: 'ISO 9001:2015',
-            companyFirstName: 'محمد',
-            companyShortCode: "ASDF"
+            companyName: '{{ getSettingsValByName("company_name") }}',
+            isoSystemAndCodeAndVersion: 'ISO {{ getIsoSystem(1)->code }} {{ getIsoSystem(1)->version }}',
+            companyFirstName: '{{ getSettingsValByName("company_name") }}',
+            companyShortCode: "{{ getSettingsValByName("company_symbol") }}"
         };
 
         // وظيفة استبدال البليسهولدر
@@ -1223,16 +1223,18 @@
             });
         }
 
-        // Replace placeholder
-        $('#replacePlaceholdersBtn').on('click', function() {
 
-            // Replace placeholders in all text fields or textareas
-            $('input[type="text"], textarea').each(function() {
+        // Replace placeholder
+      function replacePlaceholdersInForm() {
+        $('input[type="text"], textarea').each(function() {
                 const currentValue = $(this).val();
                 const newValue = replacePlaceholders(currentValue, variables);
                 $(this).val(newValue);
             });
-        });
+        }
+
+        // Replace placeholder
+        replacePlaceholdersInForm();
 
     });
 </script>

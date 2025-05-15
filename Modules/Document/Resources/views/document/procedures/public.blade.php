@@ -29,6 +29,7 @@
                         title="{{ __('Public Procedure List') }}" 
                         relatedProcess="Modules\Document\Entities\Procedure" 
                         :categoryId="2"
+                        :customColumns="$customColumns"
                       />
                     </div>
                 </div>

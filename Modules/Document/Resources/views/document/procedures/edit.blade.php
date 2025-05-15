@@ -75,6 +75,7 @@
                             @csrf
                             @method('PUT')
                             <div class="row">
+                            <input type="hidden" name="iso_system_procedure_id" value="{{ $iso_system_Procedure->id }}">
                             <div class="form-group col-md-6">
                                 {{ Form::label('category_id', __('Category'), ['class' => 'form-label']) }}
                                 {{ Form::select('category_id', $categories, old('category_id', $procedure->category_id), ['class' => 'form-control hidesearch']) }}
@@ -122,7 +123,7 @@
                             <div class="form-group col-md-6 mt-3">
                                 {{ Form::label('issue_date', __('Issue Date') . ' <span class="text-danger">*</span>', ['class' => 'form-label'], false) }}
                                 <div class="input-group date">
-                                    {{ Form::text('issue_date', old('issue_date', $document->lastVersion->issue_date), ['class' => 'form-control' . ($errors->has('issue_date') ? ' is-invalid' : ''), 'required' => 'required', 'id' => 'issue_date', 'placeholder' => 'YYYY-MM-DD', 'autocomplete' => 'off']) }}
+                                    {{ Form::text('issue_date', old('issue_date', $document?->lastVersion->issue_date), ['class' => 'form-control' . ($errors->has('issue_date') ? ' is-invalid' : ''), 'required' => 'required', 'id' => 'issue_date', 'placeholder' => 'YYYY-MM-DD', 'autocomplete' => 'off']) }}
                                     <span class="input-group-text bg-primary">
                                         <i class="ti ti-calendar text-white"></i>
                                     </span>
@@ -134,7 +135,7 @@
                                 {{ Form::label('expiry_date', __('Expiry Date') . ' <span class="text-danger">*</span>', ['class' => 'form-label'], false) }}
                                 <span class="text-red-200">{{ __('Default value is 3 years from issue date') }}</span>
                                 <div class="input-group date">
-                                    {{ Form::text('expiry_date', old('expiry_date', $document->lastVersion->expiry_date), ['class' => 'form-control' . ($errors->has('expiry_date') ? ' is-invalid' : ''), 'required' => 'required', 'id' => 'expiry_date', 'placeholder' => 'YYYY-MM-DD', 'autocomplete' => 'off']) }}
+                                    {{ Form::text('expiry_date', old('expiry_date', $document?->lastVersion->expiry_date), ['class' => 'form-control' . ($errors->has('expiry_date') ? ' is-invalid' : ''), 'required' => 'required', 'id' => 'expiry_date', 'placeholder' => 'YYYY-MM-DD', 'autocomplete' => 'off']) }}
                                     <span class="input-group-text bg-primary">
                                         <i class="ti ti-calendar text-white"></i>
                                     </span>
@@ -144,7 +145,7 @@
                             <div class="form-group col-md-6 mt-3">
                                 {{ Form::label('reminder_days', __('Reminder Before Expiry') . ' <span class="text-danger">*</span>', ['class' => 'form-label'], false) }}
                                 <div class="input-group">
-                                    {{ Form::number('reminder_days', old('reminder_days', $document->lastVersion->reminder_days), ['class' => 'form-control' . ($errors->has('reminder_days') ? ' is-invalid' : ''), 'required' => 'required', 'min' => '1', 'max' => '365', 'id' => 'reminder_days']) }}
+                                    {{ Form::number('reminder_days', old('reminder_days', $document?->lastVersion->reminder_days), ['class' => 'form-control' . ($errors->has('reminder_days') ? ' is-invalid' : ''), 'required' => 'required', 'min' => '1', 'max' => '365', 'id' => 'reminder_days']) }}
                                     <span class="input-group-text bg-info">
                                         <i class="ti ti-bell text-white"></i>
                                     </span>
@@ -196,6 +197,9 @@
                         </h2>
                         <div id="collapseConfig" class="accordion-collapse collapse" aria-labelledby="headingConfig" data-bs-parent="#procedureAccordion">
                             <div class="accordion-body">
+                                @php
+                                    
+                                @endphp
                                 @include('document::document.procedures.config.procedure', [
                                     'purposes' => $purposes,
                                     'scopes' => $scopes,
@@ -205,6 +209,7 @@
                                     'procedures' => $procedures,
                                     'risk_matrix' => $risk_matrix,
                                     'kpis' => $kpis,
+                                    'users' => $users,
                                 ])
 
                                 <div class="text-end mt-3">
@@ -307,7 +312,17 @@
             
             // Collect all form data using the function from procedure.blade.php
             const configData = collectAllFormData();
-            
+             // عرض رسالة تحميل
+             Swal.fire({
+                    title: '{{ __('Saving...') }}',
+                    text: '{{ __('Please wait while saving the data') }}',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    showConfirmButton: false,
+                    willOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
             $.ajax({
                 url: '{{ route("tenant.document.procedures.saveConfigure", $procedure->id) }}',
                 method: 'POST',
@@ -317,12 +332,14 @@
                     category_id: '{{ $procedure->category_id }}'
                 },
                 success: function(response) {
+                    Swal.close();
                     notifier.show('Success!', response.message || '{{ __('Configuration saved successfully') }}', 'success',successImg, 4000);
                     button.html(originalText);
                     button.prop('disabled', false);
                     $('#save-procedure').prop('disabled', false);
                 },
                 error: function(xhr) {
+                    Swal.close();
                     button.html(originalText);
                     button.prop('disabled', false);
                     $('#save-procedure').prop('disabled', false);

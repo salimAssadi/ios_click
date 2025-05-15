@@ -37,8 +37,8 @@ class IsoSystemProcedure extends BaseModel
         'parent_id',
     ];
 
-    protected $cast =[
-        'data' =>'object'
+    protected $casts = [
+        'data' => 'array'
     ];
     /**
      * Get the ISO system associated with this procedure.

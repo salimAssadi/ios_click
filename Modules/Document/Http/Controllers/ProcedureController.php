@@ -24,7 +24,7 @@ use Modules\Setting\Entities\Position;
 use Meneses\LaravelMpdf\Facades\LaravelMpdf;
 use Illuminate\Support\Facades\File;
 use Modules\Tenant\Entities\User;
-
+use Modules\Setting\Entities\Employee;
 
 class ProcedureController extends BaseModuleController
 {
@@ -51,21 +51,57 @@ class ProcedureController extends BaseModuleController
         $system_id = getSettingsValByName('current_iso_system');
         $category_id = '1';
         $used_procedures = IsoSystemProcedure::where('iso_system_id',$system_id)->where('data','<>',null)->with(['isoSystem','procedure'])->get();
-        return view($this->viewPath . '.main', compact('used_procedures','orginal_procedures','category_id'));
+        
+        // تعريف الأعمدة المخصصة للجدول
+        $customColumns = [
+            [
+                'data' => 'procedure_coding',
+                'title' => __('Procedure Code'),
+                'name' => 'documentable.procedure_coding',
+                'orderable' => true,
+                'searchable' => true,
+                'raw' => false,
+                'default' => '-'
+            ]
+        ];
+        
+        return view($this->viewPath . '.main', compact('used_procedures', 'orginal_procedures', 'category_id', 'customColumns'));
     }
 
     public function publicProcedures()
     {
         $procedures = Procedure::where('category_id', '2')->paginate(20);
         $category_id = '2';
-        return view($this->viewPath . '.public', compact('procedures','category_id'));
+        $customColumns = [
+            [
+                'data' => 'procedure_coding',
+                'title' => __('Procedure Code'),
+                'name' => 'documentable.procedure_coding',
+                'orderable' => true,
+                'searchable' => true,
+                'raw' => false,
+                'default' => '-'
+            ]
+        ];
+        return view($this->viewPath . '.public', compact('procedures','category_id','customColumns'));
     }
 
     public function privateProcedures()
     {
         $procedures = Procedure::where('category_id', '3')->paginate(20);
         $category_id = '3';
-        return view($this->viewPath . '.private', compact('procedures','category_id'));
+        $customColumns = [
+            [
+                'data' => 'procedure_coding',
+                'title' => __('Procedure Code'),
+                'name' => 'documentable.procedure_coding',
+                'orderable' => true,
+                'searchable' => true,
+                'raw' => false,
+                'default' => '-'
+            ]
+        ];
+        return view($this->viewPath . '.private', compact('procedures','category_id','customColumns'));
     }
 
     /**
@@ -75,8 +111,11 @@ class ProcedureController extends BaseModuleController
     public function create(Request $request)
     {
         $category_id = $request->category_id;
+        $users = User::whereHas('employee')->get()->pluck('name', 'id');
+        $procedureCodeing =getSettingsValByName('company_symbol').'-'.generateProcedureCoding(getIsoSystemSymbol(currentISOSystem()),null);
         $categories = Category::where('id',$category_id)->get()->pluck('title', 'id');
-        return view($this->viewPath . '.create', compact('categories'));
+        $redirectUrl = url()->previous(); // Correct way
+        return view($this->viewPath . '.create', compact('categories','users','procedureCodeing','redirectUrl'));
     }
 
     
@@ -126,9 +165,17 @@ class ProcedureController extends BaseModuleController
             'procedure_description_ar' => 'nullable|string|max:1000',
             'is_optional' => 'nullable|boolean',
             'status' => 'required|boolean',
+            'procedure_code' => 'required|string|max:50',
+            'prepared_by' => 'required|exists:users,id',
+            'approved_by' => 'required|exists:users,id',
+            'reviewers' => 'nullable|array',
+            'issue_date' => 'required|date',
+            'expiry_date' => 'required|date|after:issue_date',
+            'reminder_days' => 'required|integer|min:1|max:365',
             'attachments.*' => 'file|mimes:pdf,doc,docx,xls,xlsx|max:10240',
         ]);
-
+         $request->procedure_setup_data = json_encode([]);
+        $users = Employee::where('user_id','!=',null)->get();
         if ($validator->fails()) {
             if ($request->ajax()) {
                 return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
@@ -152,24 +199,30 @@ class ProcedureController extends BaseModuleController
             $procedure->enable_editor = $request->has('enable_editor') ? 1 : 0;
             $procedure->blade_view = '';
             $procedure->save();
-
-            // Handle file uploads
-            if ($request->hasFile('attachments')) {
-                foreach ($request->file('attachments') as $file) {
-                    $fileName = time() . '_' . $file->getClientOriginalName();
-                    $filePath = $file->storeAs('procedure_attachments', $fileName, 'public');
-                    // Create new attachment without triggering the procedure's deleting event
-                    ProcedureAttachment::create([
-                        'procedure_id' => $procedure->id,
-                        'file_name' => $fileName,
-                        'original_name' => $file->getClientOriginalName(),
-                        'file_path' => $filePath,
-                        'mime_type' => $file->getMimeType(),
-                        'file_size' => $file->getSize(),
-                    ]);
-                }
+            $iso_system_Procedure = new IsoSystemProcedure();
+            $iso_system_Procedure->iso_system_id = currentISOSystem();
+            $iso_system_Procedure->procedure_id = $procedure->id;
+            $iso_system_Procedure->category_id = $request->input('category_id');
+            $iso_system_Procedure->procedure_coding = getSettingsValByName('company_symbol').'-'.generateProcedureCoding(getIsoSystemSymbol(currentISOSystem()),$procedure->id);
+            $iso_system_Procedure->data =  json_encode([]);
+            $iso_system_Procedure->created_by = auth('tenant')->user()->id;
+            $iso_system_Procedure->parent_id = auth('tenant')->user()->id;
+            $iso_system_Procedure->save();
+            $document=[
+                'prepared_by' => $request->prepared_by,
+                'approved_by' => $request->approved_by,
+                'reviewer_ids' => $request->has('reviewers') ? json_encode($request->input('reviewers')) : null,
+                'issue_date' => $request->issue_date,
+                'expiry_date' => $request->expiry_date,
+                'reminder_days' => $request->reminder_days,
+            ];
+            $check_type=$request->category_id;
+            if($check_type == '2'){
+                $this->SaveDocument($request,$procedure->id,'public',$document);
+            }else{
+                $this->SaveDocument($request,$procedure->id,'private',$document);
             }
-
+            
             DB::commit();
             
             // If it's an AJAX request, return JSON
@@ -177,11 +230,12 @@ class ProcedureController extends BaseModuleController
                 // Prepare config data for the view
                 $jobRoles = Position::get();
                 $departments = Department::get();
-                $contentData = $procedure->content ?? [];
+                $contentData = $iso_system_Procedure->data ?? [];
                 
                 // Render the config view as HTML
                 $configView = view($this->viewPath . '.config.procedure', [
                     'procedure' => $procedure,
+                    'iso_system_Procedure' => $iso_system_Procedure,
                     'jobRoles' => $jobRoles,
                     'departments' => $departments,
                     'purposes' => ($contentData['purpose'] ?? []),
@@ -192,6 +246,7 @@ class ProcedureController extends BaseModuleController
                     'procedures' => ($contentData['procedures'] ?? []),
                     'risk_matrix' => ($contentData['risk_matrix'] ?? []),
                     'kpis' => ($contentData['kpis'] ?? []),
+                    'users' => $users,
                 ])->render();
                 
                 return response()->json([
@@ -219,7 +274,6 @@ class ProcedureController extends BaseModuleController
     /**
      * Display the specified resource.
      */
-
     public function show(string $id)
     {
         $id = Crypt::decrypt($id);
@@ -239,40 +293,81 @@ class ProcedureController extends BaseModuleController
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id , $category_id =null)
+    public function edit(string $id, $category_id = null)
     {   
-        $id = Crypt::decrypt($id);
-        $category_id = Crypt::decrypt($category_id);
-        $procedure = Procedure::where(['id'=> $id,'category_id'=>$category_id])->first();
-        $document = Document::where('documentable_id', $id)->with('documentable','lastVersion')->first();
-        if (!$procedure) {
-            return redirect()->back()->with('error', __('Not Found'));
+        try {
+            $id = Crypt::decrypt($id);
+            $category_id = Crypt::decrypt($category_id);
+            
+            // Get the IsoSystemProcedure with its related procedure
+            $iso_system_Procedure = IsoSystemProcedure::where([
+                'procedure_id' => $id,
+                'category_id' => $category_id,
+                'iso_system_id' => currentISOSystem()
+            ])->with('procedure')->first();
+            
+            if (!$iso_system_Procedure || !$iso_system_Procedure->procedure) {
+                return redirect()->back()->with('error', __('Not Found'));
+            }
+            
+            $procedure = $iso_system_Procedure->procedure;
+            
+            // Get related document
+            $document = Document::where('documentable_id', $iso_system_Procedure->id)
+                              ->where('documentable_type', 'Modules\\Document\\Entities\\IsoSystemProcedure')
+                              ->with('documentable', 'lastVersion')
+                              ->first();
+            
+            $procedureCodeing = $iso_system_Procedure->procedure_coding ?? 
+                                getSettingsValByName('company_symbol').'-'.generateProcedureCoding(getIsoSystemSymbol(currentISOSystem()), $procedure->id);
+            
+            $users = Employee::where('user_id','!=',null)->get();
+            $jobRoles = Position::get();
+            $departments = Department::get();
+            
+            // Make sure data is in the correct format
+            $contentData = [];
+            if (!empty($iso_system_Procedure->data)) {
+                if (is_string($iso_system_Procedure->data)) {
+                    $contentData = json_decode($iso_system_Procedure->data, true) ?: [];
+                } else if (is_array($iso_system_Procedure->data)) {
+                    $contentData = $iso_system_Procedure->data;
+                } else if (is_object($iso_system_Procedure->data)) {
+                    $contentData = (array)$iso_system_Procedure->data;
+                }
+            }
+            // $contentData = $iso_system_Procedure->data??[];
+            
+            // For debugging
+            \Log::info('Content Data Structure:', ['data' => $contentData]);
+            
+            $categories = Category::where('id', $category_id)->get()->pluck('title', 'id');
+            
+            return view($this->viewPath . '.edit', [
+                'procedure' => $procedure,
+                'iso_system_Procedure' => $iso_system_Procedure,
+                'categories' => $categories,
+                'procedureCodeing' => $procedureCodeing,
+                'selectedCategoryId' => $procedure->category_id,
+                'jobRoles' => $jobRoles,
+                'departments' => $departments,
+                'purposes' => ($contentData['purpose'] ?? []),
+                'scopes' => ($contentData['scope'] ?? []),
+                'responsibilities' => ($contentData['responsibility'] ?? []),
+                'definitions' => ($contentData['definitions'] ?? []),
+                'forms' => ($contentData['forms'] ?? []),
+                'procedures' => ($contentData['procedures'] ?? []),
+                'risk_matrix' => ($contentData['risk_matrix'] ?? []),
+                'kpis' => ($contentData['kpis'] ?? []),
+                'document' => $document,
+                'users' => $users,
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error in edit method: ' . $e->getMessage());
+            return redirect()->back()->with('error', __('An error occurred. Please try again.'));
         }
-        $procedureCodeing =getSettingsValByName('company_symbol').'-'.generateProcedureCoding(getIsoSystemSymbol(currentISOSystem()), $procedure->id);
-        $users = User::whereHas('employee')->get()->pluck('name', 'id');
-        $jobRoles = Position::get();
-        $departments = Department::get();
-        $contentData = $procedure->content ?? [];
-        $categories = Category::where('id', $category_id)->get()->pluck('title', 'id');
-        return view($this->viewPath . '.edit', [
-            'procedure' => $procedure,
-            'categories' => $categories,
-            'procedureCodeing' => $procedureCodeing,
-            'selectedCategoryId' => $procedure->category_id,
-            'jobRoles' => $jobRoles,
-            'departments' => $departments,
-            'purposes' => ($contentData['purpose'] ?? []),
-            'scopes' => ($contentData['scope'] ?? []),
-            'responsibilities' => ($contentData['responsibility'] ?? []),
-            'definitions' => ($contentData['definitions'] ?? []),
-            'forms' => ($contentData['forms'] ?? []),
-            'procedures' => ($contentData['procedures'] ?? []),
-            'risk_matrix' => ($contentData['risk_matrix'] ?? []),
-            'kpis' => ($contentData['kpis'] ?? []),
-            'document' => $document,
-            'users' => $users,
-        ]);
     }
+
 
     /**
      * Update the specified resource in storage.
@@ -296,6 +391,7 @@ class ProcedureController extends BaseModuleController
             'expiry_date' => 'required|date|after:issue_date',
             'reminder_days' => 'required|integer|min:1|max:365',
             'attachments.*' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx|max:10240',
+            'iso_system_procedure_id' => 'required|exists:iso_system_procedures,id',
         ]);
 
         if ($validator->fails()) {
@@ -311,7 +407,7 @@ class ProcedureController extends BaseModuleController
         try {
 
             $procedure = Procedure::findOrFail($id);
-
+            $iso_system_Procedure = IsoSystemProcedure::findOrFail($request->input('iso_system_procedure_id'));
             // Update the procedure data
             $procedure->category_id = $request->input('category_id');
             $procedure->procedure_name_ar = $request->input('procedure_name_ar');
@@ -324,7 +420,7 @@ class ProcedureController extends BaseModuleController
             $procedure->save();
 
             // Update document version if exists
-            $document = Document::where('documentable_id', $id)->where('documentable_type', Procedure::class)->first();
+            $document = Document::where('documentable_id', $iso_system_Procedure->id)->where('documentable_type', IsoSystemProcedure::class)->first();
             
             if ($document && $document->lastVersion) {
                 $document->update([
@@ -445,8 +541,10 @@ class ProcedureController extends BaseModuleController
         $departments = Department::get();
         $contentData = $procedure->content??[];
         $pageTitle = __('Configure') . ' ' . $procedure->procedure_name;
+        $users = Employee::where('user_id','!=',null)->get();
         // dd($contentData);
         return view('document::document.procedures.configure', [
+
             'pageTitle' => $pageTitle,
             'procedure' => $procedure,
             'jobRoles' => $jobRoles,
@@ -459,6 +557,7 @@ class ProcedureController extends BaseModuleController
             'procedures' => ($contentData['procedures'] ?? []),
             'risk_matrix' => ($contentData['risk_matrix'] ?? []),
             'kpis' => ($contentData['kpis'] ?? []),
+            'users' => $users,
         ]);
     }
 
@@ -479,11 +578,12 @@ class ProcedureController extends BaseModuleController
             ]);
             $category_id = $request->category_id;
             if($category_id == 1){
-                $this->SaveMainProcedure($request,$id);
+                // $this->SaveMainProcedure($request,$id);
+                $this->SaveDocument($request,$id,'main',null);
             }elseif($category_id == 2){
-                $this->SavePublicPrivateProcedure($request,$id,'public');
+                $this->SaveDocument($request,$id,'public',null);
             }elseif($category_id == 3){
-                $this->SavePublicPrivateProcedure($request,$id,'private');
+                $this->SaveDocument($request,$id,'private',null);
             }
            
            
@@ -505,40 +605,81 @@ class ProcedureController extends BaseModuleController
             }else{
                 return response()->json(['message' => __('Error while saving data')], 500);
             }
-                
-            $docucment_number = 'MP-'.date('YmdHis');
             
             // Generate and save PDF
+            $docucment_number = 'MP-'.date('YmdHis');
             $pdfPath = $this->generatePDF($procedCofig->procedure,$procedCofig->data,'main', $docucment_number);
-            $document = new Document();
-            $document->title_ar = $procedCofig->procedure->procedure_name_ar;
-            $document->title_en = $procedCofig->procedure->procedure_name_en;
-            $document->description_ar = $procedCofig->procedure->description_ar;
-            $document->description_en = $procedCofig->procedure->description_en;
-            $document->category_id = $request->category_id;
-            $document->document_number = $docucment_number;
-            $document->documentable_type = 'Modules\Document\Entities\IsoSystemProcedure';
-            $document->documentable_id = $procedCofig->id;
-            $document->document_type = 'procedure';
-            $document->status_id = 11; // Active by default
-            $document->creation_date = now();
-            $document->created_by = auth('tenant')->user()->id;
-            $document->save();
             
-            $procedCofig->document()->save($document);
+            // Check if a document already exists for this procedure
+            $existingDocument = Document::where('documentable_type', 'Modules\Document\Entities\IsoSystemProcedure')
+                                    ->where('documentable_id', $procedCofig->id)
+                                    ->first();
+            
+            if ($existingDocument) {
+                // Update existing document
+                $existingDocument->title_ar = $procedCofig->procedure->procedure_name_ar;
+                $existingDocument->title_en = $procedCofig->procedure->procedure_name_en;
+                $existingDocument->description_ar = $procedCofig->procedure->description_ar;
+                $existingDocument->description_en = $procedCofig->procedure->description_en;
+                $existingDocument->category_id = $request->category_id;
+                $existingDocument->save();
+                
+                // Create a new version for the existing document
+                $latestVersion = DocumentVersion::where('document_id', $existingDocument->id)
+                                    ->orderBy('version', 'desc')
+                                    ->first();
+                
+                $newVersionNumber = $latestVersion ? (float)$latestVersion->version + 0.1 : 1.0;
+                
+                $version = new DocumentVersion();
+                $version->document_id = $existingDocument->id;
+                $version->version = (string)$newVersionNumber;
+                $version->issue_date = null;
+                $version->expiry_date = null;
+                $version->status_id = 17; // Active status
+                $version->file_path = $pdfPath;
+                $version->storage_path = $pdfPath;
+                $version->is_active = true;
+                $version->created_by = auth('tenant')->user()->id;
+                $version->save();
+                
+                // Set previous versions to inactive
+                DocumentVersion::where('document_id', $existingDocument->id)
+                    ->where('id', '!=', $version->id)
+                    ->update(['is_active' => false]);
+                
+            } else {
+                // Create new document
+                $document = new Document();
+                $document->title_ar = $procedCofig->procedure->procedure_name_ar;
+                $document->title_en = $procedCofig->procedure->procedure_name_en;
+                $document->description_ar = $procedCofig->procedure->description_ar;
+                $document->description_en = $procedCofig->procedure->description_en;
+                $document->category_id = $request->category_id;
+                $document->document_number = $docucment_number;
+                $document->documentable_type = 'Modules\Document\Entities\IsoSystemProcedure';
+                $document->documentable_id = $procedCofig->id;
+                $document->document_type = 'procedure';
+                $document->status_id = 11; // Active by default
+                $document->creation_date = now();
+                $document->created_by = auth('tenant')->user()->id;
+                $document->save();
+                
+                $procedCofig->document()->save($document);
 
-            // Create the initial document version
-            $version = new DocumentVersion();
-            $version->document_id = $document->id;
-            $version->version = '1.0';
-            $version->issue_date = null;
-            $version->expiry_date = null;
-            $version->status_id = 17; // Active status
-            $version->file_path = $pdfPath;
-            $version->storage_path = $pdfPath;
-            $version->is_active = true;
-            $version->created_by = auth('tenant')->user()->id;
-            $version->save();
+                // Create the initial document version
+                $version = new DocumentVersion();
+                $version->document_id = $document->id;
+                $version->version = '1.0';
+                $version->issue_date = null;
+                $version->expiry_date = null;
+                $version->status_id = 17; // Active status
+                $version->file_path = $pdfPath;
+                $version->storage_path = $pdfPath;
+                $version->is_active = true;
+                $version->created_by = auth('tenant')->user()->id;
+                $version->save();
+            }
             
             return response()->json([
                 'status' => 'success'
@@ -549,64 +690,113 @@ class ProcedureController extends BaseModuleController
         }
     }
 
-    public function SavePublicPrivateProcedure($request,$id,$type)
+    public function SaveDocument($request,$procedure_id,$type,$documentdata=[])
     {
         try {
             $system_id = getSettingsValByName('current_iso_system');
             $procedureData = json_decode($request->procedure_setup_data, true);
-            $procedure= Procedure::where('id', $id)->first();
-            if($procedure){
-                $procedure->content = $procedureData;
-                $procedure->save();
-            }else{
-                return response()->json(['message' => __('Error while saving data')], 500);
+            $iso_system_Procedure= IsoSystemProcedure::where('procedure_id', $procedure_id)->where('iso_system_id', $system_id)->with('procedure')->first();
+            if($iso_system_Procedure){
+                $iso_system_Procedure->data = $procedureData;
+                $iso_system_Procedure->save();
             }
+            $procedure= $iso_system_Procedure->procedure;
+          
+            $procedure->procedure_coding =  $iso_system_Procedure->procedure_coding;
             
+
             if($type == 'public'){
                 $docucment_number = 'PP-'.date('YmdHis');
-            }else{
+            }elseif($type == 'private'){
                 $docucment_number = 'PRP-'.date('YmdHis');
+            }elseif($type == 'main'){
+                $docucment_number = 'MP-'.date('YmdHis');
             }
-            
-            
             
             // Generate and save PDF
             $pdfPath = $this->generatePDF($procedure,$procedureData, $type,$docucment_number);
-            $document = new Document();
-            $document->title_ar = $procedure->procedure_name_ar;
-            $document->title_en = $procedure->procedure_name_en;
-            $document->description_ar = $procedure->description_ar;
-            $document->description_en = $procedure->description_en;
-            $document->category_id = $request->category_id;
-            $document->document_number = $docucment_number;
-            $document->documentable_type = 'Modules\Document\Entities\Procedure';
-            $document->documentable_id = $id;
-            $document->document_type = 'procedure';
-            $document->status_id = 11; // Active by default
-            $document->creation_date = now();
-            $document->created_by = auth('tenant')->user()->id;
-            $document->save();
             
-            $procedure->document()->save($document);
+            // Check if a document already exists for this procedure
+            $existingDocument = Document::where('documentable_type', 'Modules\Document\Entities\IsoSystemProcedure')
+                                    ->where('documentable_id', $iso_system_Procedure->id)
+                                    ->first();
+            if ($existingDocument) {
+                // Update existing document
+                $existingDocument->title_ar = $procedure->procedure_name_ar;
+                $existingDocument->title_en = $procedure->procedure_name_en;
+                $existingDocument->description_ar = $procedure->description_ar;
+                $existingDocument->description_en = $procedure->description_en;
+                $existingDocument->category_id = $request->category_id;
+                $existingDocument->save();
+                
+                // Create a new version for the existing document
+                $latestVersion = DocumentVersion::where('document_id', $existingDocument->id)
+                                    ->orderBy('version', 'desc')
+                                    ->first();
+                
+                $newVersionNumber = $latestVersion ? (float)$latestVersion->version + 0.1 : 1.0;
+                
+                $version = new DocumentVersion();
+                $version->document_id = $existingDocument->id;
+                $version->version = (string)$newVersionNumber;
+                $version->issue_date = $documentdata['issue_date']??null;
+                $version->expiry_date = $documentdata['expiry_date']??null;
+                $version->reminder_days = $documentdata['reminder_days']??null;
+                $version->status_id = 17; // Active status
+                $version->file_path = $pdfPath;
+                $version->storage_path = $pdfPath;
+                $version->is_active = true;
+                $version->created_by = auth('tenant')->user()->id;
+                $version->save();
+                
+                // Set previous versions to inactive
+                DocumentVersion::where('document_id', $existingDocument->id)
+                    ->where('id', '!=', $version->id)
+                    ->update(['is_active' => false]);
+                
+            } else {
+                // Create new document
+                $document = new Document();
+                $document->title_ar = $procedure->procedure_name_ar;
+                $document->title_en = $procedure->procedure_name_en;
+                $document->description_ar = $procedure->description_ar;
+                $document->description_en = $procedure->description_en;
+                $document->category_id = $request->category_id;
+                $document->document_number = $docucment_number;
+                $document->documentable_type = 'Modules\Document\Entities\IsoSystemProcedure';
+                $document->documentable_id = $iso_system_Procedure->id;
+                $document->reviewer_ids = $documentdata['reviewer_ids']??[];
+                $document->preparer_id = $documentdata['prepared_by']??null;
+                $document->approver_id = $documentdata['approved_by']??null;
+                $document->document_type = 'procedure';
+                $document->status_id = 11; // Active by default
+                $document->creation_date = now();
+                $document->created_by = auth('tenant')->user()->id;
+                $document->save();
+                
+                $iso_system_Procedure->document()->save($document);
 
-            // Create the initial document version
-            $version = new DocumentVersion();
-            $version->document_id = $document->id;
-            $version->version = '1';
-            $version->issue_date = null;
-            $version->expiry_date = null;
-            $version->status_id = 17; // Active status
-            $version->file_path = $pdfPath;
-            $version->storage_path = $pdfPath;
-            $version->is_active = true;
-            $version->created_by = auth('tenant')->user()->id;
-            $version->save();
+                // Create the initial document version
+                $version = new DocumentVersion();
+                $version->document_id = $document->id;
+                $version->version = '1.0';
+                $version->issue_date = $documentdata['issue_date']??null;
+                $version->expiry_date = $documentdata['expiry_date']??null;
+                $version->reminder_days = $documentdata['reminder_days']??null;
+                $version->status_id = 17; // Active status
+                $version->file_path = $pdfPath;
+                $version->storage_path = $pdfPath;
+                $version->is_active = true;
+                $version->created_by = auth('tenant')->user()->id;
+                $version->save();
+            }
             
             return response()->json([
                 'status' => 'success'
             ]);
 
         } catch (\Exception $e) {
+            throw $e;
             return response()->json(['message' => 'حدث خطأ أثناء حفظ البيانات: ' . $e->getMessage()], 500);
         }
     }
@@ -627,6 +817,10 @@ class ProcedureController extends BaseModuleController
             $viewData = [
                 'pageTitle' => $procedure->procedure_name,
                 'procedure' => $procedure,
+                'procedure_name' => $procedure->procedure_name,
+                'procedure_code' => $procedure->procedure_coding,
+                'Department_name_ar' =>'الإدارة العليا',
+                'Department_name_en' =>'Top Management',
                 'document_number' => $documentNumber,
                 'jobRoles' => $jobRoles,
                 'departments' => $departments,
@@ -708,4 +902,5 @@ class ProcedureController extends BaseModuleController
     {
         return Form::changeStatus($id);
     }
+
 }

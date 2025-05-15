@@ -42,14 +42,7 @@ class DocumentDatatableController extends Controller
             
             if ($category_id && strpos($document->documentable_type, 'Procedure') !== false) {
                 if (isset($category_id)) {
-                    switch ($category_id) {
-                        case 1:
-                            return route('tenant.document.procedures.configure', [$document->documentable_id]);
-                        case 2:
-                            return route('tenant.document.procedures.edit', [encrypt($document->documentable_id),encrypt($document->category_id)]);
-                        case 3:
-                            return route('tenant.document.procedures.edit', [encrypt($document->documentable_id),encrypt($document->category_id)]);
-                    }
+                    return route('tenant.document.procedures.edit', [encrypt($document->documentable_id),encrypt($document->category_id)]);
                 }
             }
             
@@ -73,6 +66,9 @@ class DocumentDatatableController extends Controller
             'document_type' => 'nullable|string',
             'related_process' => 'nullable|string',
             'category_id' => 'nullable|integer',
+            'custom_columns' => 'nullable|array',
+            'custom_columns.*.data' => 'required_with:custom_columns|string',
+            'custom_columns.*.title' => 'required_with:custom_columns|string',
         ]);
 
         if ($validator->fails()) {
@@ -121,8 +117,8 @@ class DocumentDatatableController extends Controller
             $query->where('category_id', $request->category_id);
         }
 
-        // Process with DataTables
-        return DataTables::of($query)
+        // إعداد DataTables
+        $dataTables = DataTables::of($query)
             ->addIndexColumn()
             ->addColumn('title', function ($document) {
                 return $document->title;
@@ -134,9 +130,58 @@ class DocumentDatatableController extends Controller
                 return $document->status_badge;
             })
             ->addColumn('version', function ($document) {
-                return $document->lastVersion?->version ;
-            })
-            ->addColumn('action', function ($document) {
+                return $document->lastVersion?->version;
+            });
+        
+        // إضافة الأعمدة المخصصة إذا وجدت
+        if ($request->filled('custom_columns') && is_array($request->custom_columns)) {
+            foreach ($request->custom_columns as $column) {
+                if (isset($column['data'])) {
+                    $dataTables->addColumn($column['data'], function ($document) use ($column) {
+                        // محاولة الحصول على البيانات من المستند أو العلاقات المرتبطة
+                        $field = $column['data'];
+                        $value = null;
+                        
+                        // فحص المستند نفسه
+                        if (isset($document->$field)) {
+                            $value = $document->$field;
+                        } 
+                        // فحص متغيرات متداخلة مثل documentable.fieldname
+                        elseif (str_contains($field, '.')) {
+                            $parts = explode('.', $field);
+                            $property = $document;
+                            foreach ($parts as $part) {
+                                if (is_object($property) && isset($property->$part)) {
+                                    $property = $property->$part;
+                                } else {
+                                    $property = null;
+                                    break;
+                                }
+                            }
+                            $value = $property;
+                        }
+                        // فحص الإصدار الأخير
+                        elseif ($document->lastVersion && isset($document->lastVersion->$field)) {
+                            $value = $document->lastVersion->$field;
+                        }
+                        // فحص المستندات المرتبطة
+                        elseif ($document->documentable && isset($document->documentable->$field)) {
+                            $value = $document->documentable->$field;
+                        }
+                        
+                        // معالجة واجهة مخصصة إذا كانت محددة
+                        if (isset($column['formatter']) && is_callable($column['formatter'])) {
+                            return $column['formatter']($value, $document);
+                        }
+                        
+                        // القيمة الافتراضية
+                        return $value !== null ? $value : (isset($column['default']) ? $column['default'] : '-');
+                    });
+                }
+            }
+        }
+        // إضافة عمود الإجراءات
+        $dataTables->addColumn('action', function ($document) {
                 $encryptedId = encrypt($document->id);
                 $actions = '';
                 
@@ -208,8 +253,21 @@ class DocumentDatatableController extends Controller
                 }
                 
                 return $actions;
-            })
-            ->rawColumns(['status_badge', 'action'])
+            });
+        
+        // تحديد الأعمدة التي تحتوي على HTML
+        $rawColumns = ['status_badge', 'action'];
+        
+        // إضافة أي أعمدة مخصصة تحتوي على HTML
+        if ($request->filled('custom_columns') && is_array($request->custom_columns)) {
+            foreach ($request->custom_columns as $column) {
+                if (isset($column['raw']) && $column['raw'] === true && isset($column['data'])) {
+                    $rawColumns[] = $column['data'];
+                }
+            }
+        }
+        
+        return $dataTables->rawColumns($rawColumns)
             ->make(true);
     }
 

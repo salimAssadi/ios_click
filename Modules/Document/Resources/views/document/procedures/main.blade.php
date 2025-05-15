@@ -1,28 +1,3 @@
-{{-- @extends('tenant::layouts.app')
-
-@section('page-title', __('Main Procedures'))
-@section('breadcrumb')
-    <li class="breadcrumb-item"><a href="{{ route('tenant.document.index') }}">{{ __('Documents') }}</a></li>
-    <li class="breadcrumb-item active">{{ __('Main Procedures') }}</li>
-@endsection
-
-@section('content')
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">{{ __('Main Procedures') }}</h5>
-                   
-                </div>
-                <div class="card-body">
-                    
-                </div>
-            </div>
-        </div>
-    </div>
-@endsection --}}
-
-
 @extends('tenant::layouts.app')
 
 @section('page-title', __('Main Procedures'))
@@ -64,7 +39,8 @@
                                     documentType="procedure" 
                                     title="{{ __('Procedures List') }}" 
                                     relatedProcess="Modules\\Document\\Entities\\IsoSystemProcedure" 
-                                    :categoryId="1" 
+                                    :categoryId="1"
+                                    :customColumns="$customColumns"
                                 />
                             </div>
 

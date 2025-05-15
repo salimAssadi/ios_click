@@ -2036,9 +2036,12 @@ if (!function_exists('authPage')) {
         function generateProcedureCoding(String $isoSystemSymbol, ?int $procedureId): string
         {
             $type = 'P';
-            if (empty($type) || empty($isoSystemSymbol) || empty($procedureId)) {
+            if (empty($type) || empty($isoSystemSymbol)) {
                 throw new InvalidArgumentException('Invalid input for procedure coding generation.');
             }
+           if (empty($procedureId)) {
+                $procedureId = Modules\Document\Entities\Procedure::max('id') + 1;
+             }
             $formattedProcedureId = sprintf('%02d', $procedureId);
             return "{$type}-{$isoSystemSymbol}-" . $formattedProcedureId;
         }
