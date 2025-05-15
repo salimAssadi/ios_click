@@ -222,8 +222,8 @@
                     success: function(response) {
                         if (response.success) {
                             // Show success message
-                            toastrs('success',response.message, 'success');
-                        
+                            notifier.show('Success!', response.message, 'success',successImg, 4000);
+
                             // Show config container
                             $('#procedure-config-container').show();
                             
@@ -241,7 +241,7 @@
                             initConfigScripts();
                         } else {
                             // Show error message
-                            toastrs('Error', response.message || 'An error occurred. Please try again.', 'error');
+                            notifier.show('Error!', response.message || 'An error occurred. Please try again.', 'error',errorImg, 4000);
                         }
                     },
                     error: function(xhr) {
@@ -262,7 +262,7 @@
                         }
                         
                         // Show error message
-                        toastrs('Error', errorMessage, 'error');
+                        notifier.show('Error!', errorMessage, 'error',errorImg, 4000);
                         
                         // Append error message above the form
 
