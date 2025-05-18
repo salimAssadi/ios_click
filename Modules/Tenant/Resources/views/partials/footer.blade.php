@@ -38,64 +38,7 @@
 <script src="{{ asset('assets/js/plugins/feather.min.js') }}"></script>
 <!-- Laravel Reverb للإشعارات في الوقت الحقيقي -->
 {{-- <script src="https://cdn.jsdelivr.net/npm/laravel-echo/dist/echo.iife.js"></script> --}}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/laravel-echo/1.19.0/echo.iife.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pusher/8.4.0/pusher.min.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // تأكد من تحميل الصفحة بالكامل قبل إعداد Echo
-        window.Echo = new Echo({
-            broadcaster: 'reverb',
-            key: '{{ config("broadcasting.connections.reverb.key") }}',
-            wsHost: window.location.hostname,
-            wsPort: {{ config("broadcasting.connections.reverb.port") }},
-            forceTLS: false,
-            disableStats: true,
-            enabledTransports: ['ws', 'wss'],
-            cluster: 'eu',
-            authEndpoint: '/broadcasting/auth',
-            auth: {
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                }
-            } 
-        });
 
-        const userId = {{ auth()->id() }};
-        
-        // بدء معالجة الإشعارات
-        if (typeof initNotifications === 'function') {
-            initNotifications();
-        }
-
-        // الاستماع إلى قناة الإشعارات الخاصة
-        try {
-            console.log('محاولة الاشتراك في قناة الإشعارات:', `notifications.${userId}`);
-            window.Echo.private(`notifications.${userId}`)
-                .listen('.document.notification', (notification) => {
-                    console.log('تم استلام إشعار جديد من Reverb:', notification);
-                    if (typeof playNotificationSound === 'function') {
-                        playNotificationSound();
-                    }
-                    if (typeof createNotificationItem === 'function') {
-                        $('.notifications-list').prepend(createNotificationItem(notification.notification));
-                        $('.notification-empty').addClass('d-none');
-                    }
-
-                    const count = parseInt($('.notifications-count').text() || '0') + 1;
-                    $('.notifications-count').text(count).show();
-
-                    if (typeof toastr !== 'undefined') {
-                        const data = notification.notification.data;
-                        toastr.info(data.message, data.title || 'تنبيه');
-                    }
-                });
-                
-            console.log('تم الاشتراك في قناة الإشعارات:', `notifications.${userId}`);
-        } catch (error) {
-            console.error('خطأ في الاشتراك بقناة الإشعارات:', error);
-        }
-    });
-</script>
 <script src="{{ asset('modules/document/js/notifications.js') }}"></script>
 
 <!-- datatable Js -->
@@ -599,3 +542,63 @@
             errorImg, 4000);
     </script>
 @endif
+
+
+{{-- <script src="https://cdnjs.cloudflare.com/ajax/libs/laravel-echo/1.19.0/echo.iife.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pusher/8.4.0/pusher.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // تأكد من تحميل الصفحة بالكامل قبل إعداد Echo
+        window.Echo = new Echo({
+            broadcaster: 'reverb',
+            key: '{{ config("broadcasting.connections.reverb.key") }}',
+            wsHost: window.location.hostname,
+            wsPort: {{ config("broadcasting.connections.reverb.port") }},
+            forceTLS: false,
+            disableStats: true,
+            enabledTransports: ['ws', 'wss'],
+            cluster: 'eu',
+            authEndpoint: '/broadcasting/auth',
+            auth: {
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            } 
+        });
+
+        const userId = {{ auth()->id() }};
+        
+        // بدء معالجة الإشعارات
+        if (typeof initNotifications === 'function') {
+            initNotifications();
+        }
+
+        // الاستماع إلى قناة الإشعارات الخاصة
+        try {
+            console.log('محاولة الاشتراك في قناة الإشعارات:', `notifications.${userId}`);
+            window.Echo.private(`notifications.${userId}`)
+                .listen('.document.notification', (notification) => {
+                    console.log('تم استلام إشعار جديد من Reverb:', notification);
+                    if (typeof playNotificationSound === 'function') {
+                        playNotificationSound();
+                    }
+                    if (typeof createNotificationItem === 'function') {
+                        $('.notifications-list').prepend(createNotificationItem(notification.notification));
+                        $('.notification-empty').addClass('d-none');
+                    }
+
+                    const count = parseInt($('.notifications-count').text() || '0') + 1;
+                    $('.notifications-count').text(count).show();
+
+                    if (typeof toastr !== 'undefined') {
+                        const data = notification.notification.data;
+                        toastr.info(data.message, data.title || 'تنبيه');
+                    }
+                });
+                
+            console.log('تم الاشتراك في قناة الإشعارات:', `notifications.${userId}`);
+        } catch (error) {
+            console.error('خطأ في الاشتراك بقناة الإشعارات:', error);
+        }
+    });
+</script> --}}

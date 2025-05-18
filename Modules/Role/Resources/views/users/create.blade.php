@@ -119,6 +119,34 @@
                                         @endforeach
                                     </div>
                                 </div>
+                                <div class="col-md-12 mb-4 ">
+                                    <div class="form-group col-md-12 mt-3">
+                                        <div class="form-check form-switch custom-switch-v1">
+                                            <input type="checkbox" name="signature_pad_enable" id="signature_pad_enable" class="form-check-input"  >
+                                            <label class="form-check-label" for="signature_pad_enable">{{ __('Enable Signature Pad') }}</label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group col-md-12 signature-pad-container d-none">
+                                        {{ Form::label('signature_pad', __('Create Signature'), ['class' => 'form-label']) }}
+                                        <div class="signature-pad border rounded mb-2">
+                                            <canvas id="signature-pad" style="width: 100%; height: 200px; border: 1px solid #ccc; background-color: #fff;"></canvas>
+                                        </div>
+                                        <div class="d-flex mt-1">
+                                            <button type="button" class="btn btn-sm btn-danger signature-clear-btn me-2">{{ __('Clear') }}</button>
+                                            <button type="button" class="btn btn-sm btn-success signature-save-btn">{{ __('Save Signature') }}</button>
+                                            <input type="hidden" name="signature_pad_data" id="signature_pad_data">
+                                        </div>
+                                         {{-- @if(!empty($settings['signature_pad_data']))
+                                            <div class="mt-3">
+                                                <strong>{{ __('Current Signature:') }}</strong><br>
+                                                <img src="{{ $settings['signature_pad_data'] }}" class="img-responsive mt-2" width="200">
+                                            </div>
+                                        @endif  --}}
+                                    </div>
+                                    </div>
+                                </div>
+                                
                             </div>
                         </div>
 
@@ -132,8 +160,77 @@
     </div>
 @endsection
 
-@section('scripts')
+@push('script-page')
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+
 <script>
+     var signaturePad = null;
+        
+        function initSignaturePad() {
+            if (document.getElementById('signature-pad')) {
+                const canvas = document.getElementById('signature-pad');
+                signaturePad = new SignaturePad(canvas, {
+                    backgroundColor: 'rgb(255, 255, 255)'
+                });
+                
+                // Adjust canvas size
+                function resizeCanvas() {
+                    const ratio = Math.max(window.devicePixelRatio || 1, 1);
+                    canvas.width = canvas.offsetWidth * ratio;
+                    canvas.height = canvas.offsetHeight * ratio;
+                    canvas.getContext("2d").scale(ratio, ratio);
+                    signaturePad.clear(); // Otherwise isEmpty() might return incorrect value
+                }
+                
+                window.addEventListener("resize", resizeCanvas);
+                resizeCanvas();
+            }
+        }
+        
+        // Initialize on page load
+        initSignaturePad();
+        
+        // Toggle signature pad container
+        $('#signature_pad_enable').on('change', function() {
+            if ($(this).is(':checked')) {
+                $('.signature-pad-container').removeClass('d-none');
+                // Re-initialize signature pad when it becomes visible
+                setTimeout(function() {
+                    initSignaturePad();
+                }, 100);
+            } else {
+                $('.signature-pad-container').addClass('d-none');
+            }
+        });
+        
+        // Clear signature pad
+        $('.signature-clear-btn').on('click', function() {
+            if (signaturePad) {
+                signaturePad.clear();
+            }
+        });
+        
+        // Save signature
+        $('.signature-save-btn').on('click', function() {
+            if (signaturePad && !signaturePad.isEmpty()) {
+                var signatureData = signaturePad.toDataURL();
+                $('#signature_pad_data').val(signatureData);
+                
+                // Show preview
+                if ($('.signature-pad-container .mt-3').length) {
+                    $('.signature-pad-container .mt-3 img').attr('src', signatureData);
+                } else {
+                    $('.signature-pad-container').append(
+                        '<div class="mt-3"><strong>{{ __("Current Signature:") }}</strong><br>' +
+                        '<img src="' + signatureData + '" class="img-responsive mt-2" width="500"></div>'
+                    );
+                }
+                
+                toastr.success('{{ __("Signature saved successfully") }}');
+            } else {
+                toastr.error('{{ __("Please provide signature first") }}');
+            }
+        });
     function loadPositions() {
         const departmentId = document.getElementById('department').value;
         const positionOptions = document.querySelectorAll('.position-option');
@@ -155,4 +252,4 @@
         loadPositions();
     });
 </script>
-@endsection
+@endpush

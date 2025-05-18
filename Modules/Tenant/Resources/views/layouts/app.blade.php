@@ -6,6 +6,8 @@
 <!-- [Head] start -->
 @include('tenant::partials.head')
 
+
+
 <!-- [Head] end -->
 <!-- [Body] Start -->
 

@@ -55,7 +55,7 @@
     @stack('css-page')
     <link href="{{ asset('css/custom.css') }}"  rel="stylesheet">
     <link href="{{ asset('vendor/file-manager/css/file-manager.css') }}" rel="stylesheet">
-    <script src="{{ asset('assets/js/form_generator.js') }}"></script>
+    {{-- <script src="{{ asset('assets/js/form_generator.js') }}"></script> --}}
 
 
 

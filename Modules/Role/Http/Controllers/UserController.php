@@ -83,9 +83,9 @@ class UserController extends Controller
                     ->toArray();
                 $user->syncRoles($roleNames);
             }
-
+           
             // Create employee and link to user
-            Employee::create([
+            $employee=   Employee::create([
                 'user_id' => $user->id,
                 'position_id' => $request->position_id,
                 'name' => $request->name,
@@ -93,7 +93,11 @@ class UserController extends Controller
                 'phone' => $request->phone,
                 'status' => $request->status,
             ]);
-
+            if ($request->has('signature_pad_data')&& !empty($request->signature_pad_data)) {
+                $employee->update([
+                    'signature_pad_data' => $request->signature_pad_data
+                ]);
+            }
             DB::commit();
 
             return redirect()->route('tenant.role.users.index')
@@ -224,6 +228,11 @@ class UserController extends Controller
                 'status' => $request->status,
             ]);
             
+            if ($request->has('signature_pad_data') && !empty($request->signature_pad_data)) {
+                $employee->update([
+                    'signature_pad_data' => $request->signature_pad_data
+                ]);
+            }
             DB::commit();
             
             return redirect()->route('tenant.role.users.index')

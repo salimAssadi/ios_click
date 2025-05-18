@@ -25,30 +25,36 @@ use Meneses\LaravelMpdf\Facades\LaravelMpdf;
 use Illuminate\Support\Facades\File;
 use Modules\Tenant\Entities\User;
 use Modules\Setting\Entities\Employee;
+use Illuminate\Support\Facades\Cache;
+use App\Services\Cache\CacheLoaderService;
 
 class ProcedureController extends BaseModuleController
 {
     /**
      * Display a listing of the resource.
      */
+    protected $procedureCacheService;
     public function __construct()
     {
         parent::__construct();
         $this->viewPath = 'document::document.procedures';
         $this->routePrefix = 'document.procedures';
         $this->moduleName = 'Procedures';
+        $this->procedureCacheService = new CacheLoaderService();
     }
     
     public function index()
     {
         // $procedures = Procedure::searchable(['name'])->with(['form', 'attachments', 'document.category'])->paginate(10);
         // return view($this->viewPath . '.index', compact('procedures'));
+        // $procedureCacheService = new ProcedureCacheService();
+        // $procedures = $procedureCacheService->getOriginalProcedures();
     }
 
     public function mainProcedures()
     {
-        $orginal_procedures = Procedure::where('category_id', '1')->paginate(20);
-        $system_id = getSettingsValByName('current_iso_system');
+        $orginal_procedures = $this->procedureCacheService->getOriginalProcedures();
+        $system_id = currentISOSystem();
         $category_id = '1';
         $used_procedures = IsoSystemProcedure::where('iso_system_id',$system_id)->where('data','<>',null)->with(['isoSystem','procedure'])->get();
         
@@ -230,6 +236,8 @@ class ProcedureController extends BaseModuleController
                 // Prepare config data for the view
                 $jobRoles = Position::get();
                 $departments = Department::get();
+                $iso_system_reference = $this->procedureCacheService->getIsoSystemReference();
+
                 $contentData = $iso_system_Procedure->data ?? [];
                 
                 // Render the config view as HTML
@@ -247,6 +255,7 @@ class ProcedureController extends BaseModuleController
                     'risk_matrix' => ($contentData['risk_matrix'] ?? []),
                     'kpis' => ($contentData['kpis'] ?? []),
                     'users' => $users,
+                    'iso_system_reference' => $iso_system_reference
                 ])->render();
                 
                 return response()->json([
@@ -361,6 +370,7 @@ class ProcedureController extends BaseModuleController
                 'kpis' => ($contentData['kpis'] ?? []),
                 'document' => $document,
                 'users' => $users,
+                'iso_system_reference' => $iso_system_reference
             ]);
         } catch (\Exception $e) {
             \Log::error('Error in edit method: ' . $e->getMessage());
@@ -542,6 +552,7 @@ class ProcedureController extends BaseModuleController
         $contentData = $procedure->content??[];
         $pageTitle = __('Configure') . ' ' . $procedure->procedure_name;
         $users = Employee::where('user_id','!=',null)->get();
+        $iso_system_references = $this->procedureCacheService->getIsoSystemReference();
         // dd($contentData);
         return view('document::document.procedures.configure', [
 
@@ -558,6 +569,7 @@ class ProcedureController extends BaseModuleController
             'risk_matrix' => ($contentData['risk_matrix'] ?? []),
             'kpis' => ($contentData['kpis'] ?? []),
             'users' => $users,
+            'iso_system_references' => $iso_system_references
         ]);
     }
 

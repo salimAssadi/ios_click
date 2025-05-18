@@ -5,16 +5,15 @@ namespace Modules\Tenant\Http\Controllers;
 use Illuminate\Routing\Controller;
 use Modules\Document\Entities\DocumentRequest;
 use Modules\Document\Entities\Status;
-//use Modules\Tenant\Models\Category;
+use Modules\Document\Entities\Category;
 use Modules\Tenant\Models\Contact;
 use Modules\Tenant\Models\Custom;
-use Modules\Tenant\Models\Document;
+use Modules\Document\Entities\Document;
 use Modules\Tenant\Models\FAQ;
 use Modules\Tenant\Models\HomePage;
 use Modules\Tenant\Models\NoticeBoard;
 use Modules\Tenant\Models\PackageTransaction;
 use Modules\Tenant\Models\Page;
-use Modules\Tenant\Models\Reminder;
 use Modules\Tenant\Models\SubCategory;
 use Modules\Tenant\Models\Subscription;
 use Modules\Tenant\Models\Support;
@@ -27,6 +26,7 @@ use Modules\Tenant\Models\IsoPolicy;
 use Modules\Tenant\Models\User;
 use Modules\Tenant\Models\IsoSystem;
 use Carbon\Carbon;
+use Modules\Reminder\Entities\Reminder;
 
 
 class HomeController extends Controller
@@ -47,6 +47,10 @@ class HomeController extends Controller
                 $result['totalReferences'] = IsoReference::count();
                 $result['totalInstructions'] = IsoInstruction::count();
                 $result['totalPolicies'] = IsoPolicy::count();
+               
+                $result['total'] = Reminder::count();
+                $result['upcoming'] = Reminder::where('remind_at', '>=', now())->count();
+                $result['document'] = Reminder::where('reminder_type', 'document_expiry')->count();
 
                 // $result['totalContact'] = Contact::where('parent_id', \Auth::user()->id)->count();
 
@@ -71,7 +75,7 @@ class HomeController extends Controller
                 $result['documentByCategory'] = $this->documentByCategory();
                 $result['documentBySubCategory'] = $this->documentBySubCategory();
                 $result['settings'] = settings();
-
+                $result['documentStatusChart'] = $this->documentStatusChartData();
 
                 return view('tenant::dashboard.index', compact('result'));
             }else{
@@ -150,28 +154,31 @@ class HomeController extends Controller
 
     public function documentByCategory()
     {
-        // $categories = Category::where('parent_id', parentId())->get();
-        // $documents = [];
-        // $cat = [];
-        // foreach ($categories as $category) {
-        //     $documents[] = Document::where('parent_id', parentId())->where('category_id', $category->id)->count();
-        //     $cat[] = $category->title;
-        // }
-        $result['data'] = [];
-        $result['category'] = [];
+        $categories = Category::get();
+        $documents = [];
+        $cat = [];
+        foreach ($categories as $category) {
+            $documents[] = Document::where('category_id', $category->id)->count();
+            $cat[] = $category->title;
+        }
+        $result['data'] = $documents;
+        $result['category'] = $cat;
         return $result;
     }
     public function documentBySubCategory()
     {
-        // $categories = SubCategory::where('parent_id', parentId())->get();
-        // $documents = [];
-        // $cat = [];
-        // foreach ($categories as $category) {
-        //     $documents[] = Document::where('parent_id', parentId())->where('category_id', $category->id)->count();
-        //     $cat[] = $category->title;
-        // }
         $result['data'] = [];
         $result['category'] = [];
         return $result;
+    }
+
+    public function documentStatusChartData()
+    {
+        $statuses = Status::where('type', 'document')->get();
+        $data = [];
+        foreach ($statuses as $status) {
+            $data[$status->name] = Document::where('status_id', $status->id)->count();
+        }
+        return $data;
     }
 }

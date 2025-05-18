@@ -23,16 +23,18 @@ class SettingController extends BaseModuleController
     //    ---------------------- Account --------------------------------------------------------
     public function index()
     {
-        $loginUser = \Auth::user();
+        $activeTab = 'general_settings';
+
+        $loginUser = auth('tenant')->user();
         $settings = settings();
         $timezones = config('timezones');
-        $activeTab ='general_settings';
-        return $this->view('index', compact('loginUser', 'settings', 'timezones', 'activeTab'));
+        
+        return $this->view('index', compact('loginUser', 'settings', 'timezones', 'activeTab'))->with('tab', $activeTab);
     }
 
     public function accountData(Request $request)
     {
-        $loginUser = \Auth::user();
+        $loginUser = auth('tenant')->user();
         $user = User::find($loginUser->id);
         $validator = \Validator::make(
             $request->all(),

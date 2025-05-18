@@ -9,7 +9,8 @@ use App\Models\IsoSystem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
-
+use Illuminate\Support\Facades\Cache;
+use App\Services\Cache\CacheLoaderService;
 class IsoReferenceController extends Controller
 {
     public function index()
@@ -57,13 +58,17 @@ class IsoReferenceController extends Controller
                 }
             }
             
+            
+
             DB::commit();
+            (new CacheLoaderService())->refreshIsoSystemReference();
             return redirect()->route('iso_dic.references.index')->with('success', 'Reference created successfully');
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', 'Error creating reference: ' . $e->getMessage());
         }
     }
+
 
     public function edit(IsoReference $reference)
     {

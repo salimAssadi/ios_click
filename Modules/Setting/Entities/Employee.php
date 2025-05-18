@@ -19,8 +19,10 @@ class Employee extends BaseModel
         'name',
         'email',
         'phone',
+        'signature_pad_data',
         'status'
     ];
+    
 
     public function user()
     {

@@ -94,6 +94,7 @@
                                                     'procedures' => $procedures,
                                                     'risk_matrix' => $risk_matrix,
                                                     'kpis' => $kpis,
+                                                    'iso_system_references' => $iso_system_references
                                                 ])
 
                                             </div>

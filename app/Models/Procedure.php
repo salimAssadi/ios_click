@@ -10,10 +10,12 @@ use Illuminate\Database\Eloquent\Model;
 class Procedure extends Model
 {
     use HasFactory, Searchable, Localizable;
+    protected $connection = 'iso_dic';
     
     protected $fillable = [
         'procedure_name_ar',
         'procedure_name_en',
+        'category_id',
         'description_ar',
         'description_en',
         'template_path',
@@ -36,15 +38,21 @@ class Procedure extends Model
         return $this->belongsTo(Form::class);
     }
 
+    public function getProcedureNameAttribute()
+    {
+        return $this->getLocalizedAttribute('procedure_name');
+    }
+    public function getDescriptionAttribute()
+    {
+        return $this->getLocalizedAttribute('description');
+    }
+
     public function category()
     {
         return $this->belongsTo(Category::class);
     }
 
-    public function getProcedureNameAttribute()
-    {
-        return $this->getLocalizedAttribute('procedure_name');
-    }
+   
 
     public function document()
     {

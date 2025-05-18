@@ -583,11 +583,44 @@
         </div>
     </div>
 
-    {{-- references --}}
-    <div class="tab-pane fade" id="references" role="tabpanel" aria-labelledby="references-tab">
-        <h3>{{ __('References') }}</h3>
-        <p>{{ __('This is the section for references. You can add details here.') }}</p>
-    </div>
+   {{-- references --}}
+<div class="tab-pane fade" id="references" role="tabpanel" aria-labelledby="references-tab">
+    <h3>{{ __('References') }}</h3>
+    <p>{{ __('This is the section for references. You can add details here.') }}</p>
+
+    @if ($iso_system_references)
+        <div class="row g-2 align-items-center mb-3">
+            <div class="col-md-8">
+                <select id="reference-select" class="form-select">
+                    <option value="">{{ __('Select ISO System Reference') }}</option>
+                    @foreach ($iso_system_references as $reference)
+                        <option value="{{ $reference->id }}" data-name="{{ $reference->name_ar }}">
+                            {{ $reference->name_ar }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-4">
+                <button type="button" id="add-reference-btn" class="btn btn-primary w-100">
+                    {{ __('Add') }}
+                </button>
+            </div>
+        </div>
+
+        <table class="table" id="references-table">
+            <thead>
+                <tr>
+                    <th style="width: 50px;">#</th>
+                    <th>{{ __('Reference') }}</th>
+                    <th style="width: 50px;"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {{-- Rows added dynamically --}}
+            </tbody>
+        </table>
+    @endif
+</div>
 
     {{-- detials --}}
     <div class="tab-pane fade" id="detials" role="tabpanel" aria-labelledby="detials-tab">
@@ -1004,8 +1037,60 @@
             $(this).closest('tr').remove();
         });
 
+        // references
+        let refCount = 0;
+        const referenceSelect = document.getElementById('reference-select');
+        const addBtn = document.getElementById('add-reference-btn');
+        const tableBody = document.querySelector('#references-table tbody');
 
+        addBtn.addEventListener('click', function () {
+            const selectedOption = referenceSelect.options[referenceSelect.selectedIndex];
+            const refId = selectedOption.value;
+            const refText = selectedOption.dataset.name;
 
+            if (!refId) {
+                alert('{{ __("Please select a reference first.") }}');
+                return;
+            }
+
+            // Check for duplicates
+            const existing = Array.from(tableBody.querySelectorAll('input[name="references[]"]'))
+                .some(input => input.value === refId);
+            if (existing) {
+                alert('{{ __("This reference has already been added.") }}');
+                return;
+            }
+
+            refCount++;
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${refCount}</td>
+                <td>
+                    <input type="hidden" name="references[]" value="${refId}">
+                    <input type="text" class="form-control" value="${refText}" readonly>
+                </td>
+                <td>
+                    <button type="button" class="btn btn-danger btn-sm remove-ref" title="{{ __('Remove') }}">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            `;
+            tableBody.appendChild(row);
+        });
+
+        // Remove row and update numbering
+        tableBody.addEventListener('click', function (e) {
+            if (e.target.closest('.remove-ref')) {
+                e.target.closest('tr').remove();
+
+                // Re-number the rows
+                refCount = 0;
+                Array.from(tableBody.querySelectorAll('tr')).forEach((tr, i) => {
+                    tr.querySelector('td:first-child').textContent = ++refCount;
+                });
+            }
+        });
+   
         function generateSelectOptions(className, max) {
             let options = '<select class="form-control ' + className + '">';
             options += '<option value="">اختر قيمة</option>';

@@ -1022,5 +1022,15 @@
   "Approver Name":"اسم المعتد",
   "Reviewer Name":"اسم المراجع",
   "Procedure Number":"رقم الإجراء",
-  "This action will be applied to the system you have specified":"🔔 تنبيه: سيتم تطبيق هذا الإجراء على النظام المحدد لديك"
+  "This action will be applied to the system you have specified":"🔔 تنبيه: سيتم تطبيق هذا الإجراء على النظام المحدد لديك",
+  "Document Status Distribution":"بيان حالة الوثائق",
+  "Company Symbol":"رمز الشركة",
+  "Default Language":"اللغة الافتراضية",
+  "Company Profile Information":"معلومات الشركة",
+  "Company Name (Arabic)":"اسم الشركة (العربية)",
+  "Company Name (English)":"اسم الشركة (الإنجليزية)",
+  "Company Email":"البريد الالكتروني",
+  "Company Phone":"الهاتف",
+  "Company Address":"عنوان الشركة",
+  "stamps":"الختم"
 }

@@ -83,6 +83,16 @@
                                                 @endif
                                             </td>
                                         </tr>
+                                        <tr>
+                                            <th>{{ __('Signature') }}</th>
+                                            <td>
+                                                @if ($employee->signature_pad_data)
+                                                    <img src="{{ $employee->signature_pad_data }}" alt="Signature" class="img-responsive mt-2" width="200" class="img-fluid">
+                                                @else
+                                                    {{ __('No signature available') }}
+                                                @endif
+                                            </td>
+                                        </tr>
                                     </tbody>
                                 </table>
                         </div>

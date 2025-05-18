@@ -4,8 +4,9 @@ namespace Modules\Setting\Entities;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use \App\Models\BaseModel;
 
-class CompanySeal extends Model
+class CompanySeal extends BaseModel
 {
     use HasFactory;
 

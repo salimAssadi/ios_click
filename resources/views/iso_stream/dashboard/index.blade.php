@@ -20,7 +20,7 @@
                 type: 'area',
                 height: 250,
                 toolbar: {
-                    show: false
+                    show: true
                 }
             },
             colors: ['#2ca58d', '#0a2342'],
@@ -65,7 +65,7 @@
             xaxis: {
                 categories: documentByCategory,
                 tooltip: {
-                    enabled: false
+                    enabled: true
                 },
                 labels: {
                     hideOverlappingLabels: true
