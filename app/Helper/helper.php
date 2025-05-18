@@ -29,7 +29,6 @@ use Spatie\Permission\Models\Role;
 use Modules\Setting\Entities\CompanyProfile;
 
 
-
 if (!function_exists('settingsKeys')) {
     function settingsKeys()
     {
@@ -107,25 +106,18 @@ if (!function_exists('settingsKeys')) {
 if (!function_exists('settings')) {
     function settings()
     {
-        $settingData = DB::table('settings');
-        $settingData = $settingData->get();
-        $details = settingsKeys();
+        // جلب اسم قاعدة البيانات الحالية (يدعم تعدد قواعد البيانات)
+        $currentDb = DB::connection()->getDatabaseName();
+        $cacheKey = 'settings_cache_' . $currentDb;
 
-        foreach ($settingData as $row) {
-            $details[$row->name] = $row->value;
-        }
-
-        config(
-            [
-                'captcha.secret' => $details['recaptcha_secret'],
-                'captcha.sitekey' => $details['recaptcha_key'],
-                'options' => [
-                    'timeout' => 30,
-                ]
-            ]
-        );
-
-        return $details;
+        return Cache::remember($cacheKey, 60 * 60, function () {
+            $settingData = DB::table('settings')->get();
+            $details = settingsKeys();
+            foreach ($settingData as $row) {
+                $details[$row->name] = $row->value;
+            }
+            return $details;
+        });
     }
 }
 

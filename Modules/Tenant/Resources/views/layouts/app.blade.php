@@ -1,5 +1,6 @@
 <!doctype html>
 @php
+    
     $settings = settings();
 @endphp
 <html lang="en">
