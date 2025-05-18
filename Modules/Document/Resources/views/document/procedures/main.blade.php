@@ -35,7 +35,7 @@
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="originalModalLabel">{{ __('Original Procedures') }}</h5>
+                    <h5 class="modal-title" id="originalModalLabel">{{ __('Add Form ISO Dictionary') }}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body overflow-scroll" style="max-height: 80vh;">
@@ -75,12 +75,13 @@
                         </td>
                         <td>
                             <div class="d-flex justify-content-end gap-2">
-                                <a href="{{ route('tenant.document.procedures.configure', $procedure->id) }}"
-                                    class="btn btn-sm btn-icon btn-light-primary"
+                                <button type="button"
+                                    class="btn btn-sm  btn-light-primary btn-configure-procedure"
+                                    data-id="{{ $procedure->id }}"
                                     data-bs-toggle="tooltip" data-bs-placement="top"
-                                    title="{{ __('Configure') }}">
-                                    <i class="ti ti-settings"></i>
-                                </a>
+                                    title="{{ __('Add') }}">
+                                   {{ __('Add') }}
+                                </button>
 
                               
                             </div>
@@ -104,3 +105,58 @@
     </div>
 </div>
 @endsection
+@push('script-page')
+
+<script>
+$(document).ready(function() {
+    $(document).on('click', '.btn-configure-procedure', function(e) {
+        e.preventDefault();
+        var procedureId = $(this).data('id');
+        Swal.fire({
+            title: '{{ __('Alert') }}',
+            text: "{{ __('add_procedure_confirmation', ['system' => $currentSystemName]) }}",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: '{{ __('OK') }}',
+            cancelButtonText: '{{ __('Cancel') }}',
+            allowOutsideClick: false,
+            preConfirm: () => {
+                Swal.showLoading();
+                return $.ajax({
+                    url: '/tenant/document/procedures/check-or-add',
+                    type: 'POST',
+                    data: {
+                        procedure_id: procedureId,
+                        _token: '{{ csrf_token() }}'
+                    },
+                    dataType: 'json'
+                }).then(function(response) {
+                    if (response.status === 'exists') {
+                        Swal.fire({
+                            icon: 'info',
+                            title: response.title,
+                            text: response.message,
+                            confirmButtonText: '{{ __('OK') }}'
+                        });
+                    } else if (response.status === 'added') {
+                        window.location.href = response.edit_url;
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: response.title,
+                            text: response.message
+                        });
+                    }
+                }).catch(function() {
+                    Swal.fire({
+                        icon: 'error',
+                        title: response.title,
+                        text: '{{ __('Error') }}'
+                    });
+                });
+            }
+        });
+    });
+});
+</script>
+@endpush

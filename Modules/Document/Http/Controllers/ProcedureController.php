@@ -53,8 +53,10 @@ class ProcedureController extends BaseModuleController
 
     public function mainProcedures()
     {
+        
         $orginal_procedures = $this->procedureCacheService->getOriginalProcedures();
         $system_id = currentISOSystem();
+        $currentSystemName = getIsoSystem($system_id)->name;
         $category_id = '1';
         $used_procedures = IsoSystemProcedure::where('iso_system_id',$system_id)->where('data','<>',null)->with(['isoSystem','procedure'])->get();
         
@@ -71,7 +73,7 @@ class ProcedureController extends BaseModuleController
             ]
         ];
         
-        return view($this->viewPath . '.main', compact('used_procedures', 'orginal_procedures', 'category_id', 'customColumns'));
+        return view($this->viewPath . '.main', compact('used_procedures', 'orginal_procedures', 'category_id', 'customColumns','currentSystemName'));
     }
 
     public function publicProcedures()
@@ -229,14 +231,13 @@ class ProcedureController extends BaseModuleController
                 $this->SaveDocument($request,$procedure->id,'private',$document);
             }
             
-            DB::commit();
             
             // If it's an AJAX request, return JSON
             if ($request->ajax()) {
                 // Prepare config data for the view
                 $jobRoles = Position::get();
                 $departments = Department::get();
-                $iso_system_reference = $this->procedureCacheService->getIsoSystemReference();
+                $iso_system_references = $this->procedureCacheService->getIsoSystemReference();
 
                 $contentData = $iso_system_Procedure->data ?? [];
                 
@@ -254,10 +255,12 @@ class ProcedureController extends BaseModuleController
                     'procedures' => ($contentData['procedures'] ?? []),
                     'risk_matrix' => ($contentData['risk_matrix'] ?? []),
                     'kpis' => ($contentData['kpis'] ?? []),
+                    'references' => ($contentData['references'] ?? []),
                     'users' => $users,
-                    'iso_system_reference' => $iso_system_reference
+                    'iso_system_references' => $iso_system_references
                 ])->render();
-                
+                 DB::commit();
+
                 return response()->json([
                     'success' => true, 
                     'message' => __('Procedure created successfully!'),
@@ -265,7 +268,8 @@ class ProcedureController extends BaseModuleController
                     'config_html' => $configView
                 ]);
             }
-            
+                DB::commit();
+
             // For regular requests, redirect
             return redirect()->route('tenant.document.procedures.configure', $procedure->id)
                 ->with('success', __('Procedure created successfully! Now you can configure it.'));
@@ -351,7 +355,7 @@ class ProcedureController extends BaseModuleController
             \Log::info('Content Data Structure:', ['data' => $contentData]);
             
             $categories = Category::where('id', $category_id)->get()->pluck('title', 'id');
-            
+            $iso_system_references = $this->procedureCacheService->getIsoSystemReference();
             return view($this->viewPath . '.edit', [
                 'procedure' => $procedure,
                 'iso_system_Procedure' => $iso_system_Procedure,
@@ -368,9 +372,10 @@ class ProcedureController extends BaseModuleController
                 'procedures' => ($contentData['procedures'] ?? []),
                 'risk_matrix' => ($contentData['risk_matrix'] ?? []),
                 'kpis' => ($contentData['kpis'] ?? []),
+                'references' => ($contentData['references'] ?? []),
                 'document' => $document,
                 'users' => $users,
-                'iso_system_reference' => $iso_system_reference
+                'iso_system_references' => $iso_system_references
             ]);
         } catch (\Exception $e) {
             \Log::error('Error in edit method: ' . $e->getMessage());
@@ -426,25 +431,59 @@ class ProcedureController extends BaseModuleController
             $procedure->description_en = $request->input('procedure_description_en');
             $procedure->is_optional = $request->input('is_optional');
             $procedure->status = $request->input('status');
-            // $procedure->procedure_code = $request->input('procedure_code');
             $procedure->save();
+            $iso_system_Procedure->procedure_coding = $request->input('procedure_code');
+            $iso_system_Procedure->save();
 
             // Update document version if exists
-            $document = Document::where('documentable_id', $iso_system_Procedure->id)->where('documentable_type', IsoSystemProcedure::class)->first();
-            
-            if ($document && $document->lastVersion) {
-                $document->update([
+            $existingDocument = Document::where('documentable_id', $iso_system_Procedure->id)->where('documentable_type', IsoSystemProcedure::class)->first();
+
+            if ($existingDocument && $existingDocument->lastVersion) {
+                $existingDocument->update([
                     'reviewer_ids' => $request->has('reviewers') ? json_encode($request->input('reviewers')) : null,
                     'approver_id' => $request->input('approved_by'),
                     'preparer_id' => $request->input('prepared_by'),
                 ]);
                 
-                $version = $document->lastVersion;
+                $version = $existingDocument->lastVersion;
                 $version->issue_date = $request->input('issue_date');
                 $version->expiry_date = $request->input('expiry_date');
                 $version->reminder_days = $request->input('reminder_days');
                 $version->save();
+            }else{
+                $docucment_number = 'MP-'.date('YmdHis');
+                $document = new Document();
+                $document->title_ar = $procedure->procedure_name_ar;
+                $document->title_en = $procedure->procedure_name_en;
+                $document->description_ar = $procedure->description_ar;
+                $document->description_en = $procedure->description_en;
+                $document->category_id = $request->category_id;
+                $document->document_number = $docucment_number;
+                $document->documentable_type = 'Modules\Document\Entities\IsoSystemProcedure';
+                $document->documentable_id = $iso_system_Procedure->id;
+                $document->reviewer_ids = $request->has('reviewers') ? json_encode($request->input('reviewers')) : null;
+                $document->preparer_id = $request->input('prepared_by');
+                $document->approver_id = $request->input('approved_by');
+                $document->document_type = 'procedure';
+                $document->status_id = 11; // Active by default
+                $document->creation_date = now();
+                $document->created_by = auth('tenant')->user()->id;
+                $document->save();
+
+                $version = new DocumentVersion();
+                $version->document_id = $document->id;
+                $version->version = '1';
+                $version->issue_date = $request->input('issue_date');
+                $version->expiry_date = $request->input('expiry_date');
+                $version->reminder_days = $request->input('reminder_days');
+                $version->status_id = 17; // Active status
+                $version->file_path = '';
+                $version->storage_path = '';
+                $version->is_active = true;
+                $version->created_by = auth('tenant')->user()->id;
+                $version->save();            
             }
+            
 
             // Handle file uploads
            
@@ -552,7 +591,7 @@ class ProcedureController extends BaseModuleController
         $contentData = $procedure->content??[];
         $pageTitle = __('Configure') . ' ' . $procedure->procedure_name;
         $users = Employee::where('user_id','!=',null)->get();
-        $iso_system_references = $this->procedureCacheService->getIsoSystemReference();
+        $iso_system_referencess = $this->procedureCacheService->getIsoSystemReference();
         // dd($contentData);
         return view('document::document.procedures.configure', [
 
@@ -568,8 +607,9 @@ class ProcedureController extends BaseModuleController
             'procedures' => ($contentData['procedures'] ?? []),
             'risk_matrix' => ($contentData['risk_matrix'] ?? []),
             'kpis' => ($contentData['kpis'] ?? []),
+            'references' => ($contentData['references'] ?? []),
             'users' => $users,
-            'iso_system_references' => $iso_system_references
+            'iso_system_referencess' => $iso_system_referencess
         ]);
     }
 
@@ -921,4 +961,99 @@ class ProcedureController extends BaseModuleController
         return Form::changeStatus($id);
     }
 
+    public function checkOrCreate(Request $request)
+    {
+        $procedureId = $request->input('procedure_id');
+        $isoSystemId = currentISOSystem();
+    
+        $originalProcedure = $this->procedureCacheService
+            ->getOriginalProcedures()
+            ->firstWhere('id', $procedureId);
+    
+        if (!$originalProcedure || $originalProcedure->isoSystems->isEmpty()) {
+            return response()->json([
+                'status' => 'error',
+                'title' => __('Not found'),
+                'message' => __('Procedure not found in ISO Dictionary')
+            ]);
+        }
+
+        $procedureModel = Procedure::find($procedureId);
+    
+        $existsInLinkTable = IsoSystemProcedure::where('procedure_id', $procedureId)
+            ->where('iso_system_id', $isoSystemId)
+            ->exists();
+    
+        if ($procedureModel && $existsInLinkTable) {
+            return response()->json([
+                'status' => 'exists',
+                'title' => __('Already exists'),
+                'message' => __('Procedure already exists in system.')
+            ]);
+        }
+    
+        try {
+            $user = auth('tenant')->user();
+            $userId = $user->id;
+            $parentId = $user->id;
+            DB::beginTransaction();
+
+            if (!$procedureModel) {
+                $procedureModel = Procedure::create([
+                    'id' => $originalProcedure->id,
+                    'procedure_name_ar' => $originalProcedure->procedure_name_ar,
+                    'procedure_name_en' => $originalProcedure->procedure_name_en,
+                    'category_id' =>  $originalProcedure->category_id,
+                    'description_ar' => $originalProcedure->description_ar,
+                    'description_en' => $originalProcedure->description_en,
+                    'template_path' => $originalProcedure->template_path,
+                    'is_optional' => $originalProcedure->is_optional,
+                    'form_id' => $originalProcedure->form_id,
+                    'content' => $originalProcedure->content ?? [],
+                    'enable_upload_file' => $originalProcedure->enable_upload_file,
+                    'enable_editor' => $originalProcedure->enable_editor,
+                    'has_menual_config' => $originalProcedure->has_menual_config,
+                    'blade_view' => $originalProcedure->blade_view,
+                    'status' => $originalProcedure->status,
+                ]);
+            }
+    
+            if (!$existsInLinkTable) {
+                $isoSystemProcedure = IsoSystemProcedure::create([
+                    'category_id' =>  $originalProcedure->category_id,
+                    'iso_system_id' => $isoSystemId,
+                    'procedure_id' => $procedureId,
+                    'procedure_coding' => $originalProcedure->procedure_coding,
+                    'created_by' => $userId,
+                    'parent_id' => $parentId,
+                    'data' =>  $originalProcedure->content ?? [],
+                ]);
+            }
+
+            $category_id = $originalProcedure->category_id;
+    
+            $editUrl = route('tenant.document.procedures.edit', [
+                'id' => encrypt($isoSystemProcedure->id ?? null),
+                'category_id' => encrypt($category_id)
+            ]);
+
+            DB::commit();
+            return response()->json([
+                'status' => 'added',
+                'edit_url' => $editUrl,
+                'title' => __('Success'),
+                'message' => __('Procedure added successfully')
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('checkOrCreate error: ' . $e->getMessage());
+    
+            return response()->json([
+                'status' => 'error',
+                'title' => __('Error'),
+                'message' => __('Something went wrong. Please try again later.')
+            ], 500);
+        }
+    }
+    
 }

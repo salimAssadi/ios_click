@@ -14,6 +14,7 @@ class Procedure extends BaseModel
     protected $fillable = [
         'procedure_name_ar',
         'procedure_name_en',
+        'category_id',
         'description_ar',
         'description_en',
         'template_path',

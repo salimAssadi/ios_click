@@ -52,7 +52,10 @@ class Procedure extends Model
         return $this->belongsTo(Category::class);
     }
 
-   
+    public function isoSystems()
+    {
+        return $this->belongsToMany(IsoSystem::class, 'iso_system_procedures', 'procedure_id', 'iso_system_id')->withPivot(['procedure_coding','iso_system_id']);
+    }
 
     public function document()
     {

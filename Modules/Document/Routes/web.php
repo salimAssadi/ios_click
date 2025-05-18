@@ -44,7 +44,8 @@ Route::prefix('document')->name('tenant.document.')->middleware(['auth:tenant','
         Route::post('store', 'store')->name('store');
         Route::put('update/{id}', 'update')->name('update');
         Route::get('configure/{id}', 'configure')->name('configure');
-        Route::post('configure/{id}/save', 'saveConfigure')->name('saveConfigure');;
+        Route::post('configure/{id}/save', 'saveConfigure')->name('saveConfigure');
+        Route::post('check-or-add', 'checkOrCreate')->name('check-or-add');
     });
 
 

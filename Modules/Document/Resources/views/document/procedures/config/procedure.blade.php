@@ -586,11 +586,10 @@
    {{-- references --}}
 <div class="tab-pane fade" id="references" role="tabpanel" aria-labelledby="references-tab">
     <h3>{{ __('References') }}</h3>
-    <p>{{ __('This is the section for references. You can add details here.') }}</p>
 
     @if ($iso_system_references)
         <div class="row g-2 align-items-center mb-3">
-            <div class="col-md-8">
+            <div class="col-md-10">
                 <select id="reference-select" class="form-select">
                     <option value="">{{ __('Select ISO System Reference') }}</option>
                     @foreach ($iso_system_references as $reference)
@@ -600,7 +599,7 @@
                     @endforeach
                 </select>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-2">
                 <button type="button" id="add-reference-btn" class="btn btn-primary w-100">
                     {{ __('Add') }}
                 </button>
@@ -611,11 +610,32 @@
             <thead>
                 <tr>
                     <th style="width: 50px;">#</th>
-                    <th>{{ __('Reference') }}</th>
+                    <th>{{ __('References') }}</th>
                     <th style="width: 50px;"></th>
                 </tr>
             </thead>
             <tbody>
+                @if ($references)
+                    @forelse ($references as $index => $row)
+                        <tr>
+                            <td>{{ $index + 1 }}</td>
+                            <td>
+                                <input type="text" name="references[{{ $index }}][value]" class="form-control" value="{{ $row['value'] ?? '' }}">
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-danger delete-reference-row">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="7" class="text-center">
+                                {{ __('No Data') }}
+                            </td>
+                        </tr>
+                    @endforelse
+                @endif
                 {{-- Rows added dynamically --}}
             </tbody>
         </table>
@@ -1054,8 +1074,8 @@
             }
 
             // Check for duplicates
-            const existing = Array.from(tableBody.querySelectorAll('input[name="references[]"]'))
-                .some(input => input.value === refId);
+            const existing = Array.from(tableBody.querySelectorAll('tr'))
+                .some(tr => tr.dataset.refId === refId);
             if (existing) {
                 alert('{{ __("This reference has already been added.") }}');
                 return;
@@ -1063,11 +1083,12 @@
 
             refCount++;
             const row = document.createElement('tr');
+            row.dataset.refId = refId;
             row.innerHTML = `
                 <td>${refCount}</td>
                 <td>
-                    <input type="hidden" name="references[]" value="${refId}">
-                    <input type="text" class="form-control" value="${refText}" readonly>
+                    <input type="hidden" name="references[${refCount - 1}][id]" value="${refId}">
+                    <input type="text" name="references[${refCount - 1}][value]" class="form-control" value="${refText}" readonly>
                 </td>
                 <td>
                     <button type="button" class="btn btn-danger btn-sm remove-ref" title="{{ __('Remove') }}">
@@ -1082,7 +1103,6 @@
         tableBody.addEventListener('click', function (e) {
             if (e.target.closest('.remove-ref')) {
                 e.target.closest('tr').remove();
-
                 // Re-number the rows
                 refCount = 0;
                 Array.from(tableBody.querySelectorAll('tr')).forEach((tr, i) => {
@@ -1090,6 +1110,7 @@
                 });
             }
         });
+
    
         function generateSelectOptions(className, max) {
             let options = '<select class="form-control ' + className + '">';
@@ -1114,8 +1135,23 @@
                 forms: [],
                 procedures: [],
                 risk_matrix: [],
-                kpis: []
+                kpis: [],
+                references: [],
             };
+
+            // Process references table (مثل باقي الجداول)
+            if ($('#references-table tbody tr').length > 0) {
+                $('#references-table tbody tr').each(function(index) {
+                    const refId = $(this).find('input[name^="references"][name$="[id]"]').val();
+                    const refText = $(this).find('input[name^="references"][name$="[value]"]').val();
+                    if (refId) {
+                        data.references.push({
+                            id: refId,
+                            value: refText
+                        });
+                    }
+                });
+            }
 
             // Process purpose table
             if ($('#dynamic-table-purpose tbody tr').length > 0) {

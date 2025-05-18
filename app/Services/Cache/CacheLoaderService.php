@@ -13,7 +13,7 @@ class CacheLoaderService
     public function getOriginalProcedures()
     {
         return Cache::remember($this->procedureCacheKey, now()->hours(24), function () {
-            return Procedure::on('iso_dic')->where('category_id', '1')->get();
+            return Procedure::on('iso_dic')->where('category_id', '1')->with('isoSystems')->get();
         });
     }
 

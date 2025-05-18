@@ -300,7 +300,7 @@
                 } else {
                     console.error('collectAllFormData الدالة غير موجودة');
                 }
-                
+                console.log(procedureSetupData);
                 // إضافة البيانات إلى FormData
                 formData.append('procedure_id', procedureId);
                 formData.append('procedure_setup_data', JSON.stringify(procedureSetupData));
@@ -332,7 +332,7 @@
                         Swal.close();
                         if (response.status === 'success') {
                             notifier.show('Success','{{ __('Data saved successfully') }}', 'success',successImg, 4000);
-                            window.location.href = '{{ $redirectUrl }}';
+                            // window.location.href = '{{ $redirectUrl }}';
                         } else {
                             notifier.show('Error',response.message || '{{ __('An error occurred while saving the data') }}', 'error',errorImg, 4000);
                         }

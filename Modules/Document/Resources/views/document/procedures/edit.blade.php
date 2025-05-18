@@ -231,6 +231,7 @@
                                     'risk_matrix' => $risk_matrix,
                                     'kpis' => $kpis,
                                     'users' => $users,
+                                    'iso_system_references' => $iso_system_references
                                 ])
 
                                 <div class="text-end mt-3">
@@ -333,6 +334,8 @@
             
             // Collect all form data using the function from procedure.blade.php
             const configData = collectAllFormData();
+            console.log(configData);
+
              // عرض رسالة تحميل
              Swal.fire({
                     title: '{{ __('Saving...') }}',
@@ -358,9 +361,9 @@
                     button.html(originalText);
                     button.prop('disabled', false);
                     $('#save-procedure').prop('disabled', false);
-                    setTimeout(() => {
-                        window.history.back();
-                    }, 2000);
+                    // setTimeout(() => {
+                    //     window.history.back();
+                    // }, 2000);
                 },
                 error: function(xhr) {
                     Swal.close();

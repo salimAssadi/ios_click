@@ -453,7 +453,7 @@
   "Assign Users": "تعيين المستخدمين",
   "Time Duration": "مدة الوقت",
   "Write a comment": "اكتب تعليقًا",
-  "Add": "يضيف",
+  "Add": "أضافة",
   "Create Reminder": "إنشاء تذكير",
   "Time": "وقت",
   "Enter reminder subject": "أدخل موضوع التذكير",
@@ -1033,5 +1033,8 @@
   "Company Phone":"الهاتف",
   "Company Address":"عنوان الشركة",
   "stamps":"الختم",
-  "Add Form ISO Dictionary":"إضافة من قاموس الآيزو"
+  "Add Form ISO Dictionary":"إضافة من قاموس الآيزو",
+  "add_procedure_confirmation": "عند إضافة هذا الإجراء إلى النظام، سيتم إضافته إلى نظام :system الذي قمت بتحديده. هل ترغب في المتابعة؟",
+  "Select ISO System Reference":"اختر المرجع"
+
 }
