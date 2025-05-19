@@ -13,24 +13,38 @@ class NotificationController extends Controller
 {
     public function index()
     {
-        $notifications = auth('tenant')->user()->notifications()->paginate(10);
+        $user = auth('tenant')->user();
+        $notifications = DatabaseNotification::on('tenant')
+            ->where('notifiable_type', get_class($user))
+            ->where('notifiable_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
         return view('document::notifications.index', compact('notifications'));
     }
 
     public function getUnreadCount()
     {
+        $user = auth('tenant')->user();
+        $count = DatabaseNotification::on('tenant')
+            ->where('notifiable_type', get_class($user))
+            ->where('notifiable_id', $user->id)
+            ->whereNull('read_at')
+            ->count();
         return response()->json([
-            'count' => auth('tenant')->user()->unreadNotifications()->count()
+            'count' => $count
         ]);
     }
 
     public function getLatestNotifications()
-    {   
-        $notifications = auth('tenant')->user()->unreadNotifications()
+    {
+        $user = auth('tenant')->user();
+        $notifications = DatabaseNotification::on('tenant')
+            ->where('notifiable_type', get_class($user))
+            ->where('notifiable_id', $user->id)
+            ->whereNull('read_at')
             ->latest()
             ->take(5)
             ->get();
-
         return response()->json([
             'notifications' => $notifications
         ]);
