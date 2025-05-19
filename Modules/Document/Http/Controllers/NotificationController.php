@@ -24,7 +24,8 @@ class NotificationController extends Controller
     }
 
     public function getLatestNotifications()
-    {
+    {   
+        
         $notifications = auth('tenant')->user()->unreadNotifications()
             ->latest()
             ->take(5)
