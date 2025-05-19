@@ -3,10 +3,12 @@
     'title' => 'Documents List', 
     'relatedProcess' => null, 
     'categoryId' => null,
-    'customColumns' => []
+    'customColumns' => [],
+    'filters' => []
 ])
-
+    
     <div class="card-body">
+        <x-document::dynamic-filter :filters="$filters" />
         <div class="table-responsive">
             <table class="table table-hover table-striped documents-datatable" id="documents-table">
                 <thead class="thead-light">
@@ -40,12 +42,14 @@
             ajax: {
                 url: "{{ route('tenant.document.datatable') }}",
                 data: function(d) {
+                    // Add dynamic filters
+                    $('#dynamic-filters .filter-input').each(function() {
+                        d[$(this).attr('name')] = $(this).val();
+                    });
                     // Add custom filters
                     d.document_type = "{{ $documentType }}";
                     d.related_process = "{{ $relatedProcess }}";
                     d.category_id = "{{ $categoryId }}";
-                    
-                    // إضافة الأعمدة المخصصة للطلب AJAX
                     @if(count($customColumns) > 0)
                         d.custom_columns = @json($customColumns);
                     @endif
@@ -90,6 +94,16 @@
             }
         });
         
+        // Reload table when any filter changes
+        $(document).on('change', '#dynamic-filters .filter-input', function() {
+            table.ajax.reload();
+        });
+        // Special: reload when custom_days changes and custom_period is selected
+        $(document).on('input', 'input[name="custom_days"]', function() {
+            if ($('input[name="expiry_filter"]:checked').val() === 'custom_period') {
+                table.ajax.reload();
+            }
+        });
         // Refresh table when needed
         window.refreshDocumentsTable = function() {
             table.ajax.reload();

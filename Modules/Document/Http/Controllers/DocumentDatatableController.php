@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Modules\Document\Entities\Document;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\Validator;
+use Carbon\Carbon;
 
 class DocumentDatatableController extends Controller
 {
@@ -97,7 +98,7 @@ class DocumentDatatableController extends Controller
             $relatedProcess = $request->related_process;
             
             // Convert from format like "ModulesDocumentEntitiesIsoSystemProcedure"
-            // to "Modules\Document\Entities\IsoSystemProcedure"
+            // to "Modules\\Document\\Entities\\IsoSystemProcedure"
             $className = preg_replace('/Modules(\w+)Entities(\w+)/', 'Modules\\\\$1\\\\Entities\\\\$2', $relatedProcess);
             
             // Use both formats in the query to be safe
@@ -115,6 +116,38 @@ class DocumentDatatableController extends Controller
 
         if ($request->filled('category_id')) {
             $query->where('category_id', $request->category_id);
+        }
+
+        if ($request->filled('expiry_filter') && $request->expiry_filter !== 'all') {
+            $today = Carbon::today();
+        
+            \Log::info('فلتر التاريخ مفعل: ' . $request->expiry_filter); // لمراقبة السجل
+        
+            if ($request->expiry_filter === 'expired') {
+                $query->whereHas('lastVersion', function ($q) use ($today) {
+                    $q->whereDate('expiry_date', '<', $today->toDateString());
+                });
+            } elseif ($request->expiry_filter === 'expiring_soon') {
+                $start = $today->toDateString();
+                $end = $today->copy()->addDays(30)->toDateString();
+        
+                \Log::info("تصفية من $start إلى $end");
+        
+                $query->whereHas('lastVersion', function ($q) use ($start, $end) {
+                    $q->whereBetween('expiry_date', [$start, $end]);
+                });
+            }
+        }
+        
+        
+       // Dynamic filters from frontend
+       if ($request->filled('status_filter')) {
+        $query->where('status_id', $request->status_filter);
+        }
+        // Add more dynamic filters as needed
+        // Example: if you add a filter named 'creator_id'
+        if ($request->filled('creator_id')) {
+            $query->where('creator_id', $request->creator_id);
         }
 
         // إعداد DataTables

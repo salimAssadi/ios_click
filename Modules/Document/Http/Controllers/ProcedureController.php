@@ -2,7 +2,6 @@
 
 namespace Modules\Document\Http\Controllers;
 
-use App\Constants\Status;
 use App\Http\Controllers\BaseModuleController;
 use Exception;
 use Illuminate\Http\Request;
@@ -27,6 +26,7 @@ use Modules\Tenant\Entities\User;
 use Modules\Setting\Entities\Employee;
 use Illuminate\Support\Facades\Cache;
 use App\Services\Cache\CacheLoaderService;
+use Modules\Document\Entities\Status;
 
 class ProcedureController extends BaseModuleController
 {
@@ -59,7 +59,7 @@ class ProcedureController extends BaseModuleController
         $currentSystemName = getIsoSystem($system_id)->name;
         $category_id = '1';
         $used_procedures = IsoSystemProcedure::where('iso_system_id',$system_id)->where('data','<>',null)->with(['isoSystem','procedure'])->get();
-        
+        $status = Status::where('type','document')->get()->pluck('name', 'id');
         // تعريف الأعمدة المخصصة للجدول
         $customColumns = [
             [
@@ -72,8 +72,30 @@ class ProcedureController extends BaseModuleController
                 'default' => '-'
             ]
         ];
-        
-        return view($this->viewPath . '.main', compact('used_procedures', 'orginal_procedures', 'category_id', 'customColumns','currentSystemName'));
+
+        $filters = [
+            [
+                'name' => 'expiry_filter',
+                'type' => 'select',
+                'label' => __('Expiry Filter'),
+                'options' => [
+                    'expired' => __('Expired Documents'),
+                    'expiring_soon' => __('Expiring Soon (30 days)'),
+                ],
+                'custom_days' => false
+            ],
+            [
+                'name' => 'status_filter',
+                'type' => 'select',
+                'label' => __('Document Status'),
+                'options' => $status->toArray(),
+
+                'custom_days' => false
+            ],
+
+            // ... بقية الفلاتر
+        ];
+        return view($this->viewPath . '.main', compact('used_procedures', 'orginal_procedures', 'category_id', 'customColumns','currentSystemName','filters'));
     }
 
     public function publicProcedures()
@@ -91,7 +113,8 @@ class ProcedureController extends BaseModuleController
                 'default' => '-'
             ]
         ];
-        return view($this->viewPath . '.public', compact('procedures','category_id','customColumns'));
+        $filters = [];
+        return view($this->viewPath . '.public', compact('procedures','category_id','customColumns','filters'));
     }
 
     public function privateProcedures()
@@ -109,7 +132,8 @@ class ProcedureController extends BaseModuleController
                 'default' => '-'
             ]
         ];
-        return view($this->viewPath . '.private', compact('procedures','category_id','customColumns'));
+        $filters = [];
+        return view($this->viewPath . '.private', compact('procedures','category_id','customColumns','filters'));
     }
 
     /**
@@ -1039,7 +1063,7 @@ class ProcedureController extends BaseModuleController
                     'message' => __('Something went wrong. Please try again later.')
                 ]);
             }
-            
+
             $editUrl = route('tenant.document.procedures.edit', [
                 'id' => encrypt($isoSystemProcedure->id ?? null),
                 'category_id' => encrypt($category_id)

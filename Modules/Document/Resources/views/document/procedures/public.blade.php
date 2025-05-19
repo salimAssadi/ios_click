@@ -30,6 +30,7 @@
                         relatedProcess="Modules\Document\Entities\IsoSystemProcedure" 
                         :categoryId="2"
                         :customColumns="$customColumns"
+                        :filters="$filters" 
                       />
                     </div>
                 </div>

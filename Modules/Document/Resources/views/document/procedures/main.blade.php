@@ -21,7 +21,7 @@
                     <div class="table-responsive">
                         <x-document::documents-table documentType="procedure" title="{{ __('Procedures List') }}"
                             relatedProcess="Modules\\Document\\Entities\\IsoSystemProcedure" :categoryId="1"
-                            :customColumns="$customColumns" />
+                            :customColumns="$customColumns" :filters="$filters" />
                     </div>
                 </div>
             </div>

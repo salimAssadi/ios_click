@@ -35,6 +35,8 @@
                             title="{{ __('Supporting Documents List') }}" 
                             relatedProcess="" 
                             :categoryId="$category->id"
+                            :customColumns="$customColumns"
+                            :filters="$filters"
                         />
                     </div>
                 </div>

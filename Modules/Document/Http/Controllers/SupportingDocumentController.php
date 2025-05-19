@@ -57,11 +57,42 @@ class SupportingDocumentController extends BaseModuleController
         //     ->with(['category'])
         //     ->orderBy('created_at', 'desc')
         //     ->paginate(10);
+        $customColumns = [
+            [
+                'data' => 'issue_date',
+                'title' => __('Issue Date'),
+                'name' => 'lastVersion.issue_date',
+                'orderable' => true,
+                'searchable' => true,
+                'raw' => false,
+                'default' => '-'
+            ],
+            [
+                'data' => 'expiry_date',
+                'title' => __('Expiry Date'),
+                'name' => 'lastVersion.expiry_date',
+                'orderable' => true,
+                'searchable' => true,
+                'raw' => false,
+                'default' => '-'
+            ]
+        ];
+        $filters = [
+            [
+                'name' => 'expiry_filter',
+                'type' => 'select',
+                'options' => [
+                    'expired' => __('Expired'),
+                    'expiring_soon' => __('Expiring Soon (30 days)'),
+                ],
+                'custom_days' => false
+            ],
+        ];
        $category = Category::where('id',$id)->first();
        if($category->type != 'supporting') {
            return redirect()->back()->with('error', __('Category type is not supporting'));
        }
-        return view($this->viewPath . '.index', compact('category'));
+        return view($this->viewPath . '.index', compact('category','filters','customColumns'));
     }
 
     /**

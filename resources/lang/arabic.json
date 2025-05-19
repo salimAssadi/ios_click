@@ -1035,6 +1035,12 @@
   "stamps":"الختم",
   "Add Form ISO Dictionary":"إضافة من قاموس الآيزو",
   "add_procedure_confirmation": "عند إضافة هذا الإجراء إلى النظام، سيتم إضافته إلى نظام :system الذي قمت بتحديده. هل ترغب في المتابعة؟",
-  "Select ISO System Reference":"اختر المرجع"
+  "Select ISO System Reference":"اختر المرجع",
+  "Expired Documents":"الوثائق المنتهية",
+  "Expiring Soon (30 days)":"ستنتهي خلال 30 يوما",
+  "Expiring in custom days":"ستنتهي خلال أيام مخصصة",
+  "All":"عرض الكل",
+  "Expiry Filter":"انتهاء الوثيقة",
+  "Document Status":"حالة الوثيقة"
 
 }
