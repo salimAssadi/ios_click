@@ -1031,7 +1031,15 @@ class ProcedureController extends BaseModuleController
             }
 
             $category_id = $originalProcedure->category_id;
-    
+            if(empty($category_id) || empty($isoSystemProcedure->id )){
+                DB::rollBack();
+                return response()->json([
+                    'status' => 'error',
+                    'title' => __('error'),
+                    'message' => __('Something went wrong. Please try again later.')
+                ]);
+            }
+            
             $editUrl = route('tenant.document.procedures.edit', [
                 'id' => encrypt($isoSystemProcedure->id ?? null),
                 'category_id' => encrypt($category_id)

@@ -334,7 +334,6 @@
             
             // Collect all form data using the function from procedure.blade.php
             const configData = collectAllFormData();
-            console.log(configData);
 
              // عرض رسالة تحميل
              Swal.fire({
@@ -361,9 +360,9 @@
                     button.html(originalText);
                     button.prop('disabled', false);
                     $('#save-procedure').prop('disabled', false);
-                    // setTimeout(() => {
-                    //     window.history.back();
-                    // }, 2000);
+                    setTimeout(() => {
+                        window.history.back();
+                    }, 2000);
                 },
                 error: function(xhr) {
                     Swal.close();

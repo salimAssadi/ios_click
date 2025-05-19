@@ -332,7 +332,9 @@
                         Swal.close();
                         if (response.status === 'success') {
                             notifier.show('Success','{{ __('Data saved successfully') }}', 'success',successImg, 4000);
-                            // window.location.href = '{{ $redirectUrl }}';
+                            setTimeout(() => {
+                                window.location.href = '{{ $redirectUrl }}';
+                            }, 2000);
                         } else {
                             notifier.show('Error',response.message || '{{ __('An error occurred while saving the data') }}', 'error',errorImg, 4000);
                         }
@@ -345,7 +347,6 @@
                 });
             }
             
-            // ملاحظة: تم استبدال هذه الدالة بدالة collectAllFormData التي تم تعريفها في ملف procedure.blade.php
         });
     </script>
 @endpush
