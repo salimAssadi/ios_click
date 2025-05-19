@@ -7,6 +7,7 @@ use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Broadcast;
 use Modules\Document\Events\NotificationReceived;
+use Illuminate\Notifications\DatabaseNotification;
 
 class NotificationController extends Controller
 {
@@ -25,7 +26,6 @@ class NotificationController extends Controller
 
     public function getLatestNotifications()
     {   
-        
         $notifications = auth('tenant')->user()->unreadNotifications()
             ->latest()
             ->take(5)
@@ -55,19 +55,44 @@ class NotificationController extends Controller
      * 
      * @return \Illuminate\Http\JsonResponse
      */
-    public function getUnread()
-    {
-        $user = auth('tenant')->user();
-        $notifications = $user->unreadNotifications()
-            ->latest()
-            ->take(5)
-            ->get();
+    // public function getUnread()
+    // {
+    //     $user = auth('tenant')->user();
+        
+    //     $notifications = $user->unreadNotifications()
+    //         ->latest()
+    //         ->take(5)
+    //         ->get();
             
-        return response()->json([
-            'count' => $user->unreadNotifications()->count(),
-            'notifications' => $notifications
-        ]);
-    }
+    //     return response()->json([
+    //         'count' => $user->unreadNotifications()->count(),
+    //         'notifications' => $notifications
+    //     ]);
+    // }
+    public function getUnread()
+{
+    $user = auth('tenant')->user();
+
+    // Explicitly use the current connection
+    $notifications = DatabaseNotification::on('tenant')
+        ->where('notifiable_type', get_class($user))
+        ->where('notifiable_id', $user->id)
+        ->whereNull('read_at')
+        ->latest()
+        ->take(5)
+        ->get();
+
+    $count = DatabaseNotification::on('tenant')
+        ->where('notifiable_type', get_class($user))
+        ->where('notifiable_id', $user->id)
+        ->whereNull('read_at')
+        ->count();
+
+    return response()->json([
+        'count' => $count,
+        'notifications' => $notifications
+    ]);
+}
     
     /**
      * Create a new notification and broadcast it

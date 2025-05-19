@@ -26,13 +26,14 @@
     <meta property="twitter:title" content="{{ $settings['meta_seo_title'] }}">
     <meta property="twitter:description" content="{{ $settings['meta_seo_description'] }}">
     <meta property="twitter:image" content="{{ route('tenant.setting.file',$settings['meta_seo_image']??'') }}"> --}}
+    
+    <link rel="shortcut icon" href="{{ asset(Storage::disk('tenantPublic')->url('tenants/'.$settings['company_favicon']??'')) }}"
+    type="image/x-icon">
 
     <!-- shortcut icon-->
     <link rel="icon" href="{{ asset(Storage::disk('tenantPublic')->url('tenants/'.$settings['company_favicon']??'')) }}"
         type="image/x-icon">
-    <link rel="shortcut icon" href="{{ asset(Storage::disk('tenantPublic')->url('tenants/'.$settings['company_favicon']??'')) }}"
-        type="image/x-icon">
-
+    
         <link rel="stylesheet" href="{{ asset('assets/css/plugins/notifier.css') }}" />
     <!-- [Page specific CSS] start -->
     <link rel="stylesheet" href="{{ asset('assets/css/plugins/datepicker-bs5.min.css') }}" />
