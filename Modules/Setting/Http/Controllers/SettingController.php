@@ -225,12 +225,11 @@ class SettingController extends BaseModuleController
             ];
             foreach ($smtpArray as $key => $val) {
                 \DB::insert(
-                    'insert into settings (`value`, `name`, `type`,`parent_id`) values (?, ?, ?,?) ON DUPLICATE KEY UPDATE `value` = VALUES(`value`) ',
+                    'insert into settings (`value`, `name`, `type`) values (?, ?, ?) ON DUPLICATE KEY UPDATE `value` = VALUES(`value`) ',
                     [
                         $val,
                         $key,
                         'smtp',
-                        parentId(),
                     ]
                 );
             }
@@ -287,12 +286,11 @@ class SettingController extends BaseModuleController
         // Save other settings
         foreach ($settings as $key => $value) {
                 \DB::insert(
-                    'insert into settings (`value`, `name`, `type`, `parent_id`) values (?, ?, ?, ?) ON DUPLICATE KEY UPDATE `value` = VALUES(`value`) ',
+                    'insert into settings (`value`, `name`, `type`) values (?, ?, ?) ON DUPLICATE KEY UPDATE `value` = VALUES(`value`) ',
                     [
                         $value,
                         $key,
                         'company',
-                        parentId()
                     ]
                 );
         }
@@ -319,12 +317,11 @@ class SettingController extends BaseModuleController
 
         foreach ($themeSettings as $key => $val) {
             \DB::insert(
-                'insert into settings (`value`, `name`,`type`,`parent_id`) values (?, ?, ?,?) ON DUPLICATE KEY UPDATE `value` = VALUES(`value`) ',
+                'insert into settings (`value`, `name`,`type`) values (?, ?, ?) ON DUPLICATE KEY UPDATE `value` = VALUES(`value`) ',
                 [
                     $val,
                     $key,
                     'common',
-                    parentId(),
                 ]
             );
         }
