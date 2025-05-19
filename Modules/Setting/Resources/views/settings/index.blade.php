@@ -160,7 +160,7 @@
                                                     target="_blank"><i class="ti ti-eye ms-2 f-15"></i></a>
                                                 {{ Form::file('company_logo', ['class' => 'form-control']) }}
                                                 @if(!empty($settings['company_logo']))
-                                                    <img src="{{ route('tenant.setting.file', $settings['company_logo']) }}" class="img-responsive mt-2" width="150">
+                                                    <img src="{{ asset(Storage::disk('tenantPublic')->url('tenants/'.$settings['company_logo']??'')) }}" class="img-responsive mt-2" width="150">
                                                 @endif
                                             </div>
                                         </div>
@@ -171,7 +171,7 @@
                                                     target="_blank"><i class="ti ti-eye ms-2 f-15"></i></a>
                                                 {{ Form::file('company_favicon', ['class' => 'form-control']) }}
                                                 @if(!empty($settings['company_favicon']))
-                                                    <img src="{{ route('tenant.setting.file', $settings['company_favicon']) }}" class="img-responsive mt-2" width="150">
+                                                    <img src="{{ asset(Storage::disk('tenantPublic')->url('tenants/'.$settings['company_favicon']??'')) }}" class="img-responsive mt-2" width="150">
                                                 @endif
                                             </div>
                                         </div>
@@ -182,7 +182,7 @@
                                                     target="_blank"><i class="ti ti-eye ms-2 f-15"></i></a>
                                                 {{ Form::file('light_logo', ['class' => 'form-control']) }}
                                                 @if(!empty($settings['light_logo']))
-                                                    <img src="{{ route('tenant.setting.file', $settings['light_logo']) }}" class="img-responsive mt-2" width="150">
+                                                    <img src="{{ asset(Storage::disk('tenantPublic')->url('tenants/'.$settings['light_logo']??'')) }}" class="img-responsive mt-2" width="150">
                                                 @endif
                                             </div>
                                         </div>

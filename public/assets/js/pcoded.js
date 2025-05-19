@@ -400,23 +400,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
 function font_change(name) {
     $('#layout_font').val(name);
-    var srcs = '';
-    if (name == 'Roboto') {
-        srcs = 'https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap';
-    }
-    if (name == 'Poppins') {
-        srcs = 'https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap';
-    }
-    if (name == 'Inter') {
-        srcs = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap';
-    }
-    if (name == 'Cairo') {
-        srcs = 'https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&display=swap';
-    }
-    if (name == 'Arial') {
-        srcs = 'https://fonts.googleapis.com/css2?family=Arial:wght@400;500;700&display=swap';
-    }
-    document.querySelector('#main-font-link').setAttribute('href', srcs);
     document.querySelector('body').setAttribute('style', 'font-family:"' + name + '", sans-serif');
     var control = document.querySelector('.pct-offcanvas');
     if (control) {

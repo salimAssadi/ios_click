@@ -28,10 +28,10 @@
     <meta property="twitter:image" content="{{ route('tenant.setting.file',$settings['meta_seo_image']??'') }}"> --}}
 
     <!-- shortcut icon-->
-    <link rel="icon" href="{{ route('tenant.setting.file', $settings['company_favicon']??'') }}"
+    <link rel="icon" href="{{ asset(Storage::disk('tenantPublic')->url('tenants/'.$settings['company_favicon']??'')) }}"
         type="image/x-icon">
-    {{-- <link rel="shortcut icon" href="{{ route('tenant.setting.file', $settings['company_favicon']??'') }}"
-        type="image/x-icon"> --}}
+    <link rel="shortcut icon" href="{{ asset(Storage::disk('tenantPublic')->url('tenants/'.$settings['company_favicon']??'')) }}"
+        type="image/x-icon">
 
         <link rel="stylesheet" href="{{ asset('assets/css/plugins/notifier.css') }}" />
     <!-- [Page specific CSS] start -->
@@ -42,9 +42,7 @@
      <link rel="stylesheet" href="{{ asset('assets/css/plugins/dataTables.bootstrap5.min.css') }}" />
      <link rel="stylesheet" href="{{ asset('assets/css/plugins/buttons.bootstrap5.min.css') }}" />
 
-    <!-- [Google Font] Family -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
-        id="main-font-link" />
+    <!-- [Font] Family -->
     <link rel="stylesheet" href="{{ asset('assets/fonts/phosphor/duotone/style.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/fonts/tabler-icons.min.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/fonts/feather.css') }}" />

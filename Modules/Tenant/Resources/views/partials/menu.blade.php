@@ -11,7 +11,7 @@
     <div class="navbar-wrapper">
         <div class="m-header">
             <a href="#" class="b-brand text-primary">
-                <img src="{{ route('tenant.setting.file',getSettingsValByName('company_logo')) }}"
+                <img src="{{ asset(Storage::disk('tenantPublic')->url('tenants/'.$admin_logo??'')) }}"
                     alt="" class="logo logo-lg" />
             </a>
         </div>
