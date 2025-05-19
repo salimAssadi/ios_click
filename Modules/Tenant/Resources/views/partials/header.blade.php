@@ -2,7 +2,8 @@
     $users = auth('tenant')->user();
     $languages = \App\Models\Custom::languages();
     $userLang = auth('tenant')->user()->lang;
-    $profile = asset(Storage::url('upload/profile'));
+
+    $profile = asset('assets/images/avatar.png');
 @endphp
 
 <header class="pc-header">
@@ -95,7 +96,7 @@
                         <div class="dropdown-header">
                             <div class="d-flex align-items-center mb-3">
                                 <div class="flex-shrink-0">
-                                    <img src="{{(!empty($users->profile)? $profile.'/'.$users->profile : $profile.'/avatar.png')}}" alt="user-image" class="img-fluid rounded-circle" style="width: 50px;" />
+                                    <img src="{{$profile}}" alt="user-image" class="img-fluid rounded-circle" style="width: 50px;" />
                                 </div>
                                 <div class="flex-grow-1 ms-3">
                                     <h5 class="mb-1">{{auth('tenant')->user()->name}}</h5>

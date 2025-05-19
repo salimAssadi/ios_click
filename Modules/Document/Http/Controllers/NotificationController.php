@@ -52,7 +52,10 @@ class NotificationController extends Controller
 
     public function markAsRead($id)
     {
-        $notification = auth('tenant')->user()->notifications()->findOrFail($id);
+        $notification = DatabaseNotification::on('tenant')
+            ->where('notifiable_type', get_class(auth('tenant')->user()))
+            ->where('notifiable_id', auth('tenant')->user()->id)
+            ->findOrFail($id);
         $notification->markAsRead();
 
         return response()->json(['success' => true]);
@@ -60,7 +63,12 @@ class NotificationController extends Controller
 
     public function markAllAsRead()
     {
-        auth('tenant')->user()->unreadNotifications->markAsRead();
+        $user = auth('tenant')->user();
+        DatabaseNotification::on('tenant')
+            ->where('notifiable_type', get_class($user))
+            ->where('notifiable_id', $user->id)
+            ->whereNull('read_at')
+            ->update(['read_at' => now()]);
         return response()->json(['success' => true]);
     }
 
