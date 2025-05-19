@@ -3,12 +3,9 @@
 namespace Modules\Setting\Http\Controllers;
 
 use App\Http\Controllers\BaseModuleController;
-use Modules\Setting\Models\Setting;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\get;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 
 class SettingController extends BaseModuleController
 {
@@ -19,7 +16,7 @@ class SettingController extends BaseModuleController
         $this->routePrefix = 'settings';
         $this->moduleName = 'Setting';
     }
-    
+
     //    ---------------------- Account --------------------------------------------------------
     public function index()
     {
@@ -28,7 +25,7 @@ class SettingController extends BaseModuleController
         $loginUser = auth('tenant')->user();
         $settings = settings();
         $timezones = config('timezones');
-        
+
         return $this->view('index', compact('loginUser', 'settings', 'timezones', 'activeTab'))->with('tab', $activeTab);
     }
 
@@ -47,7 +44,6 @@ class SettingController extends BaseModuleController
             $messages = $validator->getMessageBag();
             return redirect()->back()->with('error', $messages->first());
         }
-
 
         if ($request->hasFile('profile')) {
             $filenameWithExt = $request->file('profile')->getClientOriginalName();
@@ -76,7 +72,6 @@ class SettingController extends BaseModuleController
         $user->email = $request->email;
         $user->phone_number = $request->phone_number;
         $user->save();
-
 
         return redirect()->back()->with('success', 'User profile settings successfully updated.')->with('tab', 'user_profile_settings');
     }
@@ -114,7 +109,7 @@ class SettingController extends BaseModuleController
             if (Hash::check($data['current_password'], $current_password)) {
                 $user_id = $loginUser->id;
                 $user = User::find($user_id);
-                $user->password = Hash::make($data['new_password']);;
+                $user->password = Hash::make($data['new_password']);
                 $user->save();
 
                 return redirect()->back()->with('success', __('Password successfully updated.'))->with('tab', 'password_settings');
@@ -128,49 +123,48 @@ class SettingController extends BaseModuleController
 
     //    ---------------------- General --------------------------------------------------------
 
-
     public function generalData(Request $request)
-    {   
+    {
         $tab = 'general_settings';
 
         $validator = \Validator::make($request->all(), [
             'application_name' => 'required',
-            'logo'            => 'nullable|mimes:png',
-            'landing_logo'    => 'nullable|mimes:png',
-            'favicon'         => 'nullable|mimes:png',
-            'light_logo'      => 'nullable|mimes:png',
+            'logo' => 'nullable|mimes:png',
+            'landing_logo' => 'nullable|mimes:png',
+            'favicon' => 'nullable|mimes:png',
+            'light_logo' => 'nullable|mimes:png',
         ]);
-    
+
         if ($validator->fails()) {
             return redirect()->back()->with('error', $validator->errors()->first());
         }
-           // Save all request data into settings
+        // Save all request data into settings
         $excludedKeys = ['_token', 'tenant'];
         $settings = $request->except($excludedKeys);
-        
+
         $tenant = getTenantRoot();
         if ($request->hasFile('company_logo')) {
-            $request->file('company_logo')->storeAs($tenant.'/logo', 'logo.png' ,'tenants');
-            $company_logo = $tenant.'/logo/logo.png';
+            $request->file('company_logo')->storeAs($tenant . '/logo', 'logo.png', 'tenants');
+            $company_logo = $tenant . '/logo/logo.png';
             $settings['company_logo'] = $company_logo;
         }
-    
+
         if ($request->hasFile('company_favicon')) {
-            $request->file('company_favicon')->storeAs($tenant.'/logo', 'favicon.png' ,'tenants');
-            $company_favicon = $tenant.'/logo/favicon.png';
+            $request->file('company_favicon')->storeAs($tenant . '/logo', 'favicon.png', 'tenants');
+            $company_favicon = $tenant . '/logo/favicon.png';
             $settings['company_favicon'] = $company_favicon;
         }
-    
+
         if ($request->hasFile('light_logo')) {
-            $request->file('light_logo')->storeAs($tenant.'/logo', 'light_logo.png' ,'tenants');
-            $light_logo = $tenant.'/logo/light_logo.png';
+            $request->file('light_logo')->storeAs($tenant . '/logo', 'light_logo.png', 'tenants');
+            $light_logo = $tenant . '/logo/light_logo.png';
             $settings['light_logo'] = $light_logo;
         }
-    
+
         foreach ($settings as $key => $value) {
             if (!empty($value)) {
                 if (is_array($value)) {
-                    $value = json_encode($value); 
+                    $value = json_encode($value);
                 }
                 \DB::insert(
                     'INSERT INTO settings (`value`, `name`, `type`) VALUES (?, ?, ?)
@@ -179,17 +173,13 @@ class SettingController extends BaseModuleController
                 );
             }
         }
-      
-       
+
         return redirect()->back()
             ->with('success', __('General setting successfully saved.'))
             ->with('tab', $tab);
     }
-    
 
     //    ---------------------- SMTP --------------------------------------------------------
-
-
 
     public function smtpData(Request $request)
     {
@@ -224,14 +214,17 @@ class SettingController extends BaseModuleController
                 'SERVER_ENCRYPTION' => $request->server_encryption,
             ];
             foreach ($smtpArray as $key => $val) {
-                \DB::insert(
-                    'insert into settings (`value`, `name`, `type`) values (?, ?, ?) ON DUPLICATE KEY UPDATE `value` = VALUES(`value`) ',
-                    [
-                        $val,
-                        $key,
-                        'smtp',
-                    ]
-                );
+                if (!empty($val)) {
+                    \DB::insert(
+                        'insert into settings (`value`, `name`, `type`) values (?, ?, ?) ON DUPLICATE KEY UPDATE `value` = VALUES(`value`) ',
+                        [
+                            $val,
+                            $key,
+                            'smtp',
+                        ]
+                    );
+                }
+
             }
 
             return redirect()->back()->with('success', __('SMTP settings successfully saved.'))->with('tab', 'email_SMTP_settings');
@@ -261,19 +254,16 @@ class SettingController extends BaseModuleController
             $response = sendEmail($to, $data);
             if ($response['status'] == 'error') {
                 $errorMessage = $response['message'];
-                return redirect()->back()->with('error', $errorMessage)->with('tab', 'email_SMTP_settings');;
+                return redirect()->back()->with('error', $errorMessage)->with('tab', 'email_SMTP_settings');
             } else {
                 $errorMessage = $response['message'];
-                return redirect()->back()->with('success', $errorMessage)->with('tab', 'email_SMTP_settings');;
+                return redirect()->back()->with('success', $errorMessage)->with('tab', 'email_SMTP_settings');
             }
         }
     }
 
     //    ---------------------- Payment --------------------------------------------------------
 
-
-
-  
     public function companyData(Request $request)
     {
         $settings = $request->all();
@@ -281,20 +271,21 @@ class SettingController extends BaseModuleController
         unset($settings['_tab']);
         unset($settings['tenant']);
         $tab = 'company_settings';
-        
-    
+
         // Save other settings
         foreach ($settings as $key => $value) {
-                \DB::insert(
-                    'insert into settings (`value`, `name`, `type`) values (?, ?, ?) ON DUPLICATE KEY UPDATE `value` = VALUES(`value`) ',
-                    [
-                        $value,
-                        $key,
-                        'company',
-                    ]
-                );
+            if(!empty($value)){
+            \DB::insert(
+                'insert into settings (`value`, `name`, `type`) values (?, ?, ?) ON DUPLICATE KEY UPDATE `value` = VALUES(`value`) ',
+                [
+                    $value,
+                    $key,
+                    'company',
+                ]
+            );
+            }
         }
-        
+
         return redirect()->back()->with('success', __('Company settings successfully updated.'))->with('tab', 'company_settings');
     }
 
@@ -316,26 +307,22 @@ class SettingController extends BaseModuleController
         unset($themeSettings['_token']);
 
         foreach ($themeSettings as $key => $val) {
-            \DB::insert(
-                'insert into settings (`value`, `name`,`type`) values (?, ?, ?) ON DUPLICATE KEY UPDATE `value` = VALUES(`value`) ',
-                [
-                    $val,
-                    $key,
-                    'common',
-                ]
-            );
+            if(!empty($val)){
+                \DB::insert(
+                    'insert into settings (`value`, `name`,`type`) values (?, ?, ?) ON DUPLICATE KEY UPDATE `value` = VALUES(`value`) ',
+                    [
+                        $val,
+                        $key,
+                        'common',
+                    ]
+                );
+            }
         }
 
         return redirect()->back()->with('success', __('Theme settings save successfully.'));
     }
 
     //    ---------------------- SEO Settings --------------------------------------------------------
-
-
-
-    
-
-  
 
     // ---------------------- Footer Setting ---------------------------------------------
     public function footerSetting(Request $request)
@@ -355,7 +342,6 @@ class SettingController extends BaseModuleController
         unset($settings['tab']);
         unset($settings['tenant']);
 
-        
         foreach ($settings as $s_key => $s_value) {
             if (!empty($s_value)) {
                 \DB::insert(
@@ -371,7 +357,6 @@ class SettingController extends BaseModuleController
 
         return redirect()->back()->with('success', __('Footer settings save successfully.'))->with('tab', $request->tab);
     }
-
 
     // ---------------------- 2FA Setting --------------------------------
     public function twofaEnable(Request $request)
@@ -403,17 +388,17 @@ class SettingController extends BaseModuleController
             if (strpos($path, '..') !== false) {
                 abort(404);
             }
-            
+
             if (!Storage::disk('tenants')->exists($path)) {
                 abort(404);
             }
-            
+
             $file = Storage::disk('tenants')->path($path);
-            
+
             $type = File::mimeType($file);
-            
+
             $response = response(file_get_contents($file), 200)->header("Content-Type", $type);
-            
+
             return $response;
         } catch (\Exception $e) {
             return abort(404);
@@ -432,54 +417,56 @@ class SettingController extends BaseModuleController
         unset($settings['tenant']);
         $tab = 'signature_settings';
 
-        $tenant='assdaf';
+        $tenant = 'assdaf';
         // Handle company signature upload
         if ($request->hasFile('company_signature')) {
             $filenameWithExt = $request->file('company_signature')->getClientOriginalName();
             $filename = pathinfo($filenameWithExt, PATHINFO_FILENAME);
             $extension = $request->file('company_signature')->getClientOriginalExtension();
-            $path=$tenant.'/'.'signature/';
+            $path = $tenant . '/' . 'signature/';
             $fileNameToStore = 'company_signature_' . time() . '.' . $extension;
 
-            $request->file('company_signature')->storeAs($path, $fileNameToStore ,'tenants');
-            $settings['company_signature'] = $path.$fileNameToStore;
-        }else{
+            $request->file('company_signature')->storeAs($path, $fileNameToStore, 'tenants');
+            $settings['company_signature'] = $path . $fileNameToStore;
+        } else {
             unset($settings['company_signature']);
         }
-        
+
         // Handle company stamp upload
         if ($request->hasFile('company_stamp')) {
             $filenameWithExt = $request->file('company_stamp')->getClientOriginalName();
             $filename = pathinfo($filenameWithExt, PATHINFO_FILENAME);
             $extension = $request->file('company_stamp')->getClientOriginalExtension();
-            $path= $tenant.'/'.'stamp/';
+            $path = $tenant . '/' . 'stamp/';
             $fileNameToStore = 'company_stamp_' . time() . '.' . $extension;
-            
-            $request->file('company_stamp')->storeAs($path, $fileNameToStore ,'tenants');
-            $settings['company_stamp'] = $path.$fileNameToStore;
-        }else{
+
+            $request->file('company_stamp')->storeAs($path, $fileNameToStore, 'tenants');
+            $settings['company_stamp'] = $path . $fileNameToStore;
+        } else {
             unset($settings['company_stamp']);
         }
-        
+
         // Handle signature pad data
         if ($request->has('signature_pad_data') && !empty($request->signature_pad_data)) {
             $settings['signature_pad_data'] = $request->signature_pad_data;
-        }else{
+        } else {
             unset($settings['signature_pad_data']);
         }
-        
+
         // Save settings
         foreach ($settings as $key => $value) {
-                \DB::insert(
-                    'insert into settings (`value`, `name`, `type`) values (?, ?, ?) ON DUPLICATE KEY UPDATE `value` = VALUES(`value`) ',
-                    [
-                        $value,
-                        $key,
-                        'signature',
-                    ]
-                );
+            if(!empty($value)){
+            \DB::insert(
+                'insert into settings (`value`, `name`, `type`) values (?, ?, ?) ON DUPLICATE KEY UPDATE `value` = VALUES(`value`) ',
+                [
+                    $value,
+                    $key,
+                    'signature',
+                ]
+            );
+            }
         }
-        
-        return redirect()->back()->with('success', __('Signature settings successfully updated.'))->with('tab', $tab );
+
+        return redirect()->back()->with('success', __('Signature settings successfully updated.'))->with('tab', $tab);
     }
 }
