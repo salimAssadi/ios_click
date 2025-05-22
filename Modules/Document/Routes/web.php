@@ -40,12 +40,13 @@ Route::prefix('document')->name('tenant.document.')->middleware(['auth:tenant','
         Route::get('public', 'publicProcedures')->name('public');
         Route::get('private', 'privateProcedures')->name('private');
         Route::get('edit/{id}/{category_id}', 'edit')->name('edit');
-        Route::post('create', 'create')->name('create');
+        Route::get('create/{category_id}', 'create')->name('create');
         Route::post('store', 'store')->name('store');
         Route::put('update/{id}', 'update')->name('update');
         Route::get('configure/{id}', 'configure')->name('configure');
         Route::post('configure/{id}/save', 'saveConfigure')->name('saveConfigure');
         Route::post('check-or-add', 'checkOrCreate')->name('check-or-add');
+        Route::get('preview/{id}', 'previewpdf')->name('preview');
     });
 
 

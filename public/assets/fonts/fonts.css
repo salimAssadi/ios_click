@@ -1,5 +1,5 @@
 /* Local font-face declarations for Roboto, Poppins, Inter, Cairo, Arial */
-
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&display=swap');
 /* Roboto */
 @font-face {
   font-family: 'Roboto';
@@ -61,7 +61,7 @@
 }
 
 /* Cairo (200, 400, 700, 1000) */
-@font-face {
+/* @font-face {
   font-family: 'Cairo';
   src: url('/assets/fonts/Cairo/Cairo-ExtraLight.woff2') format('woff2');
   font-weight: 200;
@@ -84,7 +84,10 @@
   src: url('/assets/fonts/Cairo/Cairo-Black.woff2') format('woff2');
   font-weight: 1000;
   font-style: normal;
-}
+} */
+
+
+
 
 /* Arial (system font fallback, not local) */
 /* No @font-face needed for Arial as it's a system font */

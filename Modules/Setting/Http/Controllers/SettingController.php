@@ -296,7 +296,19 @@ class SettingController extends BaseModuleController
         $user = \Auth::user();
         $user->lang = $lang;
         $user->save();
-
+        if($user->lang == 'arabic'){
+            $theme_dir='rtl';
+        }else{
+            $theme_dir='ltr';
+        }
+        \DB::insert(
+            'insert into settings (`value`, `name`,`type`) values (?, ?, ?) ON DUPLICATE KEY UPDATE `value` = VALUES(`value`) ',
+            [
+                $theme_dir,
+                'theme_dir',
+                'common',
+            ]
+        );
         return redirect()->back()->with('success', __('Language successfully changed.'));
     }
 

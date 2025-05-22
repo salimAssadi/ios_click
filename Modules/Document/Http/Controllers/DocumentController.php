@@ -571,7 +571,7 @@ class DocumentController extends Controller
         $id = decrypt($id);
         try {
             // 1. Get document and version
-            $document = Document::with(['lastVersion'])->findOrFail($id);
+            $document = Document::with(['lastVersion', 'documentable'])->findOrFail($id);
 
             // 2. Get specific version if requested
             if ($request->has('version')) {
@@ -591,15 +591,15 @@ class DocumentController extends Controller
 
             // 4. Check tenant access
             $user = auth('tenant')->user();
-            if ($user->tenant_id !== $document->tenant_id) {
-                \Log::warning('Unauthorized tenant access attempt', [
-                    'user_id' => $user->id,
-                    'tenant_id' => $user->tenant_id,
-                    'document_id' => $document->id,
-                    'document_tenant' => $document->tenant_id,
-                ]);
-                return redirect()->back()->with('error', 'Access denied');
-            }
+            // if ($user->tenant_id !== $document->tenant_id) {
+            //     \Log::warning('Unauthorized tenant access attempt', [
+            //         'user_id' => $user->id,
+            //         'tenant_id' => $user->tenant_id,
+            //         'document_id' => $document->id,
+            //         'document_tenant' => $document->tenant_id,
+            //     ]);
+            //     return redirect()->back()->with('error', 'Access denied');
+            // }
 
             // 5. Rate limiting
             if (!RateLimiter::remaining('file-downloads:' . $user->id, 60)) {
@@ -608,12 +608,9 @@ class DocumentController extends Controller
             RateLimiter::hit('file-downloads:' . $user->id);
 
             // 6. Get file path and validate
-            $filePath = $version->file_path;
+            $filePath = $version->file_path??'';
             if (!Storage::disk('tenants')->exists($filePath)) {
-                return response()->json([
-                    'error' => 'File not found',
-                    'path' => $filePath,
-                ], 404);
+               return redirect()->back()->with('error', 'File not found');
             }
 
             // 7. Log access
@@ -628,7 +625,6 @@ class DocumentController extends Controller
 
             // 8. Generate temporary URL or serve file
             if ($request->get('preview', false)) {
-                // For preview, serve directly with strict headers
                 return response()->file(
                     Storage::disk('tenants')->path($filePath),
                     [
@@ -661,6 +657,40 @@ class DocumentController extends Controller
                 'message' => app()->environment('local') ? $e->getMessage() : 'An error occurred',
             ], 500);
         }
+    }
+
+    public function previewPDF($documentdata, $contentData, $department_name_ar, $department_name_en, $preparers, $reviewers, $approver,$jobRoles,$departments)
+    {
+
+        $viewData = [
+            'department_name_ar' => $department_name_ar,
+            'department_name_en' => $department_name_en,
+            'logo' => getSettingsValByName('company_logo'),
+            'procedure_name' => $documentdata['procedure_name_ar'],
+            'procedure_coding' => $documentdata['procedure_coding'],
+            'pageTitle' => $documentdata['procedure_name_en'],
+            'procedure' => $documentdata['procedure'],
+            'jobRoles' => $jobRoles,
+            'departments' => $departments,
+            'purposes' => ($contentData['purpose'] ?? []),
+            'scopes' => ($contentData['scope'] ?? []),
+            'responsibilities' => ($contentData['responsibility'] ?? []),
+            'definitions' => ($contentData['definitions'] ?? []),
+            'forms' => ($contentData['forms'] ?? []),
+            'procedures' => ($contentData['procedures'] ?? []),
+            'risk_matrix' => ($contentData['risk_matrix'] ?? []),
+            'kpis' => ($contentData['kpis'] ?? []),
+            'references' => ($contentData['references'] ?? []),
+            'preparers' => $preparers,
+            'reviewers' => $reviewers,
+            'approver' => $approver,
+        ];
+
+        // إنشاء الـ PDF
+        $pdf = LaravelMpdf::loadView('template.procedures.procedure_template', $viewData);
+
+        // عرض الـ PDF في المتصفح بدون تحميل
+        return $pdf->stream('preview-procedure.pdf');
     }
 
     public function download($id)

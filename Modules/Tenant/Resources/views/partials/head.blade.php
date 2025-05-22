@@ -29,6 +29,8 @@
     
     {{-- <link rel="shortcut icon" href="{{ asset(Storage::disk('tenantPublic')->url('tenants/'.$settings['company_favicon']??'')) }}"
     type="image/x-icon"> --}}
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&display=swap"
+        id="main-font-link" />
     <link rel="shortcut icon" href="{{ asset('assets/images/favicon.png') }}"
     type="image/x-icon">
 

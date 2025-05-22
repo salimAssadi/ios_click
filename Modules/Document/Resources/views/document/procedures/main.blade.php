@@ -73,7 +73,7 @@
                                             <div class="d-flex justify-content-end gap-2">
                                                 <button type="button"
                                                     class="btn btn-sm  btn-light-primary btn-configure-procedure"
-                                                    data-id="{{ $procedure->id }}" data-bs-toggle="tooltip"
+                                                    data-uuid="{{ $procedure->uuid }}" data-bs-toggle="tooltip"
                                                     data-bs-placement="top" title="{{ __('Add') }}">
                                                     {{ __('Add') }}
                                                 </button>
@@ -104,7 +104,7 @@
                     $(document).ready(function() {
                         $(document).on('click', '.btn-configure-procedure', function(e) {
                             e.preventDefault();
-                            var procedureId = $(this).data('id');
+                            var procedureUuid = $(this).data('uuid');
                             Swal.fire({
                                 title: '{{ __('Alert') }}',
                                 text: "{{ __('add_procedure_confirmation', ['system' => $currentSystemName]) }}",
@@ -119,7 +119,7 @@
                                         url: '/tenant/document/procedures/check-or-add',
                                         type: 'POST',
                                         data: {
-                                            procedure_id: procedureId,
+                                            procedure_uuid: procedureUuid,
                                             _token: '{{ csrf_token() }}'
                                         },
                                         dataType: 'json'

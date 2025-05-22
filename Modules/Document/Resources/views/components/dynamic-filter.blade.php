@@ -176,7 +176,7 @@
     }
 </style>
 @if(!empty($filters))
-<div class="filter-card">
+{{-- <div class="filter-card"> --}}
 <div class="filter-bar" id="dynamic-filters">
     @foreach($filters as $filter)
         <div class="filter-group">
@@ -207,7 +207,7 @@
         </div>
     @endforeach
 </div>
-</div>
+{{-- </div> --}}
 @endif
 {{-- <script>
     // فلترة مباشرة عند تغيير أي قيمة

@@ -14,7 +14,7 @@ $base64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAK8AAAAsCAIAAACc1H9UAAA
             <td width="33%" class="text-center" style="word-wrap: break-word;">
                 <p class="top-info"></p>
                 <p style="line-height: 10px;" class="top-info">{{ $procedure_name }}</p>
-                <p class="top-info"> {{ $procedure_code }}</p>
+                <p class="top-info"> {{ $procedure_coding }}</p>
             </td>
             
             <td  width="33%" rowspan="2"> 
@@ -29,8 +29,8 @@ $base64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAK8AAAAsCAIAAACc1H9UAAA
         </tr>
         <tr>
             <td width="33%" class="text-center">
-                <p class="top-info">{{ $Department_name_ar }}</p>
-                <p class="top-info">{{ $Department_name_en }}</p>          
+                <p class="top-info">{{ $department_name_ar }}</p>
+                <p class="top-info">{{ $department_name_en }}</p>          
             </td>
             <td width="33%" class="text-center">
                 ISO 9001: 2015

@@ -12,6 +12,7 @@ class Procedure extends BaseModel
     use HasFactory, Localizable;
     
     protected $fillable = [
+        'uuid',
         'procedure_name_ar',
         'procedure_name_en',
         'category_id',
@@ -30,6 +31,7 @@ class Procedure extends BaseModel
 
     protected $casts = [
         'content' => 'array',
+        
     ];
 
     public function form()

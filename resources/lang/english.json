@@ -178,6 +178,8 @@
     "Next": "Next",
     "Last": "Last",
     "This action will be applied to the system you have specified": "🔔 Note: This action will be applied to the system you have specified",
-"add_procedure_confirmation": "When you add this procedure to the system, it will be added to the \":system\" system you have selected. Do you want to continue?"
+"add_procedure_confirmation": "When you add this procedure to the system, it will be added to the \":system\" system you have selected. Do you want to continue?",
+"Please select a reference first or add empty reference ":"Please select a reference from the list of references or click on 'Add empty field' to add your own reference."
+
 
 }

@@ -9,6 +9,7 @@ use Modules\Tenant\Entities\User;
 use Modules\Document\Entities\Category;
 use Modules\Document\Entities\Status;
 use Modules\Document\Entities\DocumentRequest;
+use Modules\Setting\Entities\Employee;
 use App\Traits\Localizable;
 
 class Document extends BaseModel
@@ -26,7 +27,7 @@ class Document extends BaseModel
         'updated_at' => 'datetime',
         'reviewer_ids' => 'array',
         'approver_id' => 'integer',
-        'preparer_id' => 'integer',
+        'preparer_id' => 'array',
     ];
 
     public function getTitleAttribute(){
@@ -76,19 +77,27 @@ class Document extends BaseModel
         return $this->hasMany(DocumentRequest::class);
     }
     
+    
     public function category()
     {
         return $this->belongsTo(Category::class);
     }
     
-    public function approver()
+    public function getApproverAttribute()
     {
-        return $this->belongsTo(User::class, 'approver_id');
+        return Employee::where('user_id', $this->approver_id)->with(['user','position','department'])->first();
     }
     
-    public function preparer()
-    {
-        return $this->belongsTo(User::class, 'preparer_id');
+    public function getPreparerlistAttribute()
+    {       
+        $ids = json_decode($this->preparer_id ?? '[]', true);
+        return Employee::whereIn('user_id', $ids)->with(['user','position','department'])->get();
+    }
+    
+    public function getReviewerslistAttribute()
+    {   
+        $ids = json_decode($this->reviewer_ids ?? '[]', true);
+        return Employee::whereIn('user_id', $ids)->with(['user','position','department'])->get();
     }
     
     /**

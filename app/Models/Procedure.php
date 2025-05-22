@@ -13,6 +13,7 @@ class Procedure extends Model
     protected $connection = 'iso_dic';
     
     protected $fillable = [
+        'uuid',
         'procedure_name_ar',
         'procedure_name_en',
         'category_id',

@@ -2,14 +2,15 @@
 
 namespace Modules\Tenant\Http\Controllers\Auth;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\BaseModuleController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Modules\Tenant\Entities\User;
 use Modules\Tenant\Services\TenantService;
+use Modules\Tenant\Providers\RouteServiceProvider;
 
-class LoginController extends Controller
+class LoginController extends BaseModuleController
 {
     protected $tenantService;
 

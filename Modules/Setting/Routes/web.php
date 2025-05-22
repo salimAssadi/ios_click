@@ -32,7 +32,8 @@ Route::prefix('setting')->name('tenant.setting.')->middleware(['auth:tenant', 'X
     // Route::put('/', [CompanyProfileController::class, 'update'])->name('update');
     
     Route::post('updateSetting', [SettingController::class, 'footerData'])->name('updateSetting');
-    
+    Route::get('language/{lang}', [SettingController::class,'lanquageChange'])->name('language.change');
+
     // General Settings
     Route::post('/account', [SettingController::class, 'accountData'])->name('account');
     Route::post('/password', [SettingController::class, 'passwordData'])->name('password');

@@ -93,7 +93,7 @@
                 <table class="table" id="dynamic-table-purpose">
                     <thead>
                         <tr>
-                            <th style="width: 50px;">التسلسل</th>
+                            <th style="width: 90px;">التسلسل</th>
                             <th>المحتوى</th>
                             <th style="width: 50px;">
                                 <button type="button" class="btn btn-sm btn-success add-row px-3"
@@ -104,7 +104,7 @@
                     <tbody>
                         @forelse ($purposes as $index => $row)
                             <tr>
-                                <td style="width: 50px;">
+                                <td style="width: 90px;">
                                     <input type="text" name="purpose[{{ $index }}][sequence]"
                                         class="form-control" value="{{ $row['sequence'] }}">
                                 </td>
@@ -141,7 +141,7 @@
                 <table class="table" id="dynamic-table-scope">
                     <thead>
                         <tr>
-                            <th style="width: 50px;">التسلسل</th>
+                            <th style="width: 90px;">التسلسل</th>
                             <th>المحتوى</th>
                             <th style="width: 50px;">
                                 <button type="button" class="btn btn-sm btn-success add-row px-3"
@@ -152,7 +152,7 @@
                     <tbody>
                         @forelse ($scopes  as $index => $row)
                             <tr>
-                                <td style="width: 50px;">
+                                <td style="width: 90px;">
                                     <input type="text" name="scope[{{ $index }}][sequence]"
                                         class="form-control" value="{{ $row['sequence'] }}">
                                 </td>
@@ -189,7 +189,7 @@
                 <table class="table" id="dynamic-table-responsibility">
                     <thead>
                         <tr>
-                            <th style="width: 50px;">التسلسل</th>
+                            <th style="width: 90px;">التسلسل</th>
                             <th>المحتوى</th>
                             <th style="width: 50px;">
                                 <button type="button" class="btn btn-sm btn-success add-row px-3"
@@ -200,7 +200,7 @@
                     <tbody>
                         @forelse ($responsibilities as $index => $row)
                             <tr>
-                                <td style="width: 50px;">
+                                <td style="width: 90px;">
                                     <input type="text" name="responsibility[{{ $index }}][sequence]"
                                         class="form-control" value="{{ $row['sequence'] }}" readonly>
                                 </td>
@@ -245,7 +245,7 @@
                 <table class="table" id="dynamic-table-definitions">
                     <thead>
                         <tr>
-                            <th style="width: 50px;">التسلسل</th>
+                            <th style="width: 90px;">التسلسل</th>
                             <th>المحتوى</th>
                             <th style="width: 50px;">
                                 <button type="button" class="btn btn-sm btn-success add-row px-3"
@@ -256,7 +256,7 @@
                     <tbody>
                         @forelse ($definitions as $index => $row)
                             <tr>
-                                <td style="width: 50px;">
+                                <td style="width: 90px;">
                                     <input type="text" name="definitions[{{ $index }}][sequence]"
                                         class="form-control" value="{{ $row['sequence'] }}">
                                 </td>
@@ -600,16 +600,21 @@
                 </select>
             </div>
             <div class="col-md-2">
-                <button type="button" id="add-reference-btn" class="btn btn-primary w-100">
-                    {{ __('Add') }}
-                </button>
+                <div class="d-flex gap-1">
+                    <button type="button" id="add-reference-btn" class="btn btn-primary w-100">
+                        {{ __('Add') }}
+                    </button>
+                    <button type="button" id="add-empty-reference-btn" class="btn btn-secondary w-100">
+                        {{ __('Add Empty') }}
+                    </button>
+                </div>
             </div>
         </div>
 
         <table class="table" id="references-table">
             <thead>
                 <tr>
-                    <th style="width: 50px;">#</th>
+                    <th style="width: 90px;">#</th>
                     <th>{{ __('References') }}</th>
                     <th style="width: 50px;"></th>
                 </tr>
@@ -618,7 +623,9 @@
                 @if ($references)
                     @forelse ($references as $index => $row)
                         <tr>
-                            <td>{{ $index + 1 }}</td>
+                            <td>
+                                <input type="text" name="references[{{ $index }}][id]" class="form-control" value="{{ $row['id'] ?? '' }}">
+                            </td>
                             <td>
                                 <input type="text" name="references[{{ $index }}][value]" class="form-control" value="{{ $row['value'] ?? '' }}">
                             </td>
@@ -710,66 +717,9 @@
             }
         }
 
-        // initializeDynamicRows('purpose', {{ $purposes ? count($purposes) : 0 }},
-        //     1, 'textarea', []);
-
-        // initializeDynamicRows('scope', {{ $scopes ? count($scopes) : 0 }},
-        //     2, 'textarea', []);
-
-        // initializeDynamicRows('responsibility',
-        //     {{ $responsibilities ? count($responsibilities) : 0 }},
-        //     3, 'select', jobRoles);
-
-        // initializeDynamicRows('definitions', {{ $definitions ? count($definitions) : 0 }},
-        //     4, 'textarea', []);
-
-
-        // function initializeDynamicRows(tabId, initialRowCount, index, inputType = 'textarea', options = []) {
-        //     let rowCount = initialRowCount;
-
-        //     $('#dynamic-table-' + tabId).on('click', '.add-row[data-tab="' + tabId + '"]', function() {
-        //         let inputField;
-
-        //         if (inputType === 'select') {
-        //             let optionsHtml = '';
-        //             inputField = `
-        //                 <select name="content[${rowCount}][value]" class="form-control showsearch">
-        //                     <option value="">اختر وظيفة</option>
-        //                     @foreach ($jobRoles as $option)
-        //                         <option value="{{ $option->id }}">{{ $option->title }}</option>
-        //                     @endforeach
-        //                 </select>
-        //             `;
-        //         } else {
-        //             inputField = `
-        //                 <textarea name="content[${rowCount}][value]" class="form-control" rows="1" placeholder="أدخل المحتوى"></textarea>
-        //             `;
-        //         }
-
-        //         const newRow = `
-        //                 <tr>
-        //                     <td style="width: 50px;">
-        //                         <input type="text" name="content[${rowCount}][sequence]" class="form-control" readonly value="${(rowCount + 1)}-${index}">
-        //                     </td>
-        //                     <td>
-        //                         ${inputField}
-        //                     </td>
-        //                     <td style="width: 50px;">
-        //                         <button type="button" class="btn btn-sm btn-danger remove-row px-3">-</button>
-        //                     </td>
-        //                 </tr>
-        //             `;
-
-        //         $('#dynamic-table-' + tabId + ' tbody').append(newRow);
-        //         rowCount++;
-        //     });
-
-        //     $('#dynamic-table-' + tabId).on('click', '.remove-row', function() {
-        //         $(this).closest('tr').remove();
-        //     });
-        // }
 
         let purposeRowCount = {{ $purposes ? count($purposes) : 0 }};
+        let referencesRowCount = {{ $references ? count($references) : 0 }};
         let scopeRowCount = {{ $scopes ? count($scopes) : 0 }};
         let responsibilityRowCount = {{ $responsibilities ? count($responsibilities) : 0 }};
         let definitionsRowCount = {{ $definitions ? count($definitions) : 0 }};
@@ -779,7 +729,7 @@
             const newRow = `
                 <tr>
                     <td style="width: 50px;">
-                        <input type="text" name="purposes[${purposeRowCount}][sequence]" class="form-control" readonly value="${(purposeRowCount + 1)}-1">
+                        <input type="text" name="purposes[${purposeRowCount}][sequence]" class="form-control" value="${(purposeRowCount + 1)}-1">
                     </td>
                     <td>
                         <textarea name="purposes[${purposeRowCount}][value]" class="form-control" rows="1" placeholder="أدخل المحتوى"></textarea>
@@ -801,7 +751,7 @@
             const newRow = `
                 <tr>
                     <td style="width: 50px;">
-                        <input type="text" name="scope[${scopeRowCount}][sequence]" class="form-control" readonly value="${(scopeRowCount + 1)}-2">
+                        <input type="text" name="scope[${scopeRowCount}][sequence]" class="form-control"  value="${(scopeRowCount + 1)}-2">
                     </td>
                     <td>
                         <textarea name="scope[${scopeRowCount}][value]" class="form-control" rows="1" placeholder="أدخل المحتوى"></textarea>
@@ -1058,9 +1008,9 @@
         });
 
         // references
-        let refCount = 0;
         const referenceSelect = document.getElementById('reference-select');
         const addBtn = document.getElementById('add-reference-btn');
+        const addEmptyBtn = document.getElementById('add-empty-reference-btn');
         const tableBody = document.querySelector('#references-table tbody');
 
         addBtn.addEventListener('click', function () {
@@ -1069,26 +1019,52 @@
             const refText = selectedOption.dataset.name;
 
             if (!refId) {
-                alert('{{ __("Please select a reference first.") }}');
+                Swal.fire({
+                    title: '{{ __('Error') }}',
+                    icon: 'error',
+                    text: '{{ __('Please select a reference first or add empty reference') }}',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    showConfirmButton: true,
+                  
+                });
                 return;
             }
 
-            // Check for duplicates
-            const existing = Array.from(tableBody.querySelectorAll('tr'))
-                .some(tr => tr.dataset.refId === refId);
-            if (existing) {
-                alert('{{ __("This reference has already been added.") }}');
-                return;
-            }
+            // حساب عدد الصفوف الحالية في الجدول
+            const currentRows = tableBody.querySelectorAll('tr').length;
+            const index = currentRows + 1;
 
-            refCount++;
             const row = document.createElement('tr');
             row.dataset.refId = refId;
             row.innerHTML = `
-                <td>${refCount}</td>
                 <td>
-                    <input type="hidden" name="references[${refCount - 1}][id]" value="${refId}">
-                    <input type="text" name="references[${refCount - 1}][value]" class="form-control" value="${refText}" readonly>
+                    <input type="text" name="references[${index - 1}][id]" class="form-control" value="${index}">
+                </td>
+                <td>
+                    <input type="text" name="references[${index - 1}][value]" class="form-control" value="${refText}">
+                </td>
+                <td>
+                    <button type="button" class="btn btn-danger btn-sm remove-ref" title="{{ __('Remove') }}">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            `;
+            tableBody.appendChild(row);
+        });
+
+        // Add empty reference row
+        addEmptyBtn.addEventListener('click', function () {
+            // حساب عدد الصفوف الحالية في الجدول
+            const currentRows = tableBody.querySelectorAll('tr').length;
+            const index = currentRows + 1;
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>
+                    <input type="text" name="references[${index - 1}][id]" class="form-control" placeholder="{{ __('squence') }}" value="${index}">
+                </td>
+                <td>
+                    <input type="text" name="references[${index - 1}][value]" class="form-control" placeholder="{{ __('Reference') }}">
                 </td>
                 <td>
                     <button type="button" class="btn btn-danger btn-sm remove-ref" title="{{ __('Remove') }}">
@@ -1103,10 +1079,12 @@
         tableBody.addEventListener('click', function (e) {
             if (e.target.closest('.remove-ref')) {
                 e.target.closest('tr').remove();
-                // Re-number the rows
-                refCount = 0;
+                // Re-number the rows (update input value, not replace input)
                 Array.from(tableBody.querySelectorAll('tr')).forEach((tr, i) => {
-                    tr.querySelector('td:first-child').textContent = ++refCount;
+                    const idInput = tr.querySelector('td:first-child input[name^="references"][name$="[id]"]');
+                    if (idInput) {
+                        idInput.value = i + 1;
+                    }
                 });
             }
         });

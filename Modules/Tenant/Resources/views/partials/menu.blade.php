@@ -17,7 +17,6 @@
         </div>
         <div class="navbar-content">
             <ul class="pc-navbar">
-
                 <li class="pc-item {{ in_array($routeName, ['tenant.dashboard', 'home', '']) ? 'active' : '' }}">
                     <a href="{{ route('tenant.dashboard') }}" class="pc-link">
                         <span class="pc-micon"><i class="ti ti-dashboard"></i></span>
@@ -25,9 +24,7 @@
                     </a>
                 </li>
                 <!-- Document Control -->
-                
-                  
-                
+                               
                 @if(Gate::check('Manage Documents') || Gate::check('Create New Document') || Gate::check('Change History') || Gate::check('Approval Workflow') || Gate::check('Review Notifications') || Gate::check('Document Categories') || Gate::check('Access Permissions') || Gate::check('Document Archive') )
                     <li
                         class="pc-item pc-hasmenu {{ in_array($routeName, ['document.index', 'document.show', 'document.requests.index','document.procedures.main','document.procedures.public','document.procedures.private', 'document.requests.create', 'document.requests.my']) ? 'active' : '' }}">

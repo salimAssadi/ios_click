@@ -38,9 +38,9 @@
         content="{{ asset(Storage::url('upload/seo')) . '/' . $settings['meta_seo_image'] }}">
 
     <!-- shortcut icon-->
-    <link rel="icon" href="{{ route('tenant.setting.file', $settings['company_favicon']??'') }}"
+    <link rel="icon" href="{{ asset('assets/images/favicon.png') }}"
         type="image/x-icon">
-    <link rel="shortcut icon" href="{{ route('tenant.setting.file', $settings['company_favicon']??'') }}"
+    <link rel="shortcut icon" href="{{ asset('assets/images/favicon.png') }}"
         type="image/x-icon">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
         id="main-font-link" />
@@ -52,6 +52,123 @@
     <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}" id="main-style-link" />
     <link rel="stylesheet" href="{{ asset('assets/css/style-preset.css') }}" />
     <link href="{{ asset('css/custom.css') }} " rel="stylesheet">
+    <style>
+    /* خلفية ديناميكية عصرية مع صورة وتدرجات */
+    body, .auth-main {
+      min-height: 100vh;
+      background:
+        linear-gradient(120deg, rgba(80,106,178,0.12) 0%, rgba(212,83,83,0.10) 100%),
+        url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1500&q=80') center center / cover no-repeat fixed;
+      position: relative;
+    }
+    /* أشكال زخرفية عصرية */
+    .decor-shape {
+      position: absolute;
+      z-index: 1;
+      pointer-events: none;
+      transition: opacity 0.5s;
+    }
+    .decor-shape.blue {
+      width: 360px; height: 360px;
+      top: -100px; left: -120px;
+      background: radial-gradient(circle, #506ab2 60%, rgba(80,106,178,0.1) 100%);
+      opacity: 0.45;
+      filter: blur(5px);
+      border-radius: 50%;
+    }
+    .decor-shape.red {
+      width: 220px; height: 220px;
+      bottom: -60px; right: -100px;
+      background: radial-gradient(circle, #d45353 50%, rgba(212,83,83,0.13) 100%);
+      opacity: 0.28;
+      filter: blur(4px);
+      border-radius: 50%;
+    }
+    .decor-shape.white {
+      width: 140px; height: 140px;
+      top: 40%; left: 60%;
+      background: radial-gradient(circle, #fff 80%, rgba(255,255,255,0.1) 100%);
+      opacity: 0.18;
+      filter: blur(2px);
+      border-radius: 50%;
+    }
+    /* تأثير زجاجي عصري للنموذج */
+    .auth-form {
+      position: relative;
+      z-index: 10;
+      background: rgba(255,255,255,0.85);
+      border-radius: 1.5rem;
+      box-shadow: 0 8px 32px rgba(80,106,178,0.09);
+      backdrop-filter: blur(10px) saturate(140%);
+      padding: 2.5rem 2rem;
+      margin: 2rem 0;
+      border: 1px solid rgba(80,106,178,0.08);
+    }
+    /* خطوط وأزرار متناسقة مع الهوية */
+    .auth-form label, .auth-form .form-check-label {
+      color: #506ab2;
+      font-weight: 500;
+    }
+    .auth-form .btn-primary, .auth-form .btn-light.text-primary {
+      background: #506ab2;
+      color: #fff;
+      border: none;
+      border-radius: 0.75rem;
+      font-weight: bold;
+      transition: background 0.2s, color 0.2s;
+    }
+    .auth-form .btn-primary:hover, .auth-form .btn-light.text-primary:hover {
+      background: #d45353;
+      color: #fff;
+    }
+    .auth-form .form-control {
+      border-radius: 0.75rem;
+      min-height: 48px;
+      border: 1px solid #e3eafc;
+      font-size: 1.05rem;
+    }
+    .auth-form .form-control:focus {
+      border-color: #506ab2;
+      box-shadow: 0 0 0 0.1rem rgba(80,106,178,0.12);
+    }
+    /* دعم RTL */
+    [dir="rtl"] .auth-form {
+      text-align: right;
+    }
+    [dir="rtl"] .decor-shape.blue {
+      left: auto; right: -120px;
+    }
+    [dir="rtl"] .decor-shape.red {
+      right: auto; left: -100px;
+    }
+    [dir="rtl"] .decor-shape.white {
+      left: 10%; right: auto;
+    }
+    @media (max-width: 991.98px) {
+      .decor-shape.blue, .decor-shape.red, .decor-shape.white {
+        opacity: 0.15;
+        width: 120px; height: 120px;
+      }
+    }
+     
+
+    #radius-shape-2 {
+      border-radius: 38% 62% 63% 37% / 70% 33% 67% 30%;
+      bottom: -60px;
+      right: -110px;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle at 60% 40%, rgba(212,83,83,0.18) 50%, rgba(80,106,178,0.18) 100%);
+      box-shadow: 0 8px 32px rgba(212, 83, 83, 0.08);
+      overflow: hidden;
+      opacity: 0.8;
+    }
+
+    .bg-glass {
+      background-color: hsla(0, 0%, 100%, 0.92) !important;
+      backdrop-filter: saturate(200%) blur(25px);
+    }
+</style>
 </head>
 
 <body data-pc-preset="{{ $settings['accent_color'] }}" data-pc-sidebar-theme="light"
@@ -62,7 +179,7 @@
             <div class="loader-fill"></div>
         </div>
     </div>
-    <div class="auth-main" style="background-color: hsl(0, 0%, 96%)">
+    <div class="auth-main login-bg background-radial-gradient">
         <div class="auth-wrapper v2">
             <div class="auth-form">
                 @yield('content')

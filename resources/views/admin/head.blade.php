@@ -28,9 +28,9 @@
     <meta property="twitter:image" content="{{ asset(Storage::url('upload/seo')) . '/' . $settings['meta_seo_image'] }}">
 
     <!-- shortcut icon-->
-    <link rel="icon" href="{{ asset(Storage::url('upload/logo')) . '/' . $settings['company_favicon'] }}"
+    <link rel="icon" href="{{ asset('assets/images/favicon.png') }}"
         type="image/x-icon">
-    <link rel="shortcut icon" href="{{ asset(Storage::url('upload/logo')) . '/' . $settings['company_favicon'] }}"
+    <link rel="shortcut icon" href="{{ asset('assets/images/favicon.png') }}"
         type="image/x-icon">
 
         <link rel="stylesheet" href="{{ asset('assets/css/plugins/notifier.css') }}" />
@@ -44,6 +44,8 @@
 
     <!-- [Google Font] Family -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
+        id="main-font-link" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&display=swap"
         id="main-font-link" />
     <link rel="stylesheet" href="{{ asset('assets/fonts/phosphor/duotone/style.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/fonts/tabler-icons.min.css') }}" />

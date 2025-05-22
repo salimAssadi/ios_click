@@ -15,10 +15,8 @@
                     </div>
                     <div class="col-auto">
                         <div class="col-auto">
-                            {{ Form::open(['route' => 'tenant.document.procedures.create', 'method' => 'post']) }}
-                            {{ Form::hidden('category_id', $category_id) }}
-                            {{ Form::submit(__('Create Public Procedure'), ['class' => 'btn btn-primary']) }}
-                            {{ Form::close() }}
+                          <a href="{{ route('tenant.document.procedures.create', ['category_id' => encrypt($category_id)]) }}"
+                            class="btn btn-primary">{{ __('Create Public Procedure') }}</a>
                         </div>
                     </div>
                 </div>

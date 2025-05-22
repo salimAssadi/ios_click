@@ -209,7 +209,6 @@
   "Google Recaptcha Settings": "إعدادات Google Recaptcha",
   "2 Factors Authentication": "2 عوامل المصادقة",
   "2 Factors Authentication Settings": "2 إعدادات مصادقة العوامل",
-  "Name": "اسم",
   "Enter your name": "أدخل اسمك",
   "Email Address": "عنوان البريد الإلكتروني",
   "Enter your email": "أدخل بريدك الإلكتروني",
@@ -828,7 +827,7 @@
   "Allowed file types: PDF, DOC, DOCX, XLS, XLSX. Max size: 10MB": "الملفات المسموح بها: PDF, DOC, DOCX, XLS, XLSX. الحجم الأقصى: 10MB",
   "Policy Name": "اسم السياسة",
   "Document Management System": "نظام إدارة المستندات",
-  "Welcome to ISO Click": "مرحبا بك في آيزو كليلك - المنصة العربية الأولى لـأتمتة أنظمة الآيزو",
+  "Welcome to ISO Click": "مرحبا بك في آيزو كليك - المنصة العربية الأولى لـأتمتة أنظمة الآيزو",
   "Streamline your ISO documentation": "",
   "Company Name": "اسم الشركة",
   "Good Morning,": "،صباح الخير",
@@ -1019,7 +1018,7 @@
   "Enter Procedure Code":"أدخل كود الإجراء",
   "Procedure Content":"محتوى الإجراء",
   "Preparer Name":"اسم المعد",
-  "Approver Name":"اسم المعتد",
+  "Approver Name":"اسم المعتمد",
   "Reviewer Name":"اسم المراجع",
   "Procedure Number":"رقم الإجراء",
   "This action will be applied to the system you have specified":"🔔 تنبيه: سيتم تطبيق هذا الإجراء على النظام المحدد لديك",
@@ -1041,6 +1040,27 @@
   "Expiring in custom days":"ستنتهي خلال أيام مخصصة",
   "All":"عرض الكل",
   "Expiry Filter":"انتهاء الوثيقة",
-  "Document Status":"حالة الوثيقة"
+  "Document Status":"حالة الوثيقة",
+  "Please select a reference first or add empty reference":" الرجاء اختيار مرجع  من قائمة المراجع أو انقر على إضافة حقل فارغ لتتمكن من اضافة المرجع الخاص بك",
+  "Add Empty":"حقل فارغ",
+  "Save and Exit":"حفظ واغلاق",
+  "Save and Continue":"حفظ و استمرار",
+  "Preparer Team":"فريق الإعداد",
+  "Reviewer Team":"فريق المراجعة",
+  "Approver Team":"فريق المصادقة",
+  "Select Preparer Team":"اختر فريق الإعداد",
+  "Select Reviewers Team":"اختر فريق المراجعة",
+  "Select Approver":"اختر اسم المعتمد",
+  "You can select multiple reviewers":"يمكنك اختيار اكثر من مراجع",
+  "You can select multiple Preparer":"يمكنك اختيار اكثر من معد",
+  "Please wait while saving the data":"الرجاء الانتظار أثناء حفظ البيانات",
+  "Sign in to ISO Click":"تسجيل الدخول إلى آيزو كليك",
+  "Preparer":"إعداد",
+  "Reviewer":"مراجعة",
+  "Approver":"اعتماد",
+  "Certifications":"الاعتمادات",
+  "Name":"الاسـم",
+  "Job":"الوظيفة",
+  "Signature":"التوقيـع"
 
 }

@@ -5,7 +5,6 @@ use App\Mail\Common;
 use App\Mail\EmailVerification;
 use App\Mail\TestMail;
 use App\Models\AuthPage;
-use App\Models\Custom;
 use App\Models\Document;
 use App\Models\FAQ;
 use App\Models\HomePage;
@@ -24,10 +23,9 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use Modules\Setting\Entities\CompanyProfile;
 use PragmaRX\Google2FAQRCode\Google2FA;
 use Spatie\Permission\Models\Role;
-use Modules\Setting\Entities\CompanyProfile;
-
 
 if (!function_exists('settingsKeys')) {
     function settingsKeys()
@@ -174,7 +172,9 @@ function tenant_can_any(array $permissions): bool
     try {
         $user = auth()->guard('tenant')->user();
 
-        if (!$user) return false;
+        if (!$user) {
+            return false;
+        }
 
         foreach ($permissions as $permission) {
             if ($user->hasPermissionTo($permission, 'tenant')) {
@@ -199,10 +199,9 @@ if (!function_exists('getTenantRoot')) {
 if (!function_exists('CurrentISOSystem')) {
     function currentISOSystem()
     {
-        return  getSettingsValByName('current_iso_system');
+        return getSettingsValByName('current_iso_system');
     }
 }
-    
 
 if (!function_exists('invoicePaymentSettings')) {
     function invoicePaymentSettings($id)
@@ -304,7 +303,7 @@ if (!function_exists('parentId')) {
     {
         if (\Auth::user()->type == 'super admin') {
             return \Auth::user()->id;
-        } 
+        }
     }
 }
 if (!function_exists('assignSubscription')) {
@@ -493,7 +492,7 @@ if (!function_exists('settingsById')) {
     function settingsById($userId)
     {
         $data = DB::table('settings');
-        $data = $data->where('parent_id',  $userId);
+        $data = $data->where('parent_id', $userId);
         $data = $data->get();
         $settings = settingsKeys();
 
@@ -616,7 +615,6 @@ if (!function_exists('defaultTemplate')) {
     }
 }
 
-
 if (!function_exists('sendEmail')) {
     function sendEmail($to, $datas)
     {
@@ -632,12 +630,11 @@ if (!function_exists('sendEmail')) {
             Log::info($e->getMessage());
             return [
                 'status' => 'error',
-                'message' => __('We noticed that the email settings have not been configured for this system. As a result, email-related functionalities may not work as expected. please add valide email smtp details first.')
+                'message' => __('We noticed that the email settings have not been configured for this system. As a result, email-related functionalities may not work as expected. please add valide email smtp details first.'),
             ];
         }
     }
 }
-
 
 if (!function_exists('commonEmailSend')) {
     function commonEmailSend($to, $datas)
@@ -662,12 +659,11 @@ if (!function_exists('commonEmailSend')) {
             Log::info($e->getMessage());
             return [
                 'status' => 'error',
-                'message' => __('We noticed that the email settings have not been configured for this system. As a result, email-related functionalities may not work as expected. please add valide email smtp details first.')
+                'message' => __('We noticed that the email settings have not been configured for this system. As a result, email-related functionalities may not work as expected. please add valide email smtp details first.'),
             ];
         }
     }
 }
-
 
 if (!function_exists('emailSettings')) {
     function emailSettings($id)
@@ -707,7 +703,6 @@ if (!function_exists('emailSettings')) {
     }
 }
 
-
 if (!function_exists('sendEmailVerification')) {
     function sendEmailVerification($to, $data)
     {
@@ -724,13 +719,12 @@ if (!function_exists('sendEmailVerification')) {
 
             return [
                 'status' => 'error',
-                'message' => __('We noticed that the email settings have not been configured for this system. As a result, email-related functionalities may not work as expected. please contact the administrator to resolve this issue.')
+                'message' => __('We noticed that the email settings have not been configured for this system. As a result, email-related functionalities may not work as expected. please contact the administrator to resolve this issue.'),
             ];
             return redirect()->back()->with('error', __(''));
         }
     }
 }
-
 
 if (!function_exists('MessageReplace')) {
     function MessageReplace($notification, $id = 0)
@@ -747,7 +741,7 @@ if (!function_exists('MessageReplace')) {
             if ($notification->module == 'user_create') {
                 $user = User::find($id);
                 $search = ['{company_name}', '{company_email}', '{company_phone_number}', '{company_address}', '{company_currency}', '{new_user_name}', '{app_link}', '{username}', '{password}'];
-                $replace = [$settings['company_name'], $settings['company_email'], $settings['company_phone'], $settings['company_address'], $settings['CURRENCY_SYMBOL'],  $user->name, env('APP_URL'), $user->email, $notification['password']];
+                $replace = [$settings['company_name'], $settings['company_email'], $settings['company_phone'], $settings['company_address'], $settings['CURRENCY_SYMBOL'], $user->name, env('APP_URL'), $user->email, $notification['password']];
             }
             if ($notification->module == 'reminder_create') {
                 $reminder = Reminder::find($id);
@@ -769,8 +763,6 @@ if (!function_exists('MessageReplace')) {
         return $return;
     }
 }
-
-
 
 if (!function_exists('RoleName')) {
     function RoleName($permission_id = '0')
@@ -917,7 +909,7 @@ if (!function_exists('HomePageSection')) {
                             </div>
                         </div>
                     </div>
-                </section>'
+                </section>',
             ],
             [
                 'title' => 'AboutUs',
@@ -992,7 +984,7 @@ if (!function_exists('HomePageSection')) {
                                 </div>
                             </div>
                         </div>
-                    </section>'
+                    </section>',
             ],
             [
                 'title' => 'Offer',
@@ -1061,7 +1053,7 @@ if (!function_exists('HomePageSection')) {
                         </div>
                     </div>
                 </section>
-                '
+                ',
             ],
             [
                 'title' => 'Pricing',
@@ -1182,7 +1174,7 @@ if (!function_exists('HomePageSection')) {
 
                     </div>
                 </section>
-                '
+                ',
             ],
             [
                 'title' => 'Core Features',
@@ -1268,13 +1260,13 @@ if (!function_exists('HomePageSection')) {
                         </div>
                     </div>
                 </section>
-                '
+                ',
             ],
             [
                 'title' => 'Testimonials',
                 'section' => 'Section 7',
                 'content_value' => '{"name":"Testimonials","section_enabled":"active","Sec7_title":"What Our Customers Say About Us","Sec7_info":"We\u2019re proud of the impact our software has had on businesses just like yours. Hear directly from our customers about how our solutions have made a difference in their day-to-day operations","Sec7_box1_name":"Lenore Becker","Sec7_box1_tag":null,"Sec7_box1_Enabled":"active","Sec7_box1_review":"Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Vestibulum rutrum, mi nec elementum vehicula, eros quam gravida nisl, id fringilla neque ante vel mi. Quisque ut nisi. Nulla porta dolor. Aenean tellus metus, bibendum sed, posuere ac, mattis non, nunc.","Sec7_box2_name":"Damian Morales","Sec7_box2_tag":"New","Sec7_box2_Enabled":"active","Sec7_box2_review":"Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Vestibulum rutrum.","Sec7_box3_name":"Oleg Lucas","Sec7_box3_tag":null,"Sec7_box3_Enabled":"active","Sec7_box3_review":"Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Vestibulum rutrum, mi nec elementum vehicula, eros quam gravida nisl, id fringilla neque ante vel mi. Quisque ut nisi. Nulla porta dolor. Aenean tellus metus, bibendum sed, posuere ac, mattis non, nunc.","Sec7_box4_name":"Jerome Mccoy","Sec7_box4_tag":null,"Sec7_box4_Enabled":"active","Sec7_box4_review":"Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Vestibulum rutrum, mi nec elementum vehicula, eros quam gravida nisl, id fringilla neque ante vel mi. Quisque ut nisi. Nulla porta dolor. Aenean tellus metus, bibendum sed, posuere ac, mattis non, nunc.","Sec7_box5_name":"Rafael Carver","Sec7_box5_tag":null,"Sec7_box5_Enabled":"active","Sec7_box5_review":"Aenean leo ligula, porttitor eu, consequat vitae, eleifend.","Sec7_box6_name":"Edan Rodriguez","Sec7_box6_tag":null,"Sec7_box6_Enabled":"active","Sec7_box6_review":"Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Vestibulum rutrum, mi nec elementum vehicula, eros quam gravida nisl, id fringilla neque ante vel mi. Quisque ut nisi. Nulla porta dolor. Aenean tellus metus, bibendum sed, posuere ac, mattis non, nunc.","Sec7_box7_name":"Kalia Middleton","Sec7_box7_tag":null,"Sec7_box7_Enabled":"active","Sec7_box7_review":"Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Vestibulum rutrum, mi nec elementum.","Sec7_box8_name":"Zenaida Chandler","Sec7_box8_tag":null,"Sec7_box8_Enabled":"active","Sec7_box8_review":"Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Vestibulum rutrum, mi nec elementum vehicula, eros quam gravida nisl, id fringilla neque ante vel mi. Quisque ut nisi. Nulla porta dolor. Aenean tellus metus, bibendum sed, posuere ac, mattis non, nunc.","section_footer_image_path":"","section_main_image_path":"","box_image_1_path":"","box_image_2_path":"","box_image_3_path":"","Box1_image_path":"","Box2_image_path":"","Sec4_box1_image_path":"","Sec4_box2_image_path":"","Sec4_box3_image_path":"","Sec4_box4_image_path":"","Sec4_box5_image_path":"","Sec4_box6_image_path":"","Sec7_box1_image_path":"upload\/homepage\/review_1.png","Sec7_box2_image_path":"upload\/homepage\/review_2.png","Sec7_box3_image_path":"upload\/homepage\/review_3.png","Sec7_box4_image_path":"upload\/homepage\/review_4.png","Sec7_box5_image_path":"upload\/homepage\/review_5.png","Sec7_box6_image_path":"upload\/homepage\/review_6.png","Sec7_box7_image_path":"upload\/homepage\/review_7.png","Sec7_box8_image_path":"upload\/homepage\/review_8.png"}',
-                'content'  => '
+                'content' => '
                 <section>
                     <div class="container">
                         <div class="row justify-content-center title">
@@ -1464,7 +1456,7 @@ if (!function_exists('HomePageSection')) {
 
                     </div>
                 </section>
-                '
+                ',
             ],
             [
                 'title' => 'Choose US',
@@ -1511,7 +1503,7 @@ if (!function_exists('HomePageSection')) {
                         </div>
                     </div>
                 </section>
-                '
+                ',
             ],
             [
                 'title' => 'FAQ',
@@ -1595,7 +1587,7 @@ if (!function_exists('HomePageSection')) {
                         </div>
                     </div>
                 </section>
-                '
+                ',
             ],
             [
                 'title' => 'AboutUS - Footer',
@@ -1695,7 +1687,7 @@ if (!function_exists('HomePageSection')) {
                         </div>
                     </div>
                 </footer>
-                '
+                ',
             ],
         ];
 
@@ -1722,12 +1714,12 @@ if (!function_exists('CustomPage')) {
             [
                 'title' => 'Privacy Policy',
                 'slug' => 'privacy_policy',
-                'content' => "<h3><strong>1. Information We Collect</strong></h3><p>We may collect the following types of information from you:</p><h4><strong>a. Personal Information</strong></h4><ul><li>Name, email address, phone number, and other contact details.</li><li>Payment information (if applicable).</li></ul><h4><strong>b. Non-Personal Information</strong></h4><ul><li>Browser type, operating system, and device information.</li><li>Usage data, including pages visited, time spent, and other analytical data.</li></ul><h4><strong>c. Information You Provide</strong></h4><ul><li>Information you voluntarily provide when contacting us, signing up, or completing forms.</li></ul><h4><strong>d. Cookies and Tracking Technologies</strong></h4><ul><li>We use cookies, web beacons, and other tracking tools to enhance your experience and analyze usage patterns.</li></ul><h3><strong>2. How We Use Your Information</strong></h3><p>We use the information collected for the following purposes:</p><ul><li>To provide, maintain, and improve our Services.</li><li>To process transactions and send you confirmations.</li><li>To communicate with you, including responding to inquiries or providing updates.</li><li>To personalize your experience and deliver tailored content.</li><li>To comply with legal obligations and protect against fraud or misuse.</li></ul><h3><strong>3. How We Share Your Information</strong></h3><p>We do not sell your personal information. However, we may share your information with:</p><ul><li><strong>Service Providers:</strong> Third-party vendors who assist in providing our Services.</li><li><strong>Legal Authorities:</strong> When required to comply with legal obligations or protect our rights.</li><li><strong>Business Transfers:</strong> In the event of a merger, acquisition, or sale of assets, your information may be transferred.</li></ul><h3><strong>4. Data Security</strong></h3><p>We implement appropriate technical and organizational measures to protect your data against unauthorized access, disclosure, alteration, or destruction. However, no method of transmission or storage is 100% secure, and we cannot guarantee absolute security.</p><h3><strong>5. Your Rights</strong></h3><p>You have the right to:</p><ul><li>Access, correct, or delete your personal data.</li><li>Opt-out of certain data processing activities, including marketing communications.</li><li>Withdraw consent where processing is based on consent.</li></ul><p>To exercise your rights, please contact us at [contact email].</p><h3><strong>6. Third-Party Links</strong></h3><p>Our Services may contain links to third-party websites. We are not responsible for the privacy practices or content of these websites. Please review their privacy policies before engaging with them.</p><h3><strong>7. Children's Privacy</strong></h3><p>Our Services are not intended for children under the age of [13/16], and we do not knowingly collect personal information from them. If we become aware that a child has provided us with personal data, we will take steps to delete it.</p><h3><strong>8. Changes to This Privacy Policy</strong></h3><p>We may update this Privacy Policy from time to time. Any changes will be posted on this page with a revised 'Last Updated' date. Your continued use of the Services after such changes constitutes your acceptance of the new terms.</p><h3>&nbsp;</h3>"
+                'content' => "<h3><strong>1. Information We Collect</strong></h3><p>We may collect the following types of information from you:</p><h4><strong>a. Personal Information</strong></h4><ul><li>Name, email address, phone number, and other contact details.</li><li>Payment information (if applicable).</li></ul><h4><strong>b. Non-Personal Information</strong></h4><ul><li>Browser type, operating system, and device information.</li><li>Usage data, including pages visited, time spent, and other analytical data.</li></ul><h4><strong>c. Information You Provide</strong></h4><ul><li>Information you voluntarily provide when contacting us, signing up, or completing forms.</li></ul><h4><strong>d. Cookies and Tracking Technologies</strong></h4><ul><li>We use cookies, web beacons, and other tracking tools to enhance your experience and analyze usage patterns.</li></ul><h3><strong>2. How We Use Your Information</strong></h3><p>We use the information collected for the following purposes:</p><ul><li>To provide, maintain, and improve our Services.</li><li>To process transactions and send you confirmations.</li><li>To communicate with you, including responding to inquiries or providing updates.</li><li>To personalize your experience and deliver tailored content.</li><li>To comply with legal obligations and protect against fraud or misuse.</li></ul><h3><strong>3. How We Share Your Information</strong></h3><p>We do not sell your personal information. However, we may share your information with:</p><ul><li><strong>Service Providers:</strong> Third-party vendors who assist in providing our Services.</li><li><strong>Legal Authorities:</strong> When required to comply with legal obligations or protect our rights.</li><li><strong>Business Transfers:</strong> In the event of a merger, acquisition, or sale of assets, your information may be transferred.</li></ul><h3><strong>4. Data Security</strong></h3><p>We implement appropriate technical and organizational measures to protect your data against unauthorized access, disclosure, alteration, or destruction. However, no method of transmission or storage is 100% secure, and we cannot guarantee absolute security.</p><h3><strong>5. Your Rights</strong></h3><p>You have the right to:</p><ul><li>Access, correct, or delete your personal data.</li><li>Opt-out of certain data processing activities, including marketing communications.</li><li>Withdraw consent where processing is based on consent.</li></ul><p>To exercise your rights, please contact us at [contact email].</p><h3><strong>6. Third-Party Links</strong></h3><p>Our Services may contain links to third-party websites. We are not responsible for the privacy practices or content of these websites. Please review their privacy policies before engaging with them.</p><h3><strong>7. Children's Privacy</strong></h3><p>Our Services are not intended for children under the age of [13/16], and we do not knowingly collect personal information from them. If we become aware that a child has provided us with personal data, we will take steps to delete it.</p><h3><strong>8. Changes to This Privacy Policy</strong></h3><p>We may update this Privacy Policy from time to time. Any changes will be posted on this page with a revised 'Last Updated' date. Your continued use of the Services after such changes constitutes your acceptance of the new terms.</p><h3>&nbsp;</h3>",
             ],
             [
                 'title' => 'Terms & Conditions',
                 'slug' => 'terms_conditions',
-                'content' => "<h3><strong>1. Acceptance of Terms</strong></h3><p>By using our Services, you confirm that you are at least [18 years old or the legal age in your jurisdiction] and capable of entering into a binding agreement. If you are using our Services on behalf of an organization, you represent that you have the authority to bind that organization to these Terms.</p><h3><strong>2. Use of Services</strong></h3><p>You agree to use our Services only for lawful purposes and in accordance with these Terms. You must not:</p><ul><li>Violate any applicable laws or regulations.</li><li>Use our Services in a manner that could harm, disable, overburden, or impair them.</li><li>Attempt to gain unauthorized access to our systems or networks.</li><li>Transmit any harmful code, viruses, or malicious software.</li></ul><h3><strong>3. User Accounts</strong></h3><p>If you create an account with us, you are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account. You agree to notify us immediately of any unauthorized use of your account or breach of security.</p><h3><strong>4. Intellectual Property</strong></h3><p>All content, trademarks, logos, and intellectual property associated with our Services are owned by [Your Company Name] or our licensors. You are granted a limited, non-exclusive, non-transferable license to access and use the Services for personal or authorized business purposes. Any unauthorized use, reproduction, or distribution is prohibited.</p><h3><strong>5. Payment and Billing</strong> (if applicable)</h3><p>If our Services involve payments:</p><ul><li>All fees are due at the time of purchase unless otherwise agreed.</li><li>We reserve the right to change pricing or introduce new fees with prior notice.</li><li>Refunds, if applicable, will be handled according to our [Refund Policy].</li></ul><h3><strong>6. Termination of Services</strong></h3><p>We reserve the right to suspend or terminate your access to our Services at our discretion, without prior notice, if:</p><ul><li>You breach these Terms.</li><li>We are required to do so by law.</li><li>Our Services are discontinued or altered.</li></ul><h3><strong>7. Limitation of Liability</strong></h3><p>To the fullest extent permitted by law:</p><ul><li>[Your Company Name] and its affiliates shall not be liable for any direct, indirect, incidental, or consequential damages resulting from your use of our Services.</li><li>Our liability is limited to the amount you paid, if any, for accessing our Services.</li></ul><h3><strong>8. Indemnification</strong></h3><p>You agree to indemnify and hold [Your Company Name], its affiliates, employees, and partners harmless from any claims, liabilities, damages, losses, or expenses arising from your use of the Services or violation of these Terms.</p><h3><strong>9. Modifications to Terms</strong></h3><p>We may update these Terms from time to time. Any changes will be effective immediately upon posting, and your continued use of the Services constitutes your acceptance of the revised Terms.</p>"
+                'content' => "<h3><strong>1. Acceptance of Terms</strong></h3><p>By using our Services, you confirm that you are at least [18 years old or the legal age in your jurisdiction] and capable of entering into a binding agreement. If you are using our Services on behalf of an organization, you represent that you have the authority to bind that organization to these Terms.</p><h3><strong>2. Use of Services</strong></h3><p>You agree to use our Services only for lawful purposes and in accordance with these Terms. You must not:</p><ul><li>Violate any applicable laws or regulations.</li><li>Use our Services in a manner that could harm, disable, overburden, or impair them.</li><li>Attempt to gain unauthorized access to our systems or networks.</li><li>Transmit any harmful code, viruses, or malicious software.</li></ul><h3><strong>3. User Accounts</strong></h3><p>If you create an account with us, you are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account. You agree to notify us immediately of any unauthorized use of your account or breach of security.</p><h3><strong>4. Intellectual Property</strong></h3><p>All content, trademarks, logos, and intellectual property associated with our Services are owned by [Your Company Name] or our licensors. You are granted a limited, non-exclusive, non-transferable license to access and use the Services for personal or authorized business purposes. Any unauthorized use, reproduction, or distribution is prohibited.</p><h3><strong>5. Payment and Billing</strong> (if applicable)</h3><p>If our Services involve payments:</p><ul><li>All fees are due at the time of purchase unless otherwise agreed.</li><li>We reserve the right to change pricing or introduce new fees with prior notice.</li><li>Refunds, if applicable, will be handled according to our [Refund Policy].</li></ul><h3><strong>6. Termination of Services</strong></h3><p>We reserve the right to suspend or terminate your access to our Services at our discretion, without prior notice, if:</p><ul><li>You breach these Terms.</li><li>We are required to do so by law.</li><li>Our Services are discontinued or altered.</li></ul><h3><strong>7. Limitation of Liability</strong></h3><p>To the fullest extent permitted by law:</p><ul><li>[Your Company Name] and its affiliates shall not be liable for any direct, indirect, incidental, or consequential damages resulting from your use of our Services.</li><li>Our liability is limited to the amount you paid, if any, for accessing our Services.</li></ul><h3><strong>8. Indemnification</strong></h3><p>You agree to indemnify and hold [Your Company Name], its affiliates, employees, and partners harmless from any claims, liabilities, damages, losses, or expenses arising from your use of the Services or violation of these Terms.</p><h3><strong>9. Modifications to Terms</strong></h3><p>We may update these Terms from time to time. Any changes will be effective immediately upon posting, and your continued use of the Services constitutes your acceptance of the revised Terms.</p>",
             ],
         ];
         foreach ($retuen as $key => $value) {
@@ -1739,7 +1731,6 @@ if (!function_exists('CustomPage')) {
             $Page->parent_id = 1;
             $Page->save();
         }
-
 
         $FAQ_retuen = [
             [
@@ -1865,7 +1856,6 @@ if (!function_exists('QrCode2FA')) {
     }
 }
 
-
 if (!function_exists('authPage')) {
     function authPage($id)
     {
@@ -1874,12 +1864,12 @@ if (!function_exists('authPage')) {
             'title' => [
                 "Secure Access, Seamless Experience.",
                 "Your Trusted Gateway to Digital Security.",
-                "Fast, Safe & Effortless Login."
+                "Fast, Safe & Effortless Login.",
             ],
             'description' => [
                 "Securely access your account with ease. Whether you're logging in, signing up, or resetting your password, we ensure a seamless and protected experience. Your data, your security, our priority.",
                 "Fast, secure, and hassle-free authentication. Sign in with confidence and experience a seamless way to access your account—because your security matters.",
-                "A seamless and secure way to access your account. Whether you're logging in, signing up, or recovering your password, we ensure your data stays protected at every step."
+                "A seamless and secure way to access your account. Whether you're logging in, signing up, or recovering your password, we ensure your data stays protected at every step.",
             ],
         ];
 
@@ -1922,11 +1912,10 @@ if (!function_exists('authPage')) {
         {
             $context = getMenuContext();
             return Gate::check('manage document history') &&
-                !empty($context['subscription']) &&
-                $context['subscription']->enabled_document_history == 1;
+            !empty($context['subscription']) &&
+            $context['subscription']->enabled_document_history == 1;
         }
     }
-
 
     function keyToTitle($text)
     {
@@ -1938,16 +1927,14 @@ if (!function_exists('authPage')) {
         return strtolower(str_replace(' ', '_', $text));
     }
 
-
     function fileUploader($file, $location, $size = null, $old = null, $thumb = null, $filename = null)
     {
         try {
 
-
-            $fileManager        = new FileManager($file);
-            $fileManager->path  = $location;
-            $fileManager->size  = $size;
-            $fileManager->old   = $old;
+            $fileManager = new FileManager($file);
+            $fileManager->path = $location;
+            $fileManager->size = $size;
+            $fileManager->old = $old;
             $fileManager->thumb = $thumb;
             $fileManager->filename = $filename;
             $fileManager->upload();
@@ -1959,18 +1946,18 @@ if (!function_exists('authPage')) {
 
     function fileManager()
     {
-        return new  FileManager();
+        return new FileManager();
     }
 
     function uploadFiles($file, $path, $useOriginalName = false, $disk = 'public')
     {
         try {
             $fileName = $useOriginalName
-                ? $file->getClientOriginalName()
-                : uniqid() . '_' . time() . '.' . $file->getClientOriginalExtension();
-    
+            ? $file->getClientOriginalName()
+            : uniqid() . '_' . time() . '.' . $file->getClientOriginalExtension();
+
             $filePath = $file->storeAs($path, $fileName, $disk);
-    
+
             return $filePath;
         } catch (\Exception $e) {
             throw new \Exception('File upload failed: ' . $e->getMessage());
@@ -2021,8 +2008,6 @@ if (!function_exists('authPage')) {
         }
     }
 
-
-
     if (!function_exists('generateProcedureCoding')) {
 
         function generateProcedureCoding(String $isoSystemSymbol, ?int $procedureId): string
@@ -2031,9 +2016,9 @@ if (!function_exists('authPage')) {
             if (empty($type) || empty($isoSystemSymbol)) {
                 throw new InvalidArgumentException('Invalid input for procedure coding generation.');
             }
-           if (empty($procedureId)) {
+            if (empty($procedureId)) {
                 $procedureId = Modules\Document\Entities\Procedure::max('id') + 1;
-             }
+            }
             $formattedProcedureId = sprintf('%02d', $procedureId);
             return "{$type}-{$isoSystemSymbol}-" . $formattedProcedureId;
         }
@@ -2062,5 +2047,20 @@ if (!function_exists('authPage')) {
             return asset($image) . $clean;
         }
         return asset('assets/images/isoIcon/defualt.png');
+    }
+
+    if (!function_exists('base64_encode_image')) {
+        function base64_encode_image($path, $disk = 'public')
+        {
+            if (!Storage::disk($disk)->exists($path)) {
+                return null;
+            }
+
+            $mime = Storage::disk($disk)->mimeType($path);
+            $data = Storage::disk($disk)->get($path);
+            $base64 = base64_encode($data);
+
+            return 'data:' . $mime . ';base64,' . $base64;
+        }
     }
 }

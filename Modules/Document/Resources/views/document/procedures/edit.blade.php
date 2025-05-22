@@ -65,7 +65,7 @@
                     <!-- Basic Info Section -->
                     <div class="accordion-item">
                         <h2 class="accordion-header" id="headingBasic">
-                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBasic" aria-expanded="true" aria-controls="collapseBasic">
+                            <button class="accordion-button" style="background-color: #2a2ae58f;" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBasic" aria-expanded="true" aria-controls="collapseBasic">
                                 <strong class="text-black"> {{ __('Basic Information') }}</strong>
                             </button>
                         </h2>
@@ -91,7 +91,7 @@
 
                             <div class="form-group col-md-6">
                                 {{ Form::label('procedure_name_en', __('Procedure Name (english)') . ' <span class="text-danger">*</span>', ['class' => 'form-label'], false) }}
-                                {{ Form::text('procedure_name_en', old('procedure_name_en', $procedure->procedure_name_en), ['class' => 'form-control', 'placeholder' => __('Enter Procedure Name (english)'), 'required' => 'required']) }}
+                                {{ Form::text('procedure_name_en', old('procedure_name_en', $procedure->procedure_name_en), ['class' => 'form-control', 'placeholder' => __('Enter Procedure Name (english)')]) }}
                             </div>
 
                             <div class="form-group col-md-6">
@@ -105,40 +105,45 @@
                             </div>
 
                             <div class="form-group col-md-6 mt-3">
-                                {{ Form::label('prepared_by', __('Preparer Name') . ' <span class="text-danger">*</span>', ['class' => 'form-label'], false) }}
-                                <select name="prepared_by" id="prepared_by" class="form-control hidesearch">
-                                    <option value="">{{ __('Select Preparer') }}</option>
+                                {{ Form::label('prepared_by', __('Preparer Team') . ' <span class="text-danger">*</span>', ['class' => 'form-label'], false) }}
+                                <br>
+                                <small class="text-muted">{{ __('You can select multiple Preparer ') }}</small>
+                                <select name="prepared_by[]" id="prepared_by" class="form-control hidesearch" multiple>
+                                    <option value="">{{ __('Select Preparer Team') }}</option>
                                     @foreach ($users as $user)
-                                        <option value="{{ $user->user_id }}" {{ old('prepared_by', $procedure->prepared_by) == $user->user_id ? 'selected' : '' }}>
+                                        <option value="{{ $user->user_id }}" {{ in_array($user->user_id, $prepared_by) ? 'selected' : '' }}>
                                             {{ $user->name }}
                                         </option>
                                     @endforeach
                                 </select>
                             </div>
                             
+                            
+                            
+                            <div class="form-group col-md-6 mt-3">
+                                {{ Form::label('reviewers', __('Reviewer Team'), ['class' => 'form-label']) }}
+                                <br>
+                                <small class="text-muted">{{ __('You can select multiple reviewers') }}</small>
+                                <select name="reviewers[]" id="reviewers" class="form-control hidesearch" multiple>
+                                    <option value="">{{ __('Select Reviewers Team') }}</option>
+                                    @foreach ($users as $user)
+                                        <option value="{{ $user->user_id }}"  {{ in_array($user->user_id, $reviewers) ? 'selected' : '' }}>
+                                            {{ $user->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
                             <div class="form-group col-md-6 mt-3">
                                 {{ Form::label('approved_by', __('Approver Name') . ' <span class="text-danger">*</span>', ['class' => 'form-label'], false) }}
                                 <select name="approved_by" id="approved_by" class="form-control hidesearch">
                                     <option value="">{{ __('Select Approver') }}</option>
                                     @foreach ($users as $user)
-                                        <option value="{{ $user->user_id }}" {{ old('approved_by', $procedure->approved_by) == $user->user_id ? 'selected' : '' }}>
+                                        <option value="{{ $user->user_id }}" {{ old('approved_by', $approved_by) == $user->user_id ? 'selected' : '' }}>
                                             {{ $user->name }}
                                         </option>
                                     @endforeach
                                 </select>
-                            </div>
-                            
-                            <div class="form-group col-md-12 mt-3">
-                                {{ Form::label('reviewers', __('Reviewer Name'), ['class' => 'form-label']) }}
-                                <select name="reviewers[]" id="reviewers" class="form-control hidesearch" multiple>
-                                    <option value="">{{ __('Select Reviewers') }}</option>
-                                    @foreach ($users as $user)
-                                        <option value="{{ $user->user_id }}" {{ in_array($user->user_id, old('reviewers', $procedure->reviewers ? json_decode($procedure->reviewers) : [])) ? 'selected' : '' }}>
-                                            {{ $user->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                <small class="text-muted">{{ __('You can select multiple reviewers') }}</small>
                             </div>
 
                             <div class="form-group col-md-6 mt-3">
@@ -186,7 +191,7 @@
                                 </div>
                             </div>
 
-                            <div class="form-group col-md-6">
+                            <div class="form-group col-md-6"  style="display: none;">
                                 {{ Form::label('status', __('Status'), ['class' => 'form-label d-block']) }}
                                 <div class="form-check form-check-inline">
                                     {{ Form::radio('status', 1, $procedure->status == 1, ['class' => 'form-check-input', 'id' => 'status_active']) }}
@@ -212,7 +217,7 @@
                     <!-- Configuration Section -->
                     <div class="accordion-item">
                         <h2 class="accordion-header" id="headingConfig">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseConfig" aria-expanded="false" aria-controls="collapseConfig">
+                            <button class="accordion-button collapsed"  style="background-color: #ff6d6db5;" type="button" data-bs-toggle="collapse" data-bs-target="#collapseConfig" aria-expanded="false" aria-controls="collapseConfig">
                                <strong class="text-black"> {{ __('Procedure Content') }}</strong>
                             </button>
                         </h2>
@@ -235,8 +240,8 @@
                                 ])
 
                                 <div class="text-end mt-3">
-                                    <button type="button" class="btn btn-secondary" onclick="window.history.back()">{{ __('Cancel') }}</button>
-                                    <button type="button" id="save-configuration" class="btn btn-primary">{{ __('Save Configuration') }}</button>
+                                    <button type="button" id="save-configuration" class="btn btn-primary">{{ __('Save and Exit') }}</button>
+                                    <button type="button" id="save-configuration-continue" class="btn btn-success">{{ __('Save and Continue') }}</button>
                                 </div>
                             </div>
                         </div>
@@ -322,30 +327,24 @@
             });
         });
 
-        // Handle Configuration Save via AJAX
-        $('#save-configuration').on('click', function() {
-            let button = $(this);
-            
-            // Show loading state and disable button
+        // وظيفة عامة لحفظ الإعدادات
+        function saveConfigurationAjax(button, doRedirect = true) {
             let originalText = button.html();
             button.html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> {{ __('Saving...') }}');
             button.prop('disabled', true);
             $('#save-procedure').prop('disabled', true);
-            
-            // Collect all form data using the function from procedure.blade.php
             const configData = collectAllFormData();
-
-             // عرض رسالة تحميل
-             Swal.fire({
-                    title: '{{ __('Saving...') }}',
-                    text: '{{ __('Please wait while saving the data') }}',
-                    allowOutsideClick: false,
-                    allowEscapeKey: false,
-                    showConfirmButton: false,
-                    willOpen: () => {
-                        Swal.showLoading();
-                    }
-                });
+            Swal.fire({
+                icon: 'info',
+                title: '{{ __('Saving...') }}',
+                text: '{{ __('Please wait while saving the data') }}',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false,
+                willOpen: () => {
+                    Swal.showLoading();
+                }
+            });
             $.ajax({
                 url: '{{ route("tenant.document.procedures.saveConfigure", $procedure->id) }}',
                 method: 'POST',
@@ -360,16 +359,17 @@
                     button.html(originalText);
                     button.prop('disabled', false);
                     $('#save-procedure').prop('disabled', false);
-                    setTimeout(() => {
-                        window.history.back();
-                    }, 2000);
+                    if (doRedirect) {
+                        setTimeout(() => {
+                            window.history.back();
+                        }, 2000);
+                    }
                 },
                 error: function(xhr) {
                     Swal.close();
                     button.html(originalText);
                     button.prop('disabled', false);
                     $('#save-procedure').prop('disabled', false);
-                    
                     let errorMessage = '{{ __('Error saving configuration') }}';
                     if (xhr.responseJSON && xhr.responseJSON.message) {
                         errorMessage = xhr.responseJSON.message;
@@ -377,6 +377,14 @@
                     notifier.show('Error!', errorMessage, 'error',errorImg, 4000);
                 }
             });
+        }
+
+        // ربط الأزرار بالوظيفة العامة
+        $('#save-configuration').on('click', function() {
+            saveConfigurationAjax($(this), true);
+        });
+        $('#save-configuration-continue').on('click', function() {
+            saveConfigurationAjax($(this), false);
         });
 
         // Handle main form save button

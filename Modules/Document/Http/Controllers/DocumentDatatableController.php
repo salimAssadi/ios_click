@@ -60,6 +60,7 @@ class DocumentDatatableController extends Controller
         
         return $defaultUrl;
     }
+   
 
     public function index(Request $request)
     {
@@ -257,8 +258,9 @@ class DocumentDatatableController extends Controller
 
                 // print action
                 // if (tenant_can('Download Document') && $document->lastVersion) {
-                    $actions .= '<a href="' . route('tenant.document.serve', $encryptedId) . '?preview=1" 
+                    $actions .= '<a href="' . route('tenant.document.procedures.preview', $encryptedId) . '" 
                                 class="btn btn-sm btn-icon btn-light-success ms-1" 
+                                target="_blank"
                                 data-bs-toggle="tooltip" 
                                 data-bs-placement="top" 
                                 title="' . __('Print') . '">

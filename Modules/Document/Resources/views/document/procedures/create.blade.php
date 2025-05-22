@@ -29,47 +29,50 @@
                         <span class="text-danger">{{ getIsoSystem(currentISOSystem())->name }}</span>
                     </div>
                     {{ Form::open(['route' => 'tenant.document.procedures.store', 'method' => 'post', 'files' => true, 'id' => 'procedure-form']) }}
-                    <div class="form-group col-md-12">
-                        {{ Form::label('category_id', __('Category'), ['class' => 'form-label']) }}
-                        {{ Form::select('category_id', $categories, old('category_id'), ['class' => 'form-control hidesearch'  ]) }}
-                    </div>
                     <div class="row">
                         <div class="form-group col-md-6">
-                            {{ Form::label('procedure_name_ar', __('Procedure Name (arabic)') . ' <span class="text-danger">*</span>', ['class' => 'form-label'], false) }}
-                            {{ Form::text('procedure_name_ar', old('procedure_name_ar',''), ['class' => 'form-control', 'placeholder' => __('Enter Procedure Name (arabic)')]) }}
+                            {{ Form::label('category_id', __('Category'), ['class' => 'form-label']) }}
+                            {{ Form::select('category_id', $categories,$procedureData['category_id']??'', ['class' => 'form-control hidesearch'  ]) }}
                         </div>
                         <div class="form-group col-md-6">
                             {{ Form::label('procedure_code', __('Procedure Code') . ' <span class="text-danger">*</span>', ['class' => 'form-label'], false) }}
-                            {{ Form::text('procedure_code', old('procedure_code', $procedureCodeing), ['class' => 'form-control', 'placeholder' => __('Enter Procedure Code')]) }}
+                            {{ Form::text('procedure_code', old('procedure_code', $procedureData['procedure_coding']??$procedureCodeing), ['class' => 'form-control', 'placeholder' => __('Enter Procedure Code')]) }}
                         </div>
+                    
                         <div class="form-group col-md-6">
-                            {{ Form::label('procedure_name_en', __('Procedure Name (english)') . ' <span class="text-danger">*</span>', ['class' => 'form-label'], false) }}
-                            {{ Form::text('procedure_name_en', old('procedure_name_en',''), ['class' => 'form-control', 'placeholder' => __('Enter Procedure Name (english)')]) }}
+                            {{ Form::label('procedure_name_ar', __('Procedure Name (arabic)') . ' <span class="text-danger">*</span>', ['class' => 'form-label'], false) }}
+                            {{ Form::text('procedure_name_ar', old('procedure_name_ar',$procedureData['procedure_name_ar']??''), ['class' => 'form-control', 'placeholder' => __('Enter Procedure Name (arabic)')]) }}
+                        </div>
+                        
+                        <div class="form-group col-md-6">
+                            {{ Form::label('procedure_name_en', __('Procedure Name (english)') . ' <span class="text-danger"></span>', ['class' => 'form-label'], false) }}
+                            {{ Form::text('procedure_name_en', old('procedure_name_en',$procedureData['procedure_name_en']??''), ['class' => 'form-control', 'placeholder' => __('Enter Procedure Name (english)')]) }}
                         </div>
                         <div class="form-group col-md-6">
                             {{ Form::label('procedure_description_ar', __('Procedure Description (arabic)'), ['class' => 'form-label']) }}
-                            {{ Form::textarea('procedure_description_ar', old('procedure_description_ar',''), ['class' => 'form-control', 'placeholder' => __('Enter Procedure Description (arabic)'), 'rows' => 2]) }}
+                            {{ Form::textarea('procedure_description_ar', old('procedure_description_ar',$procedureData['description_ar']??''), ['class' => 'form-control', 'placeholder' => __('Enter Procedure Description (arabic)'), 'rows' => 2]) }}
                         </div>
 
                         <div class="form-group col-md-6">
                             {{ Form::label('procedure_description_en', __('Procedure Description (english)'), ['class' => 'form-label']) }}
-                            {{ Form::textarea('procedure_description_en', old('procedure_description_en',''), ['class' => 'form-control', 'placeholder' => __('Enter Procedure Description (english)'), 'rows' => 2]) }}
+                            {{ Form::textarea('procedure_description_en', old('procedure_description_en',$procedureData['description_en']??''), ['class' => 'form-control', 'placeholder' => __('Enter Procedure Description (english)'), 'rows' => 2]) }}
                         </div>
 
                         <div class="form-group col-md-6 mt-3">
-                            {{ Form::label('prepared_by', __('Preparer Name') . ' <span class="text-danger">*</span>', ['class' => 'form-label'], false) }}
-                            {{ Form::select('prepared_by', $users ?? [], old('prepared_by'), ['class' => 'form-control hidesearch']) }}
+                            {{ Form::label('prepared_by', __('Preparer Team') . ' <span class="text-danger">*</span>', ['class' => 'form-label'], false) }}
+                            {{ Form::select('prepared_by[]', $users ?? [], old('prepared_by'), ['class' => 'form-control hidesearch' ,'multiple' => true]) }}
                         </div>
                         
+                       
+                        
+                        <div class="form-group col-md-6 mt-3">
+                            {{ Form::label('reviewers', __('Reviewer Team'), ['class' => 'form-label']) }}
+                            {{ Form::select('reviewers[]', $users ?? [], old('reviewers'), ['class' => 'form-control hidesearch', 'multiple' => 'multiple']) }}
+                            <small class="text-muted">{{ __('You can select multiple reviewers') }}</small>
+                        </div>
                         <div class="form-group col-md-6 mt-3">
                             {{ Form::label('approved_by', __('Approver Name') . ' <span class="text-danger">*</span>', ['class' => 'form-label'], false) }}
                             {{ Form::select('approved_by', $users ?? [], old('approved_by'), ['class' => 'form-control hidesearch']) }}
-                        </div>
-                        
-                        <div class="form-group col-md-6 mt-3">
-                            {{ Form::label('reviewers', __('Reviewer Name'), ['class' => 'form-label']) }}
-                            {{ Form::select('reviewers[]', $users ?? [], old('reviewers'), ['class' => 'form-control hidesearch', 'multiple' => 'multiple']) }}
-                            <small class="text-muted">{{ __('You can select multiple reviewers') }}</small>
                         </div>
     
                         <div class="form-group col-md-6 mt-3">
@@ -82,6 +85,9 @@
                             </div>
                             
                         </div>
+
+                        <input type="hidden" name="content" value="{{ old('content', json_encode($procedureData['content'] ?? [])) }}">
+                        <input type="hidden" name="uuid" value="{{ old('uuid', $procedureData['uuid'] ?? '') }}">
     
                         <div class="form-group col-md-6 mt-3">
                             {{ Form::label('expiry_date', __('Expiry Date') . ' <span class="text-danger">*</span>', ['class' => 'form-label'], false) }}
@@ -128,7 +134,7 @@
 
 
 
-                    <div class="form-group col-md-6">
+                    <div class="form-group col-md-6" style="display: none;">
                         {{ Form::label('status', __('Status'), ['class' => 'form-label d-block']) }}
                         <div class="form-check form-check-inline">
                             {{ Form::radio('status', 1, old('status', 1), ['class' => 'form-check-input', 'id' => 'status_active']) }}
@@ -181,7 +187,8 @@
                         </div>
                         <div class="text-end mt-3">
                             <button type="button" class="btn btn-secondary" onclick="window.history.back()">{{ __('Cancel') }}</button>
-                            <button type="button" id="save-configuration" class="btn btn-primary">{{ __('Save') }}</button>
+                            <button type="button" id="save-and-close" class="btn btn-primary">{{ __('Save and Close') }}</button>
+<button type="button" id="save-and-continue" class="btn btn-primary">{{ __('Save and Continue') }}</button>
                         </div>
                     </div>
                     
@@ -274,78 +281,75 @@
                 });
             });
             
-            // Function to initialize scripts for the config form
-            function initConfigScripts() {
-               
-                $('#save-configuration').on('click', function(event) {
-                    event.preventDefault();
-                    
-                    sendAllFormData();
-                });
-            }
-            
-            // Function to collect and send all form data
-            function sendAllFormData() {
-                // جمع البيانات من جميع الحقول في النموذج
-                var formData = new FormData();
-                
-                // جمع البيانات من النموذج الرئيسي
-                var procedureId = $('#procedure-config-container').attr('data-procedure-id');
-                // إضافة بيانات الإجراء المجمعة من الواجهة
-                var procedureSetupData = {};
-                
-                // استدعاء دالة collectAllFormData() لجمع البيانات
-                if (typeof collectAllFormData === 'function') {
-                    procedureSetupData = collectAllFormData();
-                } else {
-                    console.error('collectAllFormData الدالة غير موجودة');
+            // تهيئة السكريبت للأزرار الجديدة
+function initConfigScripts() {
+    $('#save-and-close').on('click', function(e) {
+        e.preventDefault();
+        saveProcedureConfig(true); // حفظ مع إعادة التوجيه
+    });
+    $('#save-and-continue').on('click', function(e) {
+        e.preventDefault();
+        saveProcedureConfig(false); // حفظ فقط
+    });
+}
+
+// دالة موحدة لحفظ البيانات
+function saveProcedureConfig(redirect) {
+    var formData = new FormData();
+    var procedureId = $('#procedure-config-container').attr('data-procedure-id');
+    var procedureSetupData = (typeof collectAllFormData === 'function') ? collectAllFormData() : {};
+    formData.append('procedure_id', procedureId);
+    formData.append('procedure_setup_data', JSON.stringify(procedureSetupData));
+    formData.append('category_id', $('#category_id').val());
+
+    Swal.fire({
+        title: '{{ __('Saving...') }}',
+        text: '{{ __('Please wait while saving the data') }}',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showConfirmButton: true,
+        confirmButtonText: '{{ __('Reload') }}',
+        didOpen: () => {
+            Swal.showLoading();
+            const reloadBtn = Swal.getConfirmButton();
+            reloadBtn.addEventListener('click', function() {
+                location.reload();
+            });
+        }
+    });
+
+    $.ajax({
+        url: '{{ route("tenant.document.procedures.saveConfigure", "__PLACEHOLDER__") }}'.replace('__PLACEHOLDER__', procedureId),
+        method: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        success: function(response) {
+            Swal.close();
+            if (response.status === 'success') {
+                notifier.show('Success', '{{ __('Data saved successfully') }}', 'success', successImg, 4000);
+                if (redirect) {
+                    setTimeout(function() {
+                        window.location.href = '{{ $redirectUrl }}';
+                    }, 1500);
                 }
-                console.log(procedureSetupData);
-                // إضافة البيانات إلى FormData
-                formData.append('procedure_id', procedureId);
-                formData.append('procedure_setup_data', JSON.stringify(procedureSetupData));
-                formData.append('category_id', $('#category_id').val());
-                
-                // عرض رسالة تحميل
-                Swal.fire({
-                    title: '{{ __('Saving...') }}',
-                    text: '{{ __('Please wait while saving the data') }}',
-                    allowOutsideClick: false,
-                    allowEscapeKey: false,
-                    showConfirmButton: false,
-                    willOpen: () => {
-                        Swal.showLoading();
-                    }
-                });
-                
-                // إرسال البيانات إلى الخادم
-                $.ajax({
-                    url: '{{ route("tenant.document.procedures.saveConfigure", "__PLACEHOLDER__") }}'.replace('__PLACEHOLDER__', procedureId),
-                    method: 'POST',
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    },
-                    success: function(response) {
-                        Swal.close();
-                        if (response.status === 'success') {
-                            notifier.show('Success','{{ __('Data saved successfully') }}', 'success',successImg, 4000);
-                            setTimeout(() => {
-                                window.location.href = '{{ $redirectUrl }}';
-                            }, 2000);
-                        } else {
-                            notifier.show('Error',response.message || '{{ __('An error occurred while saving the data') }}', 'error',errorImg, 4000);
-                        }
-                    },
-                    error: function(xhr) {
-                        Swal.close();
-                        notifier.show('Error!', '{{ __("An unexpected error occurred.") }}', 'error', errorImg, 4000);
-                        console.error(xhr.responseText);
-                    }
-                });
+            } else {
+                notifier.show('Error', response.message || '{{ __('An error occurred while saving the data') }}', 'error', errorImg, 4000);
             }
+        },
+        error: function(xhr) {
+            Swal.close();
+            notifier.show('Error!', '{{ __("An unexpected error occurred.") }}', 'error', errorImg, 4000);
+            console.error(xhr.responseText);
+        }
+    });
+}
+
+// تأكد من تهيئة السكريبت عند تحميل الصفحة
+$(document).ready(initConfigScripts);
             
         });
     </script>

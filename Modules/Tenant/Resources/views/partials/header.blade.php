@@ -35,7 +35,7 @@
                     <div class="dropdown-menu dropdown-menu-end pc-h-dropdown">
                         @foreach($languages as $language)
                             @if($language!='en')
-                                <a href="{{route('iso_dic.setting.language.change',$language)}}" class="dropdown-item {{ $userLang==$language?'active':'' }}">
+                                <a href="{{route('tenant.setting.language.change',$language)}}" class="dropdown-item {{ $userLang==$language?'active':'' }}">
                                     <span class="align-middle">{{ucfirst( $language)}}</span>
                                 </a>
                             @endif
