@@ -9,7 +9,7 @@
                 <!-- Left Column: Welcome -->
                 <div class="col-lg-6 d-flex flex-column justify-content-center align-items-center p-5 left-column-bg">
                     <div class="w-100 text-center text-lg-start">
-                        <h1 class="display-3 fw-bold mb-4" style="color:#506ab2">
+                        <h1 class="display-3 fw-400 mb-4" style="color:#506ab2">
                             {{ __('Welcome to ISO Click') }}
                         </h1>
                         
