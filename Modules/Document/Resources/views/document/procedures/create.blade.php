@@ -281,17 +281,18 @@
                 });
             });
             
-            // تهيئة السكريبت للأزرار الجديدة
-function initConfigScripts() {
-    $('#save-and-close').on('click', function(e) {
-        e.preventDefault();
-        saveProcedureConfig(true); // حفظ مع إعادة التوجيه
-    });
-    $('#save-and-continue').on('click', function(e) {
-        e.preventDefault();
-        saveProcedureConfig(false); // حفظ فقط
-    });
-}
+    function initConfigScripts() {
+        $('#save-and-close, #save-and-continue').off('click');
+        
+        $('#save-and-close').on('click', function(e) {
+            e.preventDefault();
+            saveProcedureConfig(true); // حفظ مع إعادة التوجيه
+        });
+        $('#save-and-continue').on('click', function(e) {
+            e.preventDefault();
+            saveProcedureConfig(false); // حفظ فقط
+        });
+    }
 
 // دالة موحدة لحفظ البيانات
 function saveProcedureConfig(redirect) {
