@@ -96,13 +96,13 @@
                                 </a>
                             </li>
                             @endif
-                            @if(Gate::check('Manage Document Categories'))
+                            {{-- @if(Gate::check('Manage Document Categories'))
                             <li class="pc-item {{ $routeName == 'document.categories.index' ? 'active' : '' }}">
                                 <a href="{{ route('tenant.document.categories.index') }}" class="pc-link">
                                     <span class="pc-mtext">{{ __('Document Categories') }}</span>
                                 </a>                                                    
                             </li>
-                            @endif
+                            @endif --}}
                             @if(Gate::check('Manage Requests'))
                             <li class="pc-item {{ in_array($routeName, ['tenant.document.requests.index', 'document.requests.create']) ? 'active' : '' }}">
                                 <a href="{{ route('tenant.document.requests.index') }}" class="pc-link">
