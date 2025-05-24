@@ -21,9 +21,12 @@ return new class extends Migration
             if (!Schema::hasColumn('documents', 'preparer_id')) {
                 $table->unsignedBigInteger('preparer_id')->nullable()->after('approver_id');
             }
-
-            $table->foreign('approver_id')->references('id')->on('users')->nullOnDelete();
-            $table->foreign('preparer_id')->references('id')->on('users')->nullOnDelete();
+            if (!Schema::hasColumn('documents', 'approver_id')) {
+                $table->foreign('approver_id')->references('id')->on('users')->nullOnDelete();
+            }
+            if (!Schema::hasColumn('documents', 'preparer_id')) {
+                $table->foreign('preparer_id')->references('id')->on('users')->nullOnDelete();
+            }
         });
     }
 
