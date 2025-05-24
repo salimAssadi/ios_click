@@ -37,7 +37,7 @@
                 <tbody>
                     <tr>
                         {{-- Preparer --}}
-                        <td class="text-start px-2" style="text-align: start;">
+                        <td class="text-start px-2" style="text-align: start; vertical-align: top;">
                             @if (!empty($preparers))
                                 @foreach ($preparers as $index => $preparer)
                                         <div style="margin-bottom: 12px;">
@@ -64,7 +64,7 @@
                         </td>
             
                         {{-- Reviewer --}}
-                        <td class="text-start px-2" style="text-align: start;">
+                        <td class="text-start px-2" style="text-align: start; vertical-align: top;">
                             @if (!empty($reviewers))
                                 @foreach ($reviewers as $index => $reviewer)
                                     <div style="margin-bottom: 12px;">
