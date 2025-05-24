@@ -38,9 +38,9 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">{{ __('Supporting Document Categories') }}</h5>
-                    <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
-                        <i class="ti ti-plus me-1"></i>{{ __('Add Category') }}
-                    </button>
+                   <a href="{{ route('tenant.document.supporting-documents.view-all') }}" class="btn btn-primary btn-sm">
+                            <i class="ti ti-list me-1"></i>{{ __('Show All Supporting Documents') }}
+                        </a>
                 </div>
                 <div class="card-body">
                     <div id="categories-container">

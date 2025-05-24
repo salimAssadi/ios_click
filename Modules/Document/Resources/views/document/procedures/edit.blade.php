@@ -9,11 +9,11 @@
         <a href="">{{ __('Dashboard') }}</a>
     </li>
     <li class="breadcrumb-item">
-        @if($procedure->category_id == 1)
+        @if($procedure->category_id == \Modules\Document\Entities\Category::CATEGORY_MAIN)
             <a href="{{ route('tenant.document.procedures.main') }}">{{ __('Main Procedures') }}</a>
-        @elseif($procedure->category_id == 2)
+        @elseif($procedure->category_id == \Modules\Document\Entities\Category::CATEGORY_PUBLIC)
             <a href="{{ route('tenant.document.procedures.public') }}">{{ __('Public Procedures') }}</a>
-        @elseif($procedure->category_id == 3)
+        @elseif($procedure->category_id == \Modules\Document\Entities\Category::CATEGORY_PRIVATE)
             <a href="{{ route('tenant.document.procedures.private') }}">{{ __('Private Procedures') }}</a>
         @endif
     </li>
@@ -51,7 +51,7 @@
                         </div>
                         <div class="col-md-2">
                             <p class="mb-1 text-muted"><strong>{{ __('ISO System') }}:</strong></p>
-                            <h6>{{ getIsoSystem(1)->name  ?? 'N/A' }}</h6>
+                            <h6>{{ getIsoSystem(currentISOSystem())->name  ?? 'N/A' }}</h6>
                         </div>
                         <div class="col-md-2">
                             <p class="mb-1 text-muted"><strong>{{ __('Status') }}:</strong></p>

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Document;
 use App\Models\IsoSpecificationItem;
 use App\Models\IsoSystem;
+use App\Models\Category;
 use App\Models\IsoSystemForm;
 use App\Models\IsoSystemProcedure;
 use App\Models\Procedure;
@@ -164,6 +165,7 @@ class IsoSystemController extends Controller
 
     public function edit($id)
     {
+        $id = Crypt::decrypt($id);
         try {
             if (\Auth::user()->type == 'super admin') {
     
@@ -420,7 +422,7 @@ class IsoSystemController extends Controller
         }
         $isoSystemProcedure = IsoSystemProcedure::create([
             'name' => $procedure->name,
-            'category_id' => 1,
+            'category_id' => $procedure->category_id,
             'iso_system_id' => $isoSystemId,
             'procedure_id' => $procedure->id,
             'procedure_coding' => $procedureCoding,
@@ -453,7 +455,7 @@ class IsoSystemController extends Controller
         }
         IsoSystemForm::create([
             'name' => $sample->name,
-            'category_id' => 1,
+            'category_id' => $sample->category_id,
             'iso_system_id' => $isoSystemProcedure->iso_system_id,
             'procedure_id' => $isoSystemProcedure->procedure_id,
             'iso_system_procedure_id' => $isoSystemProcedure->id,

@@ -30,6 +30,13 @@ class Document extends BaseModel
         'preparer_id' => 'array',
     ];
 
+    
+    const DOCUMENT_TYPE_PROCEDURE = 'procedure';
+    const DOCUMENT_TYPE_FORM = 'form';
+    const DOCUMENT_TYPE_SAMPLE = 'sample';
+    const DRAFT_DOCUMENT_STATUS_ID = 11;
+    const NEW_VERSION_STATUS_ID = 17;
+    
     public function getTitleAttribute(){
         return $this->getLocalizedAttribute('title');
     }

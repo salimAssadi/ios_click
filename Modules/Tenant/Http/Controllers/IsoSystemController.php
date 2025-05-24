@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\DB;
 use Meneses\LaravelMpdf\Facades\LaravelMpdf;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Str;
+use App\Constants\Status;
 
 class IsoSystemController extends Controller
 {
@@ -420,7 +421,7 @@ class IsoSystemController extends Controller
         }
         $isoSystemProcedure = IsoSystemProcedure::create([
             'name' => $procedure->name,
-            'category_id' => 1,
+            'category_id' => Category::CATEGORY_MAIN,
             'iso_system_id' => $isoSystemId,
             'procedure_id' => $procedure->id,
             'procedure_coding' => $procedureCoding,
@@ -453,7 +454,7 @@ class IsoSystemController extends Controller
         }
         IsoSystemForm::create([
             'name' => $sample->name,
-            'category_id' => 1,
+            'category_id' => Category::CATEGORY_MAIN,
             'iso_system_id' => $isoSystemProcedure->iso_system_id,
             'procedure_id' => $isoSystemProcedure->procedure_id,
             'iso_system_procedure_id' => $isoSystemProcedure->id,

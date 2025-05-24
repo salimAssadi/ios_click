@@ -13,6 +13,7 @@ use Modules\Document\Entities\Category;
 use Modules\Document\Entities\Document;
 use Modules\Document\Entities\DocumentVersion;
 use Modules\Reminder\Services\ReminderService;
+use Modules\Document\Entities\SupportingDocument;
 
 class SupportingDocumentController extends BaseModuleController
 {
@@ -50,13 +51,8 @@ class SupportingDocumentController extends BaseModuleController
         return view($this->viewPath . '.main', compact('categories'));
     }
     
-    public function categoryDetail($id)
+    public function categoryDetail($id=null)
     {
-        // $supportingDocuments = Document::where('document_type', 'supporting')
-        //     ->where('category_id', $id)
-        //     ->with(['category'])
-        //     ->orderBy('created_at', 'desc')
-        //     ->paginate(10);
         $customColumns = [
             [
                 'data' => 'issue_date',
@@ -88,13 +84,56 @@ class SupportingDocumentController extends BaseModuleController
                 'custom_days' => false
             ],
         ];
-       $category = Category::where('id',$id)->first();
-       if($category->type != 'supporting') {
-           return redirect()->back()->with('error', __('Category type is not supporting'));
+       $category = Category::get();
+       if($id) {
+           $category = $category->where('id', $id)->first();
        }
-        return view($this->viewPath . '.index', compact('category','filters','customColumns'));
+        $category_id = $id;
+        return view($this->viewPath . '.index', compact('category_id','filters','customColumns'));
     }
 
+    /**
+     * Show all supporting documents
+     * 
+     * @return \Illuminate\View\View
+     */
+    public function viewAll()
+    {
+        $customColumns = [
+            [
+                'data' => 'issue_date',
+                'title' => __('Issue Date'),
+                'name' => 'lastVersion.issue_date',
+                'orderable' => true,
+                'searchable' => true,
+                'raw' => false,
+                'default' => '-'
+            ],
+            [
+                'data' => 'expiry_date',
+                'title' => __('Expiry Date'),
+                'name' => 'lastVersion.expiry_date',
+                'orderable' => true,
+                'searchable' => true,
+                'raw' => false,
+                'default' => '-'
+            ]
+        ];
+        $filters = [
+            [
+                'name' => 'expiry_filter',
+                'type' => 'select',
+                'options' => [
+                    'expired' => __('Expired'),
+                    'expiring_soon' => __('Expiring Soon (30 days)'),
+                ],
+                'custom_days' => false
+            ],
+        ];
+        $category_id = null;
+        return view($this->viewPath . '.index', compact('category_id','filters','customColumns'));
+    }
+    
     /**
      * Show the form for creating a new supporting document.
      *
@@ -102,7 +141,6 @@ class SupportingDocumentController extends BaseModuleController
      */
     public function create()
     {
-        // Get categories appropriate for supporting documents
         $categories = Category::where('type', 'supporting')
         ->whereNotNull('parent_id')
         ->get()
@@ -120,7 +158,6 @@ class SupportingDocumentController extends BaseModuleController
      */
     public function store(Request $request)
     {
-        // Validate the request
         $validator = Validator::make($request->all(), [
             'title_ar' => 'required|string|max:255',
             'title_en' => 'required|string|max:255',
@@ -130,7 +167,7 @@ class SupportingDocumentController extends BaseModuleController
             'issue_date' => 'required|date',
             'expiry_date' => 'required|date|after:issue_date',
             'reminder_days' => 'required|integer|min:1|max:365',
-            'file' => 'required|file|mimes:pdf|max:10240',
+            'file' => 'required|file|mimes:doc,docx,pdf,png,jpg,jpeg|max:10240',
         ]);
 
         if ($validator->fails()) {
@@ -141,16 +178,25 @@ class SupportingDocumentController extends BaseModuleController
 
         DB::beginTransaction();
         try {
-            // Store the file
             $file = $request->file('file');
             $fileName = time() . '_' . $file->getClientOriginalName();
 
             $filePath = $file->storeAs(getTenantRoot() . '/supporting_documents', $fileName, 'tenants');
             
-            // Generate document number
             $documentNumber = 'SD-' . date('YmdHis');
             
-            // Create the document
+            $supportingDocument = SupportingDocument::create([
+                'title_ar' => $request->input('title_ar'),
+                'title_en' => $request->input('title_en'),
+                'description_ar' => $request->input('description_ar'),
+                'description_en' => $request->input('description_en'),
+                'category_id' => $request->input('category_id'),
+                'issue_date' => $request->input('issue_date'),
+                'expiry_date' => $request->input('expiry_date'),
+                'reminder_before' => $request->input('reminder_days'),
+                'created_by' => auth('tenant')->user()->id,
+            ]);
+
             $document = new Document();
             $document->title_ar = $request->input('title_ar');
             $document->title_en = $request->input('title_en');
@@ -159,25 +205,25 @@ class SupportingDocumentController extends BaseModuleController
             $document->category_id = $request->input('category_id');
             $document->document_number = $documentNumber;
             $document->document_type = 'supporting';
-            $document->status_id = 11; // Active by default
+            $document->documentable_type = SupportingDocument::class;
+            $document->documentable_id = $supportingDocument->id;
+            $document->status_id = Document::DRAFT_DOCUMENT_STATUS_ID; // Active by default
             $document->creation_date = now();
             $document->created_by = auth('tenant')->user()->id;
             $document->save();
             
-            // Create the initial document version
             $version = new DocumentVersion();
             $version->document_id = $document->id;
             $version->version = '1.0';
             $version->issue_date = $request->input('issue_date');
             $version->expiry_date = $request->input('expiry_date');
-            $version->status_id = 17; // Active status
+            $version->status_id = Document::NEW_VERSION_STATUS_ID; // Active status
             $version->file_path = $filePath;
             $version->storage_path = 'public/' . $filePath;
             $version->is_active = true;
             $version->created_by = auth('tenant')->user()->id;
             $version->save();
             
-            // Schedule the reminder using the new reminder system
             $this->scheduleReminder($version, $request->input('reminder_days'));
             
             DB::commit();
@@ -234,17 +280,29 @@ class SupportingDocumentController extends BaseModuleController
                 ->withErrors($validator)
                 ->withInput();
         }
-
-        $document = Document::with(['lastVersion'])->findOrFail($id);
-
+       
+        $document = Document::with(['lastVersion'])->where('id', $id)->first();
+       
         // Check if this is a supporting document
         if ($document->document_type !== 'supporting') {
             return redirect()->route('tenant.document.supporting-documents.index')
                 ->with('error', __('This is not a supporting document'));
         }
-
+        
         DB::beginTransaction();
+        
         try {
+            $supportingDocument = SupportingDocument::findOrFail($document->documentable_id);
+            $supportingDocument->update([
+                'title_ar' => $request->input('title_ar'),
+                'title_en' => $request->input('title_en'),
+                'description_ar' => $request->input('description_ar'),
+                'description_en' => $request->input('description_en'),
+                'category_id' => $request->input('category_id'),
+                'issue_date' => $request->input('issue_date'),
+                'expiry_date' => $request->input('expiry_date'),
+                'reminder_before' => $request->input('reminder_days'),
+            ]);
             // Update the document
             $document->title_ar = $request->input('title_ar');
             $document->title_en = $request->input('title_en');
@@ -255,15 +313,12 @@ class SupportingDocumentController extends BaseModuleController
             
             $version = $document->lastVersion;
             
-            // Handle file upload if new file is provided
             if ($request->hasFile('file')) {
                 $file = $request->file('file');
                 $fileName = time() . '_' . $file->getClientOriginalName();
                 
-                // Store the new file
                 $filePath = $file->storeAs(getTenantRoot() . '/supporting_documents', $fileName, 'tenants');
                 
-                // Delete the old file if it exists
                 if ($version->file_path && Storage::disk('tenants')->exists($version->file_path)) {
                     Storage::disk('tenants')->delete($version->file_path);
                 }

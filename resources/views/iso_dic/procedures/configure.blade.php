@@ -93,6 +93,10 @@
                                                     'kpis' => $kpis,
                                                 ])
 
+                                                <div class="text-end mt-3">
+                                                    <button type="button" id="save-configuration" class="btn btn-primary">{{ __('Save and Exit') }}</button>
+                                                    <button type="button" id="save-configuration-continue" class="btn btn-success">{{ __('Save and Continue') }}</button>
+                                                </div>
                                             </div>
                                         @endif
                                         @if ($procedure->enable_upload_file)
@@ -125,3 +129,67 @@
             </div>
         </div>
     @endsection
+    @push('script-page')
+    <script>
+        
+     // وظيفة عامة لحفظ الإعدادات
+     function saveConfigurationAjax(button, doRedirect = true) {
+            let originalText = button.html();
+            button.html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> {{ __('Saving...') }}');
+            button.prop('disabled', true);
+            $('#save-procedure').prop('disabled', true);
+            const configData = collectAllFormData();
+            Swal.fire({
+                icon: 'info',
+                title: '{{ __('Saving...') }}',
+                text: '{{ __('Please wait while saving the data') }}',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false,
+                willOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            $.ajax({
+                url: '{{ route("iso_dic.procedures.saveConfigure", $procedure->id) }}',
+                method: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    procedure_setup_data: JSON.stringify(configData),
+                    category_id: '{{ $procedure->category_id }}'
+                },
+                success: function(response) {
+                    Swal.close();
+                    notifier.show('Success!', response.message || '{{ __('Configuration saved successfully') }}', 'success',successImg, 4000);
+                    button.html(originalText);
+                    button.prop('disabled', false);
+                    $('#save-procedure').prop('disabled', false);
+                    if (doRedirect) {
+                        setTimeout(() => {
+                            window.history.back();
+                        }, 2000);
+                    }
+                },
+                error: function(xhr) {
+                    Swal.close();
+                    button.html(originalText);
+                    button.prop('disabled', false);
+                    $('#save-procedure').prop('disabled', false);
+                    let errorMessage = '{{ __('Error saving configuration') }}';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMessage = xhr.responseJSON.message;
+                    }
+                    notifier.show('Error!', errorMessage, 'error',errorImg, 4000);
+                }
+            });
+        }
+
+        // ربط الأزرار بالوظيفة العامة
+        $('#save-configuration').on('click', function() {
+            saveConfigurationAjax($(this), true);
+        });
+        $('#save-configuration-continue').on('click', function() {
+            saveConfigurationAjax($(this), false);
+        });
+    </script>
+    @endpush

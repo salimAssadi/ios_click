@@ -8,7 +8,7 @@
     <div class="navbar-wrapper">
         <div class="m-header">
             <a href="#" class="b-brand text-primary">
-                <img src="{{ asset(Storage::url('upload/logo/')) . '/' . (isset($admin_logo) && !empty($admin_logo) ? $admin_logo : 'logo.png') }}"
+                <img src="{{ asset('assets/images/logo.png') }}"
                     alt="" class="logo logo-lg" />
             </a>
         </div>

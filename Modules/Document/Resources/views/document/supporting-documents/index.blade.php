@@ -33,8 +33,8 @@
                         <x-document::documents-table 
                             documentType="supporting" 
                             title="{{ __('Supporting Documents List') }}" 
-                            relatedProcess="" 
-                            :categoryId="$category->id"
+                            relatedProcess="Modules\Document\Entities\SupportingDocument" 
+                            :categoryId="$category_id"
                             :customColumns="$customColumns"
                             :filters="$filters"
                         />

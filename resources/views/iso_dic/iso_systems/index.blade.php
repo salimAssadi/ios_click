@@ -96,11 +96,12 @@
                                                 title="{{ __('ISO Items') }}">
                                                 <i class="ti ti-eye"></i>
                                             </a>
-                                            <a href="{{ route('iso_dic.iso_systems.edit', Crypt::encrypt($system->id)) }}"
-                                                class="btn btn-sm btn-icon btn-light-info"
-                                                data-bs-toggle="tooltip"
-                                                data-bs-placement="top"
-                                                title="{{ __('Edit') }}">
+                                            <a href="#"
+                                                class="btn btn-sm btn-icon btn-light-info customModal"
+                                                data-url="{{ route('iso_dic.iso_systems.edit', Crypt::encrypt($system->id)) }}"
+                                                data-title="{{ __('Edit ISO System') }}"
+                                                data-size="lg">
+
                                                 <i class="ti ti-edit"></i>
                                             </a>
 

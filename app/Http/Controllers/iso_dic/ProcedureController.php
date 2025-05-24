@@ -22,7 +22,9 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Database\QueryException;
-
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Cache;
+use App\Models\IsoReference;
 
 class ProcedureController extends Controller
 {
@@ -93,6 +95,8 @@ class ProcedureController extends Controller
         try {
             $procedure = new Procedure();
             $procedure->category_id= $request->input('category_id');
+            $procedure->uuid= Str::uuid();
+
             $procedure->procedure_name_ar = $request->input('procedure_name_ar');
             $procedure->procedure_name_en = $request->input('procedure_name_en');
             $procedure->description_ar = $request->input('procedure_description_ar');
@@ -123,6 +127,7 @@ class ProcedureController extends Controller
                 }
             }
 
+            Cache::forget('ProcedureDictionary');
             DB::commit();
             
             return redirect()->route('iso_dic.procedures.configure', $procedure->id)->with('success', __('Procedure created successfully!'));
@@ -229,7 +234,7 @@ class ProcedureController extends Controller
                     ]);
                 }
             }
-
+            Cache::forget('ProcedureDictionary');
             DB::commit();
             return redirect()->back()->with('success', __('Procedure updated successfully'));
         } catch (\Exception $e) {
@@ -322,26 +327,30 @@ class ProcedureController extends Controller
         $procedure   = Procedure::findOrFail($id);
         
         // $jobRoles = Position::all()->pluck('title_ar', 'id');
+        $iso_system_references = IsoReference::get();
         $jobRoles = [
-            1 => 'Department Manager',
-            2 => 'Quality Committee Head',
-            3 => 'Quality Officer',
-            4 => 'Section Supervisor',
-            5 => 'Project Manager',
-            6 => 'Training Specialist',
-            7 => 'HR Officer',
-            8 => 'Quality Engineer',
-            9 => 'Maintenance Technician',
-            10 => 'Legal Advisor',
+            ['id' => 1, 'title' => 'Department Manager'],
+            ['id' => 2, 'title' => 'Quality Committee Head'],
+            ['id' => 3, 'title' => 'Quality Officer'],
+            ['id' => 4, 'title' => 'Section Supervisor'],
+            ['id' => 5, 'title' => 'Project Manager'],
+            ['id' => 6, 'title' => 'Training Specialist'],
+            ['id' => 7, 'title' => 'HR Officer'],
+            ['id' => 8, 'title' => 'Quality Engineer'],
+            ['id' => 9, 'title' => 'Maintenance Technician'],
+            ['id' => 10, 'title' => 'Legal Advisor'],
         ];
-        
+        $jobRoles = json_decode(json_encode($jobRoles));
+
         $contentData = $procedure->content;
         $pageTitle = __('Configure') . ' ' . $procedure->procedure_name;
+
             // dd($contentData);
         return view($this->iso_dic_path . '.procedures.configure', [
             'pageTitle' => $pageTitle,
             'procedure' => $procedure,
             'jobRoles' => $jobRoles,
+            'departments' => [],
             'purposes' => ($contentData['purpose'] ?? []),
             'scopes' => ($contentData['scope'] ?? []),
             'responsibilities' => ($contentData['responsibility'] ?? []),
@@ -350,6 +359,9 @@ class ProcedureController extends Controller
             'procedures' => ($contentData['procedures'] ?? []),
             'risk_matrix' => ($contentData['risk_matrix'] ?? []),
             'kpis' => ($contentData['kpis'] ?? []),
+            'references' => ($contentData['references'] ?? []),
+            'users' => [],
+            'iso_system_references' => $iso_system_references
         ]);
     }
 

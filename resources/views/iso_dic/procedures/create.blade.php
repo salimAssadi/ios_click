@@ -89,12 +89,12 @@
                             {!! Form::label('enable_upload_file', __('Enable Upload File'), ['class' => 'form-check-label']) !!}
                         </div>
 
-                        <div class="form-check form-check-inline">
-                            {!! Form::checkbox('enable_editor', 1, null, ['class' => 'form-check-input', 'id' => 'enable_editor']) !!}
+                        <div class="form-check form-check-inline" style="display: none;">
+                            {!! Form::checkbox('enable_editor', 1, 0, ['class' => 'form-check-input', 'id' => 'enable_editor']) !!}
                             {!! Form::label('enable_editor', __('Enable Editor'), ['class' => 'form-check-label']) !!}
                         </div>
 
-                        <div class="form-check form-check-inline">
+                        <div class="form-check form-check-inline" style="display: none;">
                             {!! Form::checkbox('has_menual_config', 1, null, ['class' => 'form-check-input', 'id' => 'has_menual_config' , 'checked' => true ,'readonly' => true]) !!}
                             {!! Form::label('has_menual_config', __('Has Manual Config'), ['class' => 'form-check-label']) !!}
                         </div>

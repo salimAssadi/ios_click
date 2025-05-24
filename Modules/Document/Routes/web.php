@@ -54,11 +54,12 @@ Route::prefix('document')->name('tenant.document.')->middleware(['auth:tenant','
         Route::get('/', 'index')->name('index');
         Route::get('/create', 'create')->name('create');
         Route::post('/', 'store')->name('store');
-        Route::get('/download/{id}', 'download')->name('download');
-        Route::get('/{id}', 'show')->name('show');
-        Route::get('/edit/{id}', 'edit')->name('edit');
-        Route::put('/update/{id}', 'update')->name('update');  
+        Route::get('/view-all', 'viewAll')->name('view-all');
         Route::get('/category/{id}', 'categoryDetail')->name('category-detail');
+        Route::get('/download/{id}', 'download')->name('download');
+        Route::get('/edit/{id}', 'edit')->name('edit');
+        Route::put('/update/{id}', 'update')->name('update');
+        Route::get('/{id}', 'show')->name('show');
     });
 
    

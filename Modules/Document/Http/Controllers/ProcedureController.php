@@ -53,7 +53,7 @@ class ProcedureController extends BaseModuleController
         $orginal_procedures = $this->procedureCacheService->getOriginalProcedures();
         $system_id = currentISOSystem();
         $currentSystemName = getIsoSystem($system_id)->name;
-        $category_id = '1';
+        $category_id = Category::CATEGORY_MAIN;
         $used_procedures = IsoSystemProcedure::where('iso_system_id', $system_id)->where('data', '<>', null)->with(['isoSystem', 'procedure'])->get();
         $status = Status::where('type', 'document')->get()->pluck('name', 'id');
         $customColumns = [
@@ -94,8 +94,8 @@ class ProcedureController extends BaseModuleController
 
     public function publicProcedures()
     {
-        $procedures = Procedure::where('category_id', '2')->paginate(20);
-        $category_id = '2';
+        $procedures = Procedure::where('category_id', Category::CATEGORY_PUBLIC)->paginate(20);
+        $category_id = Category::CATEGORY_PUBLIC;
         $customColumns = [
             [
                 'data' => 'procedure_coding',
@@ -113,8 +113,8 @@ class ProcedureController extends BaseModuleController
 
     public function privateProcedures()
     {
-        $procedures = Procedure::where('category_id', '3')->paginate(20);
-        $category_id = '3';
+        $procedures = Procedure::where('category_id', Category::CATEGORY_PRIVATE)->paginate(20);
+        $category_id = Category::CATEGORY_PRIVATE;
         $customColumns = [
             [
                 'data' => 'procedure_coding',
@@ -268,13 +268,13 @@ class ProcedureController extends BaseModuleController
                 'reminder_days' => $request->reminder_days,
             ];
             $check_type = $request->category_id;
-            if ($check_type == '2') {
+            if ($check_type == Category::CATEGORY_PUBLIC) {
                 $this->SaveDocument($request, $procedure->id, 'public', $document);
             } 
-            elseif ($check_type == '3') {
+            elseif ($check_type == Category::CATEGORY_PRIVATE) {
                 $this->SaveDocument($request, $procedure->id, 'private', $document);
             }
-            elseif ($check_type == '1') {
+            elseif ($check_type == Category::CATEGORY_MAIN) {
                 $this->SaveDocument($request, $procedure->id, 'main', $document);
             }
 
@@ -516,7 +516,7 @@ class ProcedureController extends BaseModuleController
                 $document->preparer_id = $request->has('prepared_by') ? json_encode($request->input('prepared_by')) : null;
                 $document->approver_id = $request->input('approved_by');
                 $document->document_type = 'procedure';
-                $document->status_id = 11; // Active by default
+                $document->status_id = Document::DRAFT_DOCUMENT_STATUS_ID; // DRAFT by default
                 $document->creation_date = now();
                 $document->created_by = auth('tenant')->user()->id;
                 $document->save();
@@ -527,7 +527,7 @@ class ProcedureController extends BaseModuleController
                 $version->issue_date = $request->input('issue_date');
                 $version->expiry_date = $request->input('expiry_date');
                 $version->reminder_days = $request->input('reminder_days');
-                $version->status_id = 17; // Active status
+                $version->status_id = Document::NEW_VERSION_STATUS_ID; // Active status
                 $version->file_path = '';
                 $version->storage_path = '';
                 $version->is_active = true;
@@ -677,11 +677,11 @@ class ProcedureController extends BaseModuleController
                 'procedure_setup_data' => 'required',
             ]);
             $category_id = $request->category_id;
-            if ($category_id == 1) {
+            if ($category_id == Category::CATEGORY_MAIN) {
                 $this->SaveDocument($request, $id, 'main', null);
-            } elseif ($category_id == 2) {
+            } elseif ($category_id == Category::CATEGORY_PUBLIC) {
                 $this->SaveDocument($request, $id, 'public', null);
-            } elseif ($category_id == 3) {
+            } elseif ($category_id == Category::CATEGORY_PRIVATE) {
                 $this->SaveDocument($request, $id, 'private', null);
             }
 
@@ -769,7 +769,7 @@ class ProcedureController extends BaseModuleController
                 $document->preparer_id = $documentdata['prepared_by'] ?? [];
                 $document->approver_id = $documentdata['approved_by'] ?? null;
                 $document->document_type = 'procedure';
-                $document->status_id = 11; // Active by default
+                $document->status_id = Document::DRAFT_DOCUMENT_STATUS_ID; // Active by default
                 $document->creation_date = now();
                 $document->created_by = auth('tenant')->user()->id;
                 $document->save();
@@ -784,7 +784,7 @@ class ProcedureController extends BaseModuleController
                 $version->issue_date = $documentdata['issue_date'] ?? $version->issue_date;
                 $version->expiry_date = $documentdata['expiry_date'] ?? $version->expiry_date;
                 $version->reminder_days = $documentdata['reminder_days'] ?? $version->reminder_days;
-                $version->status_id = 17; // Active status
+                $version->status_id = Document::NEW_VERSION_STATUS_ID; // Active status
                 $version->file_path = '';
                 $version->storage_path = '';
                 $version->is_active = true;

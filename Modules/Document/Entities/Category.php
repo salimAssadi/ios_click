@@ -16,6 +16,10 @@ class Category extends BaseModel
         'type',
         'parent_id',
     ];
+    // CATEGORY TYPE
+    const CATEGORY_MAIN = 1;
+    const CATEGORY_PUBLIC = 2;
+    const CATEGORY_PRIVATE = 3;
 
     public function parent()
     {
