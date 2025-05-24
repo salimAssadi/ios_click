@@ -227,7 +227,7 @@ class SupportingDocumentController extends BaseModuleController
             $this->scheduleReminder($version, $request->input('reminder_days'));
             
             DB::commit();
-            return redirect()->route('tenant.document.supporting-documents.index')
+            return redirect()->back()
                 ->with('success', __('Supporting document created successfully!'));
                 
         } catch (Exception $e) {
